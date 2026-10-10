@@ -47,3 +47,12 @@ next-env.d.ts
 /.local/
 *.dump
 *.backup
+
+# Firebase/Google Admin credential files must stay outside source control.
+*service-account*.json
+*serviceAccount*.json
+firebase-admin*.json
+*-firebase-adminsdk-*.json
+application_default_credentials.json
+*.p12
+*.key

@@ -25,11 +25,11 @@ select pg_temp.assert_true(not exists(select 1 from pg_proc p join pg_namespace 
 
 -- Another student's records exist, so isolation assertions are non-vacuous.
 set local role authenticated;
-select set_config('request.jwt.claims','{"sub":"10000000-0000-0000-0000-000000000006","role":"authenticated"}',true);
+select set_config('request.jwt.claims','{"iss":"https://gmvouqgjbtbkbhrdruzu.supabase.co/auth/v1","aud":"authenticated","sub":"10000000-0000-0000-0000-000000000006","role":"authenticated"}',true);
 select set_config('test.other_attempt',public.start_assessment_attempt('a0000000-0000-0000-0000-000000000002')::text,true);
 select set_config('test.other_response',public.save_assessment_response(current_setting('test.other_attempt')::uuid,'80000000-0000-0000-0000-000000000001','{"option_ids":["90000000-0000-0000-0000-000000000002"]}')::text,true);
 
-select set_config('request.jwt.claims','{"sub":"10000000-0000-0000-0000-000000000005","role":"authenticated"}',true);
+select set_config('request.jwt.claims','{"iss":"https://gmvouqgjbtbkbhrdruzu.supabase.co/auth/v1","aud":"authenticated","sub":"10000000-0000-0000-0000-000000000005","role":"authenticated"}',true);
 select pg_temp.assert_true((select count(*)=1 from public.courses),'student sees only enrolled course');
 select pg_temp.assert_true((select count(*)=1 from public.course_offerings),'student cannot see sibling cohort');
 select pg_temp.assert_true((select count(*)=1 from public.lessons),'student cannot see draft/other tenant lessons');
@@ -72,7 +72,7 @@ select set_config('test.created_org',public.create_organization('Temporary test 
 select pg_temp.assert_true(private.has_org_role(current_setting('test.created_org')::uuid,array['owner']),'atomic organization bootstrap gives contextual owner');
 
 -- Organization A owner has no role in B.
-select set_config('request.jwt.claims','{"sub":"10000000-0000-0000-0000-000000000001","role":"authenticated"}',true);
+select set_config('request.jwt.claims','{"iss":"https://gmvouqgjbtbkbhrdruzu.supabase.co/auth/v1","aud":"authenticated","sub":"10000000-0000-0000-0000-000000000001","role":"authenticated"}',true);
 select pg_temp.assert_true((select count(*)=0 from public.courses where organization_id='20000000-0000-0000-0000-000000000002'),'teacher A cannot read private tenant B course');
 select pg_temp.assert_true((select count(*)=0 from public.enrollments where offering_id='60000000-0000-0000-0000-000000000003'),'teacher A cannot read tenant B roster');
 select pg_temp.assert_true((select count(*)=0 from public.profiles where id='10000000-0000-0000-0000-000000000007'),'teacher A cannot read tenant B student');
@@ -86,7 +86,7 @@ select set_config('test.clone',public.clone_assessment('70000000-0000-0000-0000-
 select pg_temp.assert_true((select version=2 and status='draft' from public.assessments where id=current_setting('test.clone')::uuid),'cloning creates draft next version');
 
 -- Assigned instructor also has an independent admin role in organization B.
-select set_config('request.jwt.claims','{"sub":"10000000-0000-0000-0000-000000000002","role":"authenticated"}',true);
+select set_config('request.jwt.claims','{"iss":"https://gmvouqgjbtbkbhrdruzu.supabase.co/auth/v1","aud":"authenticated","sub":"10000000-0000-0000-0000-000000000002","role":"authenticated"}',true);
 select pg_temp.assert_true(private.has_org_role('20000000-0000-0000-0000-000000000001',array['teacher']) and private.has_org_role('20000000-0000-0000-0000-000000000002',array['admin']),'different tenant roles work');
 select pg_temp.assert_true((select count(*)=3 from public.enrollments),'instructor and admin can see authorized rosters');
 update public.courses set title='Admin updated title' where id='30000000-0000-0000-0000-000000000002';
@@ -97,12 +97,12 @@ select public.grade_assessment_response(current_setting('test.response')::uuid,2
 select public.finalize_assessment_grade(current_setting('test.attempt')::uuid);
 select pg_temp.assert_true((public.get_assessment_results(current_setting('test.attempt')::uuid)->>'score')::numeric=2,'instructor can finalize legitimate grade');
 
-select set_config('request.jwt.claims','{"sub":"10000000-0000-0000-0000-000000000004","role":"authenticated"}',true);
+select set_config('request.jwt.claims','{"iss":"https://gmvouqgjbtbkbhrdruzu.supabase.co/auth/v1","aud":"authenticated","sub":"10000000-0000-0000-0000-000000000004","role":"authenticated"}',true);
 select pg_temp.assert_true(private.can_edit_course('30000000-0000-0000-0000-000000000001'),'assigned editor can author course');
 select pg_temp.assert_true(private.can_support_offering('60000000-0000-0000-0000-000000000001') and not private.can_support_offering('60000000-0000-0000-0000-000000000002'),'teaching assistant roster scope is assigned offering');
 select pg_temp.assert_true(not private.can_manage_offering('60000000-0000-0000-0000-000000000001'),'teaching assistant cannot manage offering/enrollment');
 
-select set_config('request.jwt.claims','{"sub":"10000000-0000-0000-0000-000000000005","role":"authenticated"}',true);
+select set_config('request.jwt.claims','{"iss":"https://gmvouqgjbtbkbhrdruzu.supabase.co/auth/v1","aud":"authenticated","sub":"10000000-0000-0000-0000-000000000005","role":"authenticated"}',true);
 select pg_temp.assert_true((public.get_assessment_results(current_setting('test.attempt')::uuid)->>'score')::numeric=2,'student can read released own grade');
 select pg_temp.expect_error(format('select public.get_assessment_results(%L::uuid)',current_setting('test.other_attempt')),'42501','student cannot retrieve peer results');
 select pg_temp.expect_error('select awarded_points,feedback from public.assessment_responses','42501','direct grade fields require results RPC');
@@ -115,21 +115,21 @@ insert into public.media_assets(id,organization_id,uploaded_by,offering_id,kind,
 values('b0000000-0000-0000-0000-000000000001','20000000-0000-0000-0000-000000000001',auth.uid(),'60000000-0000-0000-0000-000000000001','submission','application/pdf','homework.pdf','lms-submissions','20000000-0000-0000-0000-000000000001/b0000000-0000-0000-0000-000000000001/homework.pdf');
 select pg_temp.assert_true(private.can_upload_media('lms-submissions','20000000-0000-0000-0000-000000000001/b0000000-0000-0000-0000-000000000001/homework.pdf'),'student can upload registered own submission');
 select pg_temp.expect_error($sql$select public.complete_media_upload('b0000000-0000-0000-0000-000000000001')$sql$,'23514','upload completion requires actual storage object');
-select set_config('request.jwt.claims','{"sub":"10000000-0000-0000-0000-000000000006","role":"authenticated"}',true);
+select set_config('request.jwt.claims','{"iss":"https://gmvouqgjbtbkbhrdruzu.supabase.co/auth/v1","aud":"authenticated","sub":"10000000-0000-0000-0000-000000000006","role":"authenticated"}',true);
 select pg_temp.assert_true((select count(*)=0 from public.media_assets),'student cannot read peer submission assets');
 select pg_temp.assert_true(not private.can_upload_media('lms-submissions','20000000-0000-0000-0000-000000000001/b0000000-0000-0000-0000-000000000001/homework.pdf'),'student cannot upload over peer metadata');
 
 reset role;
 update public.enrollments set status='suspended' where offering_id='60000000-0000-0000-0000-000000000001' and user_id='10000000-0000-0000-0000-000000000005';
 set local role authenticated;
-select set_config('request.jwt.claims','{"sub":"10000000-0000-0000-0000-000000000005","role":"authenticated"}',true);
+select set_config('request.jwt.claims','{"iss":"https://gmvouqgjbtbkbhrdruzu.supabase.co/auth/v1","aud":"authenticated","sub":"10000000-0000-0000-0000-000000000005","role":"authenticated"}',true);
 select pg_temp.assert_true((select count(*)=0 from public.courses),'suspended enrollment cannot access private content');
 select pg_temp.assert_true(not private.can_upload_media('lms-submissions','20000000-0000-0000-0000-000000000001/b0000000-0000-0000-0000-000000000001/homework.pdf'),'suspended enrollment cannot upload');
 select pg_temp.assert_true((public.get_assessment_results(current_setting('test.attempt')::uuid)->>'score')::numeric=2,'own historical grade survives enrollment suspension');
 reset role;
 update public.organization_memberships set status='suspended' where organization_id='20000000-0000-0000-0000-000000000001' and user_id='10000000-0000-0000-0000-000000000002';
 set local role authenticated;
-select set_config('request.jwt.claims','{"sub":"10000000-0000-0000-0000-000000000002","role":"authenticated"}',true);
+select set_config('request.jwt.claims','{"iss":"https://gmvouqgjbtbkbhrdruzu.supabase.co/auth/v1","aud":"authenticated","sub":"10000000-0000-0000-0000-000000000002","role":"authenticated"}',true);
 select pg_temp.assert_true((select count(*)=0 from public.courses where organization_id='20000000-0000-0000-0000-000000000001'),'suspended staff membership revokes assigned course access');
 select pg_temp.assert_true(private.has_org_role('20000000-0000-0000-0000-000000000002',array['admin']),'suspension in A preserves independent role in B');
 select pg_temp.expect_error($sql$select public.get_assessment_answer_keys('70000000-0000-0000-0000-000000000001')$sql$,'42501','suspended course staff loses grading keys');

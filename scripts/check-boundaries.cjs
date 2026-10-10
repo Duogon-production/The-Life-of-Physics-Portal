@@ -3,7 +3,7 @@ const path = require('node:path');
 const ts = require('typescript');
 
 const root = path.resolve(__dirname, '..');
-const serverPackages = /^(?:@prisma\/client|@clerk\/backend|@mux\/mux-node|livekit-server-sdk|resend|uploadthing\/server|server-only)(?:\/|$)/;
+const serverPackages = /^(?:firebase-admin|@prisma\/client|@clerk\/backend|@mux\/mux-node|livekit-server-sdk|resend|uploadthing\/server|server-only)(?:\/|$)/;
 
 function imports(source) {
   const edges = [];

@@ -1,5 +1,11 @@
 # Identity transition: preparation only
 
+**Historical foundation document.** The Firebase staging phase now implements
+the identity seam, profile FK transition, private onboarding/revocation and token
+adapters through two additional migrations. See [the current implementation and
+verification report](firebase-auth-integration.md). The sequence below records
+the earlier preparation plan; it does not describe current runtime behavior.
+
 ## Current trust boundary
 
 The live portal authenticates with Clerk and stores application users in Prisma.

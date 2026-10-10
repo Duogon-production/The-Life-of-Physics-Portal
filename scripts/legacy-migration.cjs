@@ -99,4 +99,4 @@ if (require.main === module) {
     if (result.problems.length) process.exitCode = 1;
   })().catch(() => { console.error('Read-only migration inspection failed. Check connectivity/input files locally; no records were written.'); process.exitCode = 1; });
 }
-module.exports = { plan, stableId };
+module.exports = { plan, stableId, models };

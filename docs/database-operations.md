@@ -3,7 +3,8 @@
 ## Applying schema and running checks
 
 The development project is `gmvouqgjbtbkbhrdruzu`; verify the target on every run.
-Its eleven migration versions match `supabase/migrations/`. Never change applied SQL.
+Its thirteen migration versions match `supabase/migrations/`. The original eleven
+are unchanged; two implement Firebase staging. Never change applied SQL.
 Create new files with `npx supabase migration new descriptive_name`; review changes,
 then use the official MCP `apply_migration`. MCP assigns the applied timestamp;
 reconcile the local filename with `list_migrations` before CLI `db push`.
@@ -90,8 +91,8 @@ pg_restore --list .local/backups/lms.dump
 
 This application-only dump needs a compatible target with auth identities, roles,
 Storage metadata and required extensions already restored/provisioned; it is NOT
-a complete Supabase disaster-recovery dump. Before detaching the auth FK, profiles
-still require matching auth.users UUIDs. Back up required auth data and Storage
+a complete Supabase disaster-recovery dump. Profile UUIDs are now independent of
+auth.users; restore the private external identity mappings as well. Back up auth data and Storage
 metadata separately using the official Supabase backup/restore workflow and strict
 credential handling. Back up Storage objects through their API; SQL metadata alone
 cannot recover files. Do not export server signing keys into Git.
@@ -110,9 +111,10 @@ public launch. A full backup/restore was not executed in this task.
 ## Self-hosted PostgreSQL and ASP.NET Core
 
 The relational model, UUIDs, timestamptz, constraints, grading and history guards
-are PostgreSQL. Supabase-specific dependencies still include auth.users FK/trigger,
-auth.uid/auth.jwt, API roles/grants, Storage buckets/objects/policies and RPC transport.
-Follow `identity-transition.md` to detach identities without rewriting user FKs.
+are PostgreSQL. Supabase-specific dependencies still include native auth triggers,
+auth.jwt, API roles/grants, Storage buckets/objects/policies and RPC transport.
+The profile/auth.users FK is detached; see `firebase-auth-integration.md` for the
+implemented external identity seam and remaining deployment acceptance requirements.
 Replace the repository adapter with ASP.NET Core endpoints, verify Firebase tokens,
 install a transaction-scoped trusted identity resolver and least-privilege RLS role,
 replace Storage transport/policies, and migrate file bytes separately. Rehearse
@@ -144,7 +146,8 @@ purchase or hosting configuration change was introduced.
 
 ## Troubleshooting
 
-- RLS denial with Clerk login: expected until the separate identity migration;
+- RLS denial with Clerk login: expected; only native Supabase or mapped Firebase
+  staging identities authorize this database. Verify the selected backend;
   do not enable a service-role browser proxy to bypass it.
 - Empty lists: inspect contextual role, organization/profile status, active
   enrollment/expiry and published content. Editors do not automatically manage cohorts.

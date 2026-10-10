@@ -11,17 +11,21 @@ The existing webpage is unchanged. Its current routes still use Clerk, Prisma an
 the legacy database. This change prepares the Supabase persistence/authentication
 foundation; it does **not** silently switch existing students or migrate legacy data.
 Clerk string IDs are not Supabase UUIDs. Do not insert them into `profiles` or
-trust Clerk sessions as Supabase sessions. The future Firebase phase must use
-verified external identities mapped to stable application UUIDs; it must NOT
-require creating a Supabase Auth account per Firebase user. See
+trust Clerk sessions as Supabase sessions. Firebase staging now uses verified
+external identities mapped to stable application UUIDs without requiring a
+Supabase Auth account per Firebase user. Production Clerk/data cutover remains
+unapproved. See [Firebase staging implementation](firebase-auth-integration.md),
 [identity transition](identity-transition.md), [operations](database-operations.md)
 and [verified implementation report](supabase-completion-report.md).
 
 ## Identity, tenants and roles
 
-`auth.users` owns authentication. Its structure is unchanged. A private trigger
-creates `public.profiles` with the same UUID. Only display name is copied from
-user-editable metadata; no authorization comes from metadata or a profile role.
+Native Supabase authentication uses unchanged `auth.users`; a private trigger
+creates a same-UUID profile and issuer/subject mapping. Firebase uses a verified
+string subject mapped privately to an independent stable profile UUID. Profiles
+no longer have an auth.users FK; all academic profile FKs remain intact. Native
+account deletion disables its mapping without deleting academic history. Only
+display name is copied from metadata; metadata and profile roles grant no access.
 
 `organizations` are tenant boundaries. `organization_memberships` scopes
 owner/admin/teacher/assistant roles and invited/active/suspended status to one
@@ -151,7 +155,7 @@ are introduced.
 
 Reusable helpers live in the non-exposed `private` schema. SECURITY DEFINER
 implementations use an empty fixed search path, qualified references and
-`private.current_app_user_id()`, currently a direct `auth.uid()` delegation. They
+`private.current_app_user_id()`, a verified issuer/subject-to-UUID resolver. They
 bypass underlying RLS solely to evaluate authorized contextual
 relationships without recursive policies. Execution is revoked from PUBLIC/anon
 and granted only where required. Public RPC wrappers are SECURITY INVOKER.
@@ -175,9 +179,9 @@ Identity/parent links are immutable. Cross-tenant media, cross-course assessment
 assignments and cross-course lesson progress are rejected by integrity triggers.
 Foreign-key indexes complement existing unique/primary indexes without duplicating
 their leading prefixes. Historical enrollments, attempts/responses and referenced
-content use restrictive deletion. Deleting `auth.users` can be blocked by LMS
-history: implement privacy-preserving anonymization/retention rather than removing
-constraints or cascading away academic records.
+content use restrictive deletion. Deleting native auth identities preserves LMS
+profiles/history and disables their native mapping. Implement privacy-preserving
+anonymization/retention rather than cascading away academic records.
 
 ## Storage
 
@@ -228,11 +232,12 @@ and checked workflow RPCs. It supports read access across the entire LMS model,
 progress writes, media registration/completion/abandonment and exam/grading commands.
 General teacher content CRUD remains a later UI/service integration, not a claimed
 complete admin application. `server/services/lms-staging.ts` requires the server
-flag `LMS_DATA_BACKEND=supabase-staging`, a verified `auth.getUser()` identity and
-an active profile. Default `legacy` fails closed before constructing a client.
-No live route invokes it. No new Supabase login flow or auth bridge was added.
-The future Firebase phase must replace this session adapter and identity resolver
-with verified external-token handling. Never use client-supplied identity UUIDs.
+flag `LMS_DATA_BACKEND=supabase-staging` and an active profile. Native sessions use
+verified `auth.getUser()`; explicit `NEXT_PUBLIC_AUTH_BACKEND=firebase-staging`
+uses a revocation-checked Firebase ID token and the `current_profile_id()` RPC.
+The isolated `/lms-staging` page uses this adapter; legacy screens remain on their
+old backend. Default `legacy` fails closed before constructing a client. Never use
+client-supplied identity UUIDs. See the Firebase report for credentials and test gaps.
 
 ## Migrations and reproducibility
 
@@ -302,12 +307,12 @@ capacity, latency, CPU or memory guarantee is claimed.
 
 ## Remaining integration and extension points
 
-- In a separate phase, integrate Firebase with verified issuer/subject mappings,
-  detach the profile/auth.users FK safely, and migrate Prisma reads/writes with
-  reviewed data mapping, backups and rollback planning.
+- Complete real Firebase Admin/browser/tenant acceptance tests, then migrate
+  Prisma reads/writes with reviewed data mapping, backups and rollback planning.
+  Staging mapping and FK separation are implemented; existing users are not migrated.
 - Connect the existing teacher/student UI to offerings, safe option selects,
   assessment RPCs and private media downloads. Do not merge cohorts into courses.
-- Implement auth refresh/callbacks, real invitation/onboarding flows, endpoint rate
+- Complete real invitation/account-claim flows, endpoint rate
   limits, upload completion/retention and per-question validation in the UI/API.
 - Run real authenticated HTTP capacity tests and concurrent owner changes before
   launch; SQL concurrency regressions passed but do not establish Free-tier capacity.

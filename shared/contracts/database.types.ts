@@ -1016,6 +1016,7 @@ export type Database = {
         Args: { p_name: string; p_slug: string }
         Returns: string
       }
+      current_profile_id: { Args: never; Returns: string }
       finalize_assessment_grade: {
         Args: { p_attempt_id: string }
         Returns: undefined
@@ -1029,6 +1030,8 @@ export type Database = {
         Args: { p_feedback?: string; p_points: number; p_response_id: string }
         Returns: undefined
       }
+      onboard_firebase_profile: { Args: never; Returns: string }
+      revoke_my_firebase_identity: { Args: never; Returns: undefined }
       save_assessment_response: {
         Args: {
           p_attempt_id: string

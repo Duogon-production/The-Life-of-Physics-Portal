@@ -11,7 +11,7 @@ function load(file, deps = {}, env = {}) {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 },
   }).outputText;
   vm.runInNewContext(source, { module, exports: module.exports, Date, process: { env }, console: { log() {}, error() {} },
-    require(name) { if (name === 'server-only') return {}; if (name === 'zod') return require('zod'); assert.ok(name in deps, name); return deps[name]; },
+    require(name) { if (name === 'server-only') return {}; if (name === 'zod') return require('zod'); if (name === '@/shared/auth-config') return { isFirebaseStaging: () => false }; assert.ok(name in deps, name); return deps[name]; },
   });
   return module.exports;
 }

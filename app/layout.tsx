@@ -9,8 +9,12 @@ import FacebookMessenger from '@/frontend/components/facebook-messenger';
 import { isTeacher } from '@/server/services/teacher';
 import { LoadingProvider } from '@/frontend/components/providers/loading-provider';
 import ScrollToTop from '@/frontend/components/scroll-to-top';
+import { isFirebaseStaging } from '@/shared/auth-config';
+import { FirebaseAuthProvider } from '@/frontend/components/providers/firebase-auth-provider';
 
 const inter = Inter({ subsets: ['latin'] });
+// Both backends render request-specific authentication; never prerender accounts.
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
 	title: 'The Life of Physics | 3rd Secondary',
@@ -22,11 +26,13 @@ export default async function RootLayout({
 }: {
 	children: React.ReactNode;
 }) {
-	const { userId, sessionClaims } = await auth();
-	const isStaff = await isTeacher(userId, sessionClaims);
+	const firebase = isFirebaseStaging();
+	const session = firebase ? null : await auth();
+	const isStaff = session ? await isTeacher(session.userId, session.sessionClaims) : false;
+	const AuthProvider = firebase ? FirebaseAuthProvider : ClerkProvider;
 
 	return (
-		<ClerkProvider afterSignOutUrl="/" appearance={{ options: { showOptionalFields: true } }}>
+		<AuthProvider {...(firebase ? {} : { afterSignOutUrl: '/', appearance: { options: { showOptionalFields: true } } })}>
 			<html lang="en" suppressHydrationWarning>
 				<body className={inter.className}>
 					<ThemeProvider
@@ -43,11 +49,11 @@ export default async function RootLayout({
 
 							{children}
 
-							{!isStaff && <FacebookMessenger />}
+							{!firebase && !isStaff && <FacebookMessenger />}
 						</LoadingProvider>
 					</ThemeProvider>
 				</body>
 			</html>
-		</ClerkProvider>
+		</AuthProvider>
 	);
 }

@@ -22,20 +22,21 @@ function load(file, dependencies, env = {}) {
 test('middleware protects student, teacher and API routes, allowing only explicit public routes', async () => {
   let protects = 0;
   const { default: middleware } = load('middleware.ts', {
+    'next/server': {},
+    '@/shared/auth-config': { isFirebaseStaging: () => false },
     '@clerk/nextjs/server': {
-      clerkMiddleware: callback => callback,
+      clerkMiddleware: callback => request => callback({ protect: async () => { protects++; } }, request),
       createRouteMatcher: patterns => request => patterns.some(pattern => new RegExp(`^${pattern}$`).test(new URL(request.url).pathname)),
     },
   });
-  const auth = { protect: async () => { protects++; } };
   for (const route of ['/home', '/group', '/teacher/courses', '/admin/users', '/api/courses', '/api/admin/students', '/api/uploadthing-evil']) {
     const before = protects;
-    await middleware(auth, new Request(`http://localhost${route}`));
+    await middleware({ url: `http://localhost${route}`, nextUrl: new URL(`http://localhost${route}`) }, {});
     assert.equal(protects, before + 1, route);
   }
   for (const route of ['/sign-in', '/sign-in/factor-one', '/sign-up', '/test-page', '/api/uploadthing']) {
     const before = protects;
-    await middleware(auth, new Request(`http://localhost${route}`));
+    await middleware({ url: `http://localhost${route}`, nextUrl: new URL(`http://localhost${route}`) }, {});
     assert.equal(protects, before, route);
   }
 });
@@ -82,6 +83,9 @@ test('Supabase client awaits request cookies and passes only the publishable key
   const writes = [];
   let config;
   const { getSupabaseServerClient } = load('server/integrations/supabase.ts', {
+    '@supabase/supabase-js': {},
+    '@/shared/auth-config': { isFirebaseStaging: () => false },
+    '@/server/services/firebase-auth': {},
     'next/headers': { cookies: async () => ({ getAll: () => [{ name: 'session', value: 'test' }], set: (...args) => writes.push(args) }) },
     '@/shared/supabase-config': { getSupabaseConfig: () => ({ url: 'https://example.supabase.co', publishableKey: 'sb_publishable_test' }) },
     '@supabase/ssr': { createServerClient: (url, key, options) => { config = { url, key, options }; return { scoped: true }; } },
