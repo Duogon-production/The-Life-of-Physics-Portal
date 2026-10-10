@@ -1,3 +1,5 @@
+import { isFirebaseStaging } from '@/shared/auth-config';
+import { TeacherEditor } from '../../../../_components/teacher-editor';
 import { auth } from '@clerk/nextjs/server';
 import { ArrowLeft, LayoutDashboard, ListChecks, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
@@ -15,7 +17,7 @@ import ChaptersForm from '@/frontend/features/teacher/courses/editor/chapters-fo
 import Actions from '@/frontend/features/teacher/courses/editor/actions';
 
 const CourseIdPage = async ({ params: paramsPromise }: { params: Promise<{ courseId: string }> }) => {
-	const params = await paramsPromise;
+	const params = await paramsPromise; if (isFirebaseStaging()) return <TeacherEditor courseId={params.courseId} />;
 	const { userId } = await auth();
 
 	if (!userId) {

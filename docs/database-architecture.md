@@ -1,5 +1,9 @@
 # Supabase database architecture
 
+## Current direction
+
+The new LMS uses Firebase Authentication and Supabase. Legacy data migration is canceled. Existing schema, identities, authorized test data and RLS remain intact. See [Phase 2 implementation and planning](new-lms-phase2.md). Earlier foundation notes below are historical; they do not authorize a legacy data cutover.
+
 ## Status and scope
 
 The initial LMS database is applied to development project `gmvouqgjbtbkbhrdruzu`

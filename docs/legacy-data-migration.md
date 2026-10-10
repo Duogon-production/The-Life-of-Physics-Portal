@@ -1,3 +1,4 @@
+> **Canceled / historical only — 10 October 2026.** This is a new LMS. No old Clerk/Prisma accounts or academic records will be migrated or linked. Do not execute this historical plan. See [the active new-LMS Phase 2 plan](new-lms-phase2.md).
 # Legacy data migration preparation
 
 Read-only inspection on 2026-10-10 found actual legacy data: 7 users, 4 courses,

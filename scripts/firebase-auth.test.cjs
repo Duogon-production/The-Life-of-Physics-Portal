@@ -51,7 +51,9 @@ test('Firebase staging never routes legacy APIs to Clerk or Prisma', () => {
   const request = path => ({ url: `http://localhost${path}`, nextUrl: new URL(`http://localhost${path}`) });
   for (const path of ['/api/uploadthing', '/api/admin/users', '/api/livekit', '/api/courses']) assert.equal(middleware(request(path), {}), 503);
   assert.equal(middleware(request('/home'), {}), 'allowed');
-  assert.equal(middleware(request('/teacher/create'), {}), '/unavailable');
+  assert.equal(middleware(request('/teacher/create'), {}), 'allowed');
+  for (const path of ['/api/teacher/organizations', '/api/teacher/courses', '/api/teacher/courses/20000000-0000-0000-0000-000000000001']) assert.equal(middleware(request(path), {}), 'allowed');
+  for (const path of ['/api/teacher/courses/invalid', '/api/teacher/courses/20000000-0000-0000-0000-000000000001/chapters']) assert.equal(middleware(request(path), {}), 503);
   assert.equal(middleware(request('/courses/id/chapters/lesson'), {}), '/unavailable');
   for (const path of ['/sign-in', '/lms-staging', '/api/auth/firebase/session']) assert.equal(middleware(request(path), {}), 'allowed');
 });

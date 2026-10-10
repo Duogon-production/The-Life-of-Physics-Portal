@@ -1016,6 +1016,10 @@ export type Database = {
         Args: { p_name: string; p_slug: string }
         Returns: string
       }
+      create_teacher_course: {
+        Args: { p_organization_id: string; p_slug: string; p_title: string }
+        Returns: string
+      }
       current_profile_id: { Args: never; Returns: string }
       finalize_assessment_grade: {
         Args: { p_attempt_id: string }

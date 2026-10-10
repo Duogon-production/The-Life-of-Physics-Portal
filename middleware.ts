@@ -21,6 +21,7 @@ export default function middleware(request: NextRequest, event: NextFetchEvent) 
     if (path === '/lms-staging') return NextResponse.redirect(new URL('/sign-in', request.url));
     return legacyMiddleware(request, event);
   }
+  if (/^\/api\/teacher\/(organizations|courses(?:\/[0-9a-f-]{36})?)$/.test(path)) return NextResponse.next();
   if (path.startsWith('/sign-in') || path.startsWith('/sign-up') || path === '/lms-staging' || isPhaseOneRoute(path)) return NextResponse.next();
   // No Firebase UID may enter an unmigrated Clerk/Prisma or UploadThing handler.
   if (path.startsWith('/api/') || path.startsWith('/trpc/')) return NextResponse.json({ error: 'This legacy workflow is unavailable in Firebase staging.' }, { status: 503 });
