@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
 import { db } from '@/server/db';
@@ -14,7 +14,7 @@ const isReviewableStatus = (value: unknown): value is ReviewableStatus =>
 	reviewableStatuses.includes(value as ReviewableStatus);
 
 const requireStaffAccess = async () => {
-	const { userId, sessionClaims } = auth();
+	const { userId, sessionClaims } = await auth();
 	if (!(await isAdminOrTeacher(userId, sessionClaims))) return null;
 	return userId;
 };

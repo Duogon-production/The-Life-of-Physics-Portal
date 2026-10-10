@@ -5,6 +5,7 @@ import { Button } from '@/frontend/components/ui/button';
 import { cn } from '@/shared/utils';
 import { Star } from 'lucide-react';
 import Image from 'next/image';
+import { useParams } from 'next/navigation';
 import FeedbackItem from '@/frontend/features/courses/feedback/feedback-item';
 import FeedbackForm from '@/frontend/features/courses/feedback/feedback-form';
 import { useEffect, useState } from 'react';
@@ -12,8 +13,8 @@ import { api } from '@/frontend/lib/api';
 import type { Feedback } from '@/shared/contracts/courses';
 import { useAuth } from '@clerk/nextjs';
 
-const CourseDetailPage = ({ params }: { params: { courseId: string } }) => {
-	const { courseId } = params;
+const CourseDetailPage = () => {
+	const { courseId } = useParams<{ courseId: string }>();
 
 	const { userId } = useAuth();
 

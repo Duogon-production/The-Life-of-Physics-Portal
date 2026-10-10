@@ -1,15 +1,16 @@
 import 'server-only';
 
 import { db } from '@/server/db';
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
 export async function POST(
 	req: Request,
-	{ params }: { params: { courseId: string } }
+	{ params: paramsPromise }: { params: Promise<{ courseId: string }> }
 ) {
+	const params = await paramsPromise;
 	try {
-		const { userId } = auth();
+		const { userId } = await auth();
 		const courseId = params.courseId;
 
 		if (!userId) {

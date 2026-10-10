@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import {
 	getStorageUsage,
 	checkAndPruneStorageIfNeeded,
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
 
 		// If force requested, ensure user is admin/teacher
 		if (force) {
-			const { userId, sessionClaims } = auth();
+			const { userId, sessionClaims } = await auth();
 			if (!userId || !(await isAdminOrTeacher(userId, sessionClaims))) {
 				return new NextResponse('Unauthorized to force storage purge', { status: 401 });
 			}

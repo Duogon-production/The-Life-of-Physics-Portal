@@ -1,15 +1,16 @@
 import 'server-only';
 
 import { db } from '@/server/db';
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
 export async function POST(
 	req: Request,
-	{ params }: { params: { courseId: string; chapterId: string } }
+	{ params: paramsPromise }: { params: Promise<{ courseId: string; chapterId: string }> }
 ) {
+	const params = await paramsPromise;
 	try {
-		const { userId } = auth();
+		const { userId } = await auth();
 
 		const { chapterId } = params;
 
@@ -36,10 +37,11 @@ export async function POST(
 
 export async function GET(
 	req: Request,
-	{ params }: { params: { courseId: string; chapterId: string } }
+	{ params: paramsPromise }: { params: Promise<{ courseId: string; chapterId: string }> }
 ) {
+	const params = await paramsPromise;
 	try {
-		const { userId } = auth();
+		const { userId } = await auth();
 
 		const { chapterId } = params;
 
@@ -63,10 +65,11 @@ export async function GET(
 
 export async function PATCH(
 	req: Request,
-	{ params }: { params: { courseId: string; chapterId: string } }
+	{ params: paramsPromise }: { params: Promise<{ courseId: string; chapterId: string }> }
 ) {
+	const params = await paramsPromise;
 	try {
-		const { userId } = auth();
+		const { userId } = await auth();
 
 		const { chapterId } = params;
 

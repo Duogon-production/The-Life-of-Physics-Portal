@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import Sidebar from '@/frontend/components/sidebar';
 import MobileSidebar from '@/frontend/features/dashboard/mobile-sidebar';
 import Footer from '@/frontend/components/footer';
@@ -7,7 +7,7 @@ import WaitlistOverlay from '@/frontend/components/waitlist-overlay';
 import { syncCurrentUser } from '@/server/services/user';
 
 const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
-	const { userId } = auth();
+	const { userId } = await auth();
 	let initialIsApproved = true;
 	let initialName: string | null = '';
 	let userRole: string | null = null;

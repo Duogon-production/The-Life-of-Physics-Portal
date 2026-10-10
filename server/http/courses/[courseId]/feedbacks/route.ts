@@ -1,15 +1,16 @@
 import 'server-only';
 
 import { db } from '@/server/db';
-import { auth, currentUser } from '@clerk/nextjs';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
 export async function POST(
 	req: Request,
-	{ params }: { params: { courseId: string } }
+	{ params: paramsPromise }: { params: Promise<{ courseId: string }> }
 ) {
+	const params = await paramsPromise;
 	try {
-		const { userId } = auth();
+		const { userId } = await auth();
 
 		const user = await currentUser();
 
@@ -39,9 +40,10 @@ export async function POST(
 
 export async function GET(
 	req: Request,
-	{ params }: { params: { courseId: string } }
+	{ params: paramsPromise }: { params: Promise<{ courseId: string }> }
 ) {
-	const { userId } = auth();
+	const params = await paramsPromise;
+	const { userId } = await auth();
 
 	if (!userId) {
 		return new NextResponse('Unauthorized', { status: 401 });

@@ -1,13 +1,13 @@
 import 'server-only';
 
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { db } from '@/server/db';
 import { syncCurrentUser, getDbUser } from '@/server/services/user';
 
 export async function GET() {
 	try {
-		const { userId } = auth();
+		const { userId } = await auth();
 		if (!userId) {
 			return NextResponse.json({ authenticated: false, user: null });
 		}
@@ -37,7 +37,7 @@ export async function GET() {
 
 export async function PATCH(req: Request) {
 	try {
-		const { userId } = auth();
+		const { userId } = await auth();
 		if (!userId) {
 			return new NextResponse('Unauthorized', { status: 401 });
 		}

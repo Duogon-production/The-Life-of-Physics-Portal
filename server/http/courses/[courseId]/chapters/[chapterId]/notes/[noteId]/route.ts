@@ -1,17 +1,18 @@
 import 'server-only';
 
 import { db } from '@/server/db';
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
 export async function DELETE(
 	req: Request,
 	{
-		params,
-	}: { params: { courseId: string; chapterId: string; noteId: string } }
+		params: paramsPromise,
+	}: { params: Promise<{ courseId: string; chapterId: string; noteId: string }> }
 ) {
+	const params = await paramsPromise;
 	try {
-		const { userId } = auth();
+		const { userId } = await auth();
 
 		const { chapterId, noteId } = params;
 

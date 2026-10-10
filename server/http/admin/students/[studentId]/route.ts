@@ -1,23 +1,24 @@
 import 'server-only';
 
-import { Clerk } from '@clerk/backend';
-import { auth } from '@clerk/nextjs';
+import { createClerkClient } from '@clerk/backend';
+import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
 import { db } from '@/server/db';
 import { isAdminOrTeacher } from '@/server/services/teacher';
 
-const clerk = Clerk({ secretKey: process.env.CLERK_SECRET_KEY });
+const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 
 const requireStaffAccess = async () => {
-	const { userId, sessionClaims } = auth();
+	const { userId, sessionClaims } = await auth();
 	return isAdminOrTeacher(userId, sessionClaims);
 };
 
 export async function GET(
 	req: Request,
-	{ params }: { params: { studentId: string } }
+	{ params: paramsPromise }: { params: Promise<{ studentId: string }> }
 ) {
+	const params = await paramsPromise;
 	if (!(await requireStaffAccess())) {
 		return new NextResponse('Unauthorized', { status: 401 });
 	}

@@ -148,6 +148,12 @@ behind a disabled staging flag until the separate identity migration. Read the
 
 ## Contribution
 
+Dependency remediation is documented in the [security report](docs/dependency-security-report.md)
+and [complete advisory inventory](docs/dependency-advisory-inventory.md).
+For the read-only local runtime checks, start a production build with
+`npm run start -- --hostname localhost --port 3108`, then run
+`npm run test:security-smoke` in another terminal. Use Node 22 or newer.
+
 Contributions are welcome! Please open an issue or submit a pull request.
 
 ---

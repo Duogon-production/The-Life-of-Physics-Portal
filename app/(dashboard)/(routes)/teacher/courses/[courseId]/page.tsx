@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { ArrowLeft, LayoutDashboard, ListChecks, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -14,8 +14,9 @@ import ChapterNumberForm from '@/frontend/features/teacher/courses/editor/chapte
 import ChaptersForm from '@/frontend/features/teacher/courses/editor/chapters-form';
 import Actions from '@/frontend/features/teacher/courses/editor/actions';
 
-const CourseIdPage = async ({ params }: { params: { courseId: string } }) => {
-	const { userId } = auth();
+const CourseIdPage = async ({ params: paramsPromise }: { params: Promise<{ courseId: string }> }) => {
+	const params = await paramsPromise;
+	const { userId } = await auth();
 
 	if (!userId) {
 		return redirect('/');

@@ -2,7 +2,8 @@ import { getCourseEntry } from '@/server/queries/catalog';
 import { recordCourseView } from '@/server/services/course-statistics';
 import { redirect } from 'next/navigation';
 
-const CourseIdPage = async ({ params }: { params: { courseId: string } }) => {
+const CourseIdPage = async ({ params: paramsPromise }: { params: Promise<{ courseId: string }> }) => {
+	const params = await paramsPromise;
 	const courseId = params.courseId;
 
 	const course = await getCourseEntry(courseId);

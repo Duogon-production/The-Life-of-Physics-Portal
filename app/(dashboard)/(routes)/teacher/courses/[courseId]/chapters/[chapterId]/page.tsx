@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { ArrowLeft, FileText, LayoutDashboard, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -13,11 +13,12 @@ import ChapterActions from '@/frontend/features/teacher/chapters/editor/chapter-
 import ChapterContentTypeForm from '@/frontend/features/teacher/chapters/editor/chapter-content-type-form';
 
 const ChapterIdPage = async ({
-	params,
+	params: paramsPromise,
 }: {
-	params: { courseId: string; chapterId: string };
+	params: Promise<{ courseId: string; chapterId: string }>;
 }) => {
-	const { userId } = auth();
+	const params = await paramsPromise;
+	const { userId } = await auth();
 
 	if (!userId) {
 		return redirect('/');

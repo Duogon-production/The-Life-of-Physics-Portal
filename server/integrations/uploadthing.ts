@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { isTeacher } from '@/server/services/teacher';
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { createUploadthing, type FileRouter } from 'uploadthing/next';
 
 const f = createUploadthing({
@@ -32,7 +32,7 @@ const ensureUploadThingIsConfigured = () => {
 const handleAuth = async () => {
 	ensureUploadThingIsConfigured();
 
-	const { userId } = auth();
+	const { userId } = await auth();
 
 	if (!userId) {
 		throw new Error('You must sign in before uploading course files.');
@@ -47,10 +47,10 @@ const handleAuth = async () => {
 	return { userId };
 };
 
-const handleStudentAuth = () => {
+const handleStudentAuth = async () => {
 	ensureUploadThingIsConfigured();
 
-	const { userId } = auth();
+	const { userId } = await auth();
 
 	if (!userId) throw new Error('You must sign in before submitting homework.');
 	return { userId };

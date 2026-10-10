@@ -38,7 +38,7 @@ function dashboard(findMany) {
 
 function endpoint(auth, queryDashboardCourses) {
   return loadBackend('server/http/courses/dashboard/route.ts', {
-    '@clerk/nextjs': { auth },
+    '@clerk/nextjs/server': { auth },
     'next/server': { NextResponse },
     '@/server/queries/get-dashboard-courses': { queryDashboardCourses },
   });

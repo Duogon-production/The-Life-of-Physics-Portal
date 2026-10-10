@@ -2,19 +2,19 @@ import { getCategories } from '@/server/queries/catalog';
 import Categories from '@/frontend/features/search/categories';
 import SearchInput from '@/frontend/components/search-input';
 import { getCourses } from '@/server/queries/get-courses';
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import CoursesList from '@/frontend/components/courses-list';
 
 interface SearchPageProps {
-	searchParams: {
+	searchParams: Promise<{
 		title: string;
 		categoryId: string;
-	};
+	}>;
 }
 
 const SearchPage = async ({ searchParams }: SearchPageProps) => {
-	const { userId } = auth();
+	const { userId } = await auth();
 
 	if (!userId) return redirect('/');
 
@@ -22,7 +22,7 @@ const SearchPage = async ({ searchParams }: SearchPageProps) => {
 
 	const courses = await getCourses({
 		userId,
-		...searchParams,
+		...(await searchParams),
 	});
 
 	return (

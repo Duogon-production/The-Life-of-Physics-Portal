@@ -1,12 +1,12 @@
 import 'server-only';
 
 import { db } from '@/server/db';
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
 export async function PUT(req: Request) {
 	try {
-		const { userId } = auth();
+		const { userId } = await auth();
 		const { ...values } = await req.json();
 
 		if (!userId) {
@@ -33,7 +33,7 @@ export async function PUT(req: Request) {
 
 export async function GET(req: Request) {
 	try {
-		const { userId } = auth();
+		const { userId } = await auth();
 
 		if (!userId) {
 			return new NextResponse('Unauthorized', { status: 401 });

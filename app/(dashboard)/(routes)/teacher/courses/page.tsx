@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { PlusCircle, ShieldCheck } from 'lucide-react';
@@ -10,7 +10,7 @@ import { DataTable } from '@/frontend/features/teacher/courses/list/data-table';
 import { columns } from '@/frontend/features/teacher/courses/list/columns';
 
 const CoursesPage = async () => {
-	const { userId } = auth();
+	const { userId } = await auth();
 
 	if (!userId) return redirect('/');
 

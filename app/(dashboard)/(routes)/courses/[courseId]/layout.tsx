@@ -1,15 +1,16 @@
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { getCourseIdentity } from '@/server/queries/catalog';
 
 const CourseLayout = async ({
 	children,
-	params,
+	params: paramsPromise,
 }: {
 	children: React.ReactNode;
-	params: { courseId: string };
+	params: Promise<{ courseId: string }>;
 }) => {
-	const { userId } = auth();
+	const params = await paramsPromise;
+	const { userId } = await auth();
 
 	if (!userId) {
 		return redirect('/');

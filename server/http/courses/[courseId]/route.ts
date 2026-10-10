@@ -2,7 +2,7 @@ import 'server-only';
 
 import Mux from '@mux/mux-node';
 import { db } from '@/server/db';
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
 const getMuxVideo = () => {
@@ -18,10 +18,11 @@ const getMuxVideo = () => {
 
 export async function DELETE(
 	req: Request,
-	{ params }: { params: { courseId: string } }
+	{ params: paramsPromise }: { params: Promise<{ courseId: string }> }
 ) {
+	const params = await paramsPromise;
 	try {
-		const { userId } = auth();
+		const { userId } = await auth();
 		const { courseId } = params;
 
 		if (!userId) {
@@ -62,10 +63,11 @@ export async function DELETE(
 
 export async function PATCH(
 	req: Request,
-	{ params }: { params: { courseId: string } }
+	{ params: paramsPromise }: { params: Promise<{ courseId: string }> }
 ) {
+	const params = await paramsPromise;
 	try {
-		const { userId } = auth();
+		const { userId } = await auth();
 		const { courseId } = params;
 		const values = await req.json();
 
@@ -87,10 +89,11 @@ export async function PATCH(
 
 export async function GET(
 	req: Request,
-	{ params }: { params: { courseId: string } }
+	{ params: paramsPromise }: { params: Promise<{ courseId: string }> }
 ) {
+	const params = await paramsPromise;
 	try {
-		const { userId } = auth();
+		const { userId } = await auth();
 
 		if (!userId) {
 			return new NextResponse('Unauthorized', { status: 401 });

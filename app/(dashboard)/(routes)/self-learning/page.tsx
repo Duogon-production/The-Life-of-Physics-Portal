@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { getSelfLearningChapters } from '@/server/queries/self-learning';
 import { SelfLearningView } from '@/frontend/features/self-learning/self-learning-view';
@@ -6,7 +6,7 @@ import { SelfLearningView } from '@/frontend/features/self-learning/self-learnin
 
 
 const SelfLearningPage = async () => {
-	const { userId } = auth();
+	const { userId } = await auth();
 
 	if (!userId) {
 		return redirect('/');

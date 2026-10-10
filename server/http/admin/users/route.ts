@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { Role } from '@prisma/client';
 
@@ -8,7 +8,7 @@ import { db } from '@/server/db';
 import { isAdminOrTeacher } from '@/server/services/teacher';
 
 const requireStaffAccess = async () => {
-	const { userId, sessionClaims } = auth();
+	const { userId, sessionClaims } = await auth();
 	return isAdminOrTeacher(userId, sessionClaims);
 };
 
@@ -94,7 +94,7 @@ export async function DELETE(req: Request) {
 
 // PATCH /api/admin/users - Toggle Approval or Manage Group Assignment
 export async function PATCH(req: Request) {
-	const { userId: adminUserId, sessionClaims } = auth();
+	const { userId: adminUserId, sessionClaims } = await auth();
 	if (!adminUserId || !(await isAdminOrTeacher(adminUserId, sessionClaims))) {
 		return new NextResponse('Unauthorized', { status: 401 });
 	}

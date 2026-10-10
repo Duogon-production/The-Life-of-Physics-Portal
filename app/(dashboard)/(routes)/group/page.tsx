@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { Users, MessageCircle } from 'lucide-react';
 
@@ -11,7 +11,7 @@ import GroupRosterView from '@/frontend/features/groups/group-roster-view';
 
 
 const GroupPage = async () => {
-	const { userId, sessionClaims } = auth();
+	const { userId, sessionClaims } = await auth();
 
 	if (!userId) {
 		return redirect('/');

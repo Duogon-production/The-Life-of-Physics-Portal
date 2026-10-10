@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import type { Chapter, Course, UserProgress } from '@/shared/contracts/courses';
 import { redirect } from 'next/navigation';
 import CourseSidebarItem from '@/frontend/features/courses/navigation/course-sidebar-item';
@@ -15,7 +15,7 @@ interface CourseSidebarProps {
 }
 
 const CourseSidebar = async ({ course, progressCount }: CourseSidebarProps) => {
-	const { userId } = auth();
+	const { userId } = await auth();
 
 	if (!userId) return redirect('/');
 

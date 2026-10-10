@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { Clock } from 'lucide-react';
 
@@ -9,7 +9,7 @@ import { isTeacher } from '@/server/services/teacher';
 import { getDbUser } from '@/server/services/user';
 
 const HomePage = async () => {
-	const { userId, sessionClaims } = auth();
+	const { userId, sessionClaims } = await auth();
 
 	if (!userId) {
 		return redirect('/');

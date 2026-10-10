@@ -1,13 +1,13 @@
 import 'server-only';
 
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
 import { db } from '@/server/db';
 import { isAdminOrTeacher } from '@/server/services/teacher';
 
 const requireStaffAccess = async () => {
-	const { userId, sessionClaims } = auth();
+	const { userId, sessionClaims } = await auth();
 	return isAdminOrTeacher(userId, sessionClaims);
 };
 

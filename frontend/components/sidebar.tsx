@@ -260,7 +260,6 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 		<div className="flex items-center gap-3 p-2 rounded-2xl bg-white border border-slate-200/60 shadow-sm">
 		{/* z-[99999] and pointer-events-auto fixes Clerk popover touch lock inside Radix Sheet */}
 		<UserButton
-		afterSignOutUrl="/"
 		appearance={{
 			elements: {
 				avatarBox: 'h-9 w-9 border-2 border-cyan-500 shadow-sm',

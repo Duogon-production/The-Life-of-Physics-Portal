@@ -1,15 +1,16 @@
 import { getChapter } from '@/server/queries/get-chapter';
 import Banner from '@/frontend/components/banner';
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import LessonTabs, { type LessonSegmentItem } from '@/frontend/features/courses/lesson/lesson-tabs';
 
 const ChapterIdPage = async ({
-	params,
+	params: paramsPromise,
 }: {
-	params: { courseId: string; chapterId: string };
+	params: Promise<{ courseId: string; chapterId: string }>;
 }) => {
-	const { userId } = auth();
+	const params = await paramsPromise;
+	const { userId } = await auth();
 
 	if (!userId) return redirect('/');
 

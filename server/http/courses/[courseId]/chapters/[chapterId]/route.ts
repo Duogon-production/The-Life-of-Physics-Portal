@@ -2,7 +2,7 @@ import 'server-only';
 
 import Mux from '@mux/mux-node';
 import { db } from '@/server/db';
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
 const getMuxVideo = () => {
@@ -18,10 +18,11 @@ const getMuxVideo = () => {
 
 export async function DELETE(
 	req: Request,
-	{ params }: { params: { courseId: string; chapterId: string } }
+	{ params: paramsPromise }: { params: Promise<{ courseId: string; chapterId: string }> }
 ) {
+	const params = await paramsPromise;
 	try {
-		const { userId } = auth();
+		const { userId } = await auth();
 		const { courseId, chapterId } = params;
 
 		if (!userId) {
@@ -89,10 +90,11 @@ export async function DELETE(
 
 export async function PATCH(
 	req: Request,
-	{ params }: { params: { courseId: string; chapterId: string } }
+	{ params: paramsPromise }: { params: Promise<{ courseId: string; chapterId: string }> }
 ) {
+	const params = await paramsPromise;
 	try {
-		const { userId } = auth();
+		const { userId } = await auth();
 		const { courseId, chapterId } = params;
 
 		const { isPublished, ...values } = await req.json();

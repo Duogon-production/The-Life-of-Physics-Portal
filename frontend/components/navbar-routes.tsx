@@ -6,7 +6,6 @@ const NavbarRoutes = () => {
 	return (
 		<div className="ml-auto flex items-center">
 			<UserButton
-				afterSignOutUrl="/"
 				showName={true}
 				appearance={{
 					elements: {

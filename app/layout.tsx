@@ -1,4 +1,5 @@
-import { ClerkProvider, auth } from '@clerk/nextjs';
+import { ClerkProvider } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
@@ -21,11 +22,11 @@ export default async function RootLayout({
 }: {
 	children: React.ReactNode;
 }) {
-	const { userId, sessionClaims } = auth();
+	const { userId, sessionClaims } = await auth();
 	const isStaff = await isTeacher(userId, sessionClaims);
 
 	return (
-		<ClerkProvider>
+		<ClerkProvider afterSignOutUrl="/" appearance={{ options: { showOptionalFields: true } }}>
 			<html lang="en" suppressHydrationWarning>
 				<body className={inter.className}>
 					<ThemeProvider

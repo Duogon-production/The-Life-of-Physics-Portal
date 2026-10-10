@@ -74,7 +74,7 @@ test('grade port validates result payload and strips unspecified key material', 
 });
 test('legacy email sync rejects unverified administrator email before database access', async () => {
   const { syncCurrentUser } = load('server/services/user.ts', {
-    '@clerk/nextjs': { currentUser: async () => ({ id: 'user', primaryEmailAddressId: 'email', emailAddresses: [{ id: 'email', emailAddress: 'support.lop.physics@gmail.com', verification: { status: 'unverified' } }] }) },
+    '@clerk/nextjs/server': { currentUser: async () => ({ id: 'user', primaryEmailAddressId: 'email', emailAddresses: [{ id: 'email', emailAddress: 'support.lop.physics@gmail.com', verification: { status: 'unverified' } }] }) },
     '@prisma/client': {}, '@/server/db': { db: new Proxy({}, { get() { assert.fail('Unverified identity reached persistence'); } }) },
   });
   assert.equal(await syncCurrentUser(), null);
