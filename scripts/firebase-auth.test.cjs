@@ -12,6 +12,40 @@ function load(file, deps, env = {}) {
   return module.exports;
 }
 const env = { NEXT_PUBLIC_FIREBASE_PROJECT_ID: 'diagonproduction' };
+test('restored-session and form completion navigate home only once', async () => {
+  const effects = [], navigations = [];
+  let finishSync;
+  const syncing = new Promise(resolve => { finishSync = resolve; });
+  const user = { emailVerified: true };
+  const jsx = (type, props) => ({ type, props });
+  const module = { exports: {} };
+  const source = ts.transpileModule(fs.readFileSync('frontend/features/auth/firebase-form.tsx', 'utf8'), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020, jsx: ts.JsxEmit.ReactJSX },
+  }).outputText;
+  const dependencies = {
+    react: { useState: initial => [initial, () => {}], useEffect: effect => effects.push(effect), useRef: value => ({ current: value }), useCallback: callback => callback },
+    'react/jsx-runtime': { jsx, jsxs: jsx },
+    'next/link': { default: 'Link' },
+    'firebase/auth': { signInWithEmailAndPassword: async () => ({ user }), getRedirectResult: async () => null },
+    '@/frontend/lib/firebase': { getFirebaseAuth: () => ({}), restoreFirebaseAuth: async () => {} },
+    '@/frontend/components/providers/firebase-auth-provider': {
+      useFirebaseAuth: () => ({ user, loading: false, error: null }),
+      synchronizeFirebaseSession: () => syncing,
+    },
+  };
+  vm.runInNewContext(source, { module, exports: module.exports,
+    window: { location: { replace: path => navigations.push(path), assign: path => navigations.push(path) } },
+    require: name => { assert.ok(name in dependencies, name); return dependencies[name]; },
+  });
+  const tree = module.exports.FirebaseForm({});
+  const form = tree.props.children.find(child => child?.type === 'form');
+  form.props.onSubmit({ preventDefault() {} });
+  await new Promise(resolve => setImmediate(resolve));
+  effects[1]();
+  finishSync();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.deepEqual(navigations, ['/home']);
+});
 const identity = () => ({ uid: 'firebase-string-uid', sub: 'firebase-string-uid', aud: 'diagonproduction', iss: 'https://securetoken.google.com/diagonproduction', exp: Date.now() / 1000 + 60 });
 function authService(admin, staging = true) {
   return load('server/services/firebase-auth.ts', { 'next/headers': {}, '@/shared/auth-config': { isFirebaseStaging: () => staging }, '@/server/integrations/firebase-admin': { getFirebaseAdminAuth: () => admin } }, env);

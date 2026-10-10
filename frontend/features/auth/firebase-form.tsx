@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import Link from 'next/link';
 import { createUserWithEmailAndPassword, GoogleAuthProvider, sendEmailVerification, sendPasswordResetEmail,
   signInWithEmailAndPassword, signInWithPopup, signInWithRedirect, getRedirectResult } from 'firebase/auth';
@@ -24,6 +24,12 @@ export function FirebaseForm({ register = false }: { register?: boolean }) {
   const { user, loading, error, refresh } = useFirebaseAuth();
   const [email, setEmail] = useState(''); const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false); const [message, setMessage] = useState<string | null>(null);
+  const redirecting = useRef(false);
+  const goHome = useCallback(() => {
+    if (redirecting.current) return;
+    redirecting.current = true;
+    window.location.replace('/home');
+  }, []);
   const run = async (operation: () => Promise<void>) => {
     setBusy(true); setMessage(null);
     try { await restoreFirebaseAuth(); await operation(); }
@@ -31,18 +37,20 @@ export function FirebaseForm({ register = false }: { register?: boolean }) {
     finally { setBusy(false); }
   };
   useEffect(() => { void restoreFirebaseAuth().then(() => getRedirectResult(getFirebaseAuth())).catch(failure => setMessage(readableError(failure))); }, []);
-  useEffect(() => { if (user && !loading && !error) window.location.replace('/home'); }, [user, loading, error]);
+  useEffect(() => {
+    if (user?.emailVerified && !loading && !error && !busy) goHome();
+  }, [user, loading, error, busy, goHome]);
   const submit = () => run(async () => {
     const auth = getFirebaseAuth();
     const credential = register ? await createUserWithEmailAndPassword(auth, email.trim(), password) : await signInWithEmailAndPassword(auth, email.trim(), password);
     if (register) { await sendEmailVerification(credential.user); setMessage('Check your email for a verification link.'); }
-    else { await synchronizeFirebaseSession(credential.user); window.location.assign('/home'); }
+    else { await synchronizeFirebaseSession(credential.user); goHome(); }
   });
   const google = () => run(async () => {
     const provider = new GoogleAuthProvider();
     try {
       const credential = await signInWithPopup(getFirebaseAuth(), provider);
-      await synchronizeFirebaseSession(credential.user); window.location.assign('/home');
+      await synchronizeFirebaseSession(credential.user); goHome();
     } catch (failure) {
       if (['auth/popup-blocked', 'auth/operation-not-supported-in-this-environment'].includes((failure as { code: string }).code)) {
         await signInWithRedirect(getFirebaseAuth(), provider);
@@ -61,7 +69,7 @@ export function FirebaseForm({ register = false }: { register?: boolean }) {
     {!register && <button disabled={busy || !email} onClick={() => void run(async () => { await sendPasswordResetEmail(getFirebaseAuth(), email.trim()); setMessage('If an account exists, a password reset email has been sent.'); })} className="mt-4 text-sky-700">Forgot password?</button>}
     {user && !user.emailVerified && <div className="mt-4 flex gap-4">
       <button disabled={busy} onClick={() => void run(async () => { await sendEmailVerification(user); setMessage('Verification email sent.'); })}>Resend verification</button>
-      <button disabled={busy} onClick={() => void run(async () => { await refresh(); window.location.assign('/home'); })}>I verified my email</button>
+      <button disabled={busy} onClick={() => void run(async () => { await refresh(); goHome(); })}>I verified my email</button>
     </div>}
     {(message || error) && <p role="status" className="mt-4 text-sm">{message || error}</p>}
     <p className="mt-6 text-sm"><Link className="text-sky-700" href={register ? '/sign-in' : '/sign-up'}>{register ? 'Already have an account? Sign in' : 'Create an account'}</Link></p>
