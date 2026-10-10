@@ -14,8 +14,12 @@ export const syncCurrentUser = async (): Promise<User | null> => {
 		const clerkUser = await currentUser();
 		if (!clerkUser) return null;
 
-		const email =
-			clerkUser.emailAddresses[0]?.emailAddress?.trim().toLowerCase();
+		const primaryEmail = clerkUser.emailAddresses.find(
+			address => address.id === clerkUser.primaryEmailAddressId
+		);
+		// Email-based linking/admin promotion must require provider verification.
+		if (primaryEmail?.verification?.status !== 'verified') return null;
+		const email = primaryEmail.emailAddress?.trim().toLowerCase();
 		if (!email) return null;
 
 		const isPredefinedAdmin = ADMIN_EMAILS.includes(email);

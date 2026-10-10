@@ -1,0 +1,206 @@
+{
+  "checkedOn": "2026-10-10",
+  "projectRef": "gmvouqgjbtbkbhrdruzu",
+  "source": "Official Supabase MCP get_advisors",
+  "security": {
+    "lints": [
+      {
+        "name": "rls_enabled_no_policy",
+        "title": "RLS Enabled No Policy",
+        "level": "INFO",
+        "facing": "EXTERNAL",
+        "categories": [
+          "SECURITY"
+        ],
+        "description": "Detects cases where row level security (RLS) has been enabled on a table but no RLS policies have been created.",
+        "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy",
+        "count": 2,
+        "findings": [
+          {
+            "detail": "Table \\`private.assessment_answer_keys\\` has RLS enabled, but no policies exist",
+            "metadata": {
+              "name": "assessment_answer_keys",
+              "type": "table",
+              "schema": "private"
+            },
+            "observed_at": "2026-10-10T10:29:33.427Z"
+          },
+          {
+            "detail": "Table \\`private.external_identities\\` has RLS enabled, but no policies exist",
+            "metadata": {
+              "name": "external_identities",
+              "type": "table",
+              "schema": "private"
+            },
+            "observed_at": "2026-10-10T10:29:33.427Z"
+          }
+        ]
+      },
+      {
+        "name": "auth_leaked_password_protection",
+        "title": "Leaked Password Protection Disabled",
+        "level": "WARN",
+        "facing": "EXTERNAL",
+        "categories": [
+          "SECURITY"
+        ],
+        "description": "Leaked password protection is currently disabled.",
+        "remediation": "https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection",
+        "count": 1,
+        "findings": [
+          {
+            "detail": "Supabase Auth prevents the use of compromised passwords by checking against HaveIBeenPwned.org. Enable this feature to enhance security.",
+            "metadata": {
+              "type": "auth",
+              "entity": "Auth"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "performance": {
+    "lints": [
+      {
+        "name": "unused_index",
+        "title": "Unused Index",
+        "level": "INFO",
+        "facing": "EXTERNAL",
+        "categories": [
+          "PERFORMANCE"
+        ],
+        "description": "Detects if an index has never been used and may be a candidate for removal.",
+        "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index",
+        "count": 14,
+        "findings": [
+          {
+            "detail": "Index \\`organizations_created_by_idx\\` on table \\`public.organizations\\` has not been used",
+            "metadata": {
+              "name": "organizations",
+              "type": "table",
+              "schema": "public"
+            },
+            "observed_at": "2026-10-10T10:29:33.460Z"
+          },
+          {
+            "detail": "Index \\`courses_created_by_idx\\` on table \\`public.courses\\` has not been used",
+            "metadata": {
+              "name": "courses",
+              "type": "table",
+              "schema": "public"
+            },
+            "observed_at": "2026-10-10T10:29:33.460Z"
+          },
+          {
+            "detail": "Index \\`enrollments_created_by_idx\\` on table \\`public.enrollments\\` has not been used",
+            "metadata": {
+              "name": "enrollments",
+              "type": "table",
+              "schema": "public"
+            },
+            "observed_at": "2026-10-10T10:29:33.460Z"
+          },
+          {
+            "detail": "Index \\`media_assets_organization_id_idx\\` on table \\`public.media_assets\\` has not been used",
+            "metadata": {
+              "name": "media_assets",
+              "type": "table",
+              "schema": "public"
+            },
+            "observed_at": "2026-10-10T10:29:33.460Z"
+          },
+          {
+            "detail": "Index \\`lesson_progress_lesson_id_idx\\` on table \\`public.lesson_progress\\` has not been used",
+            "metadata": {
+              "name": "lesson_progress",
+              "type": "table",
+              "schema": "public"
+            },
+            "observed_at": "2026-10-10T10:29:33.460Z"
+          },
+          {
+            "detail": "Index \\`assessments_course_id_idx\\` on table \\`public.assessments\\` has not been used",
+            "metadata": {
+              "name": "assessments",
+              "type": "table",
+              "schema": "public"
+            },
+            "observed_at": "2026-10-10T10:29:33.460Z"
+          },
+          {
+            "detail": "Index \\`assessments_created_by_idx\\` on table \\`public.assessments\\` has not been used",
+            "metadata": {
+              "name": "assessments",
+              "type": "table",
+              "schema": "public"
+            },
+            "observed_at": "2026-10-10T10:29:33.460Z"
+          },
+          {
+            "detail": "Index \\`assessments_supersedes_assessment_id_idx\\` on table \\`public.assessments\\` has not been used",
+            "metadata": {
+              "name": "assessments",
+              "type": "table",
+              "schema": "public"
+            },
+            "observed_at": "2026-10-10T10:29:33.460Z"
+          },
+          {
+            "detail": "Index \\`assessment_attempts_user_id_offering_assessment_id_idx\\` on table \\`public.assessment_attempts\\` has not been used",
+            "metadata": {
+              "name": "assessment_attempts",
+              "type": "table",
+              "schema": "public"
+            },
+            "observed_at": "2026-10-10T10:29:33.460Z"
+          },
+          {
+            "detail": "Index \\`assessment_attempts_graded_by_idx\\` on table \\`public.assessment_attempts\\` has not been used",
+            "metadata": {
+              "name": "assessment_attempts",
+              "type": "table",
+              "schema": "public"
+            },
+            "observed_at": "2026-10-10T10:29:33.460Z"
+          },
+          {
+            "detail": "Index \\`assessment_responses_question_id_idx\\` on table \\`public.assessment_responses\\` has not been used",
+            "metadata": {
+              "name": "assessment_responses",
+              "type": "table",
+              "schema": "public"
+            },
+            "observed_at": "2026-10-10T10:29:33.460Z"
+          },
+          {
+            "detail": "Index \\`assessment_responses_graded_by_idx\\` on table \\`public.assessment_responses\\` has not been used",
+            "metadata": {
+              "name": "assessment_responses",
+              "type": "table",
+              "schema": "public"
+            },
+            "observed_at": "2026-10-10T10:29:33.460Z"
+          },
+          {
+            "detail": "Index \\`media_assets_pending_expiry_idx\\` on table \\`public.media_assets\\` has not been used",
+            "metadata": {
+              "name": "media_assets",
+              "type": "table",
+              "schema": "public"
+            },
+            "observed_at": "2026-10-10T10:29:33.460Z"
+          },
+          {
+            "detail": "Index \\`external_identities_profile_id_idx\\` on table \\`private.external_identities\\` has not been used",
+            "metadata": {
+              "name": "external_identities",
+              "type": "table",
+              "schema": "private"
+            },
+            "observed_at": "2026-10-10T10:29:33.460Z"
+          }
+        ]
+      }
+    ]
+  }
+}

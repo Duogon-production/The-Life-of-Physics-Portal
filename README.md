@@ -4,6 +4,13 @@ A fullstack Learning Management System (LMS) built with Next.js, Prisma, Postgre
 
 The frontend and backend have distinct code layers within one Next.js deployment. See [the architecture guide](docs/architecture.md) for request flow, dependency rules, and how to add features.
 
+The new multi-teacher Supabase database foundation is documented in
+[database architecture](docs/database-architecture.md). Versioned SQL is in
+`supabase/migrations/`, development fixtures in `supabase/seed.sql`, and executable
+RLS checks in `supabase/tests/authorization.sql`. Typed browser/server Supabase
+clients use the public URL and publishable key from `.env.local` (see `.env.example`).
+The existing UI still uses Clerk/Prisma until the explicit identity/data cutover.
+
 [Live Demo](https://lms.shounoop.vercel.app)
 
 ---
@@ -56,7 +63,7 @@ The frontend and backend have distinct code layers within one Next.js deployment
 ## Getting Started
 
 ### Prerequisites
-- Node.js >= 18
+- Node.js >= 22 (required by the current Supabase client)
 - PostgreSQL database
 - [Mux](https://mux.com/) and [Clerk](https://clerk.dev/) accounts for full functionality
 
@@ -95,6 +102,12 @@ npx prisma migrate deploy
 npm run dev
 ```
 
+On Windows, the npm scripts preload a narrow filesystem compatibility fix for
+exFAT drives: Node reports `EISDIR` when reading a non-symlink, while Next.js expects
+`EINVAL`. The fix verifies that the path is not a link before normalizing this error;
+other errors are preserved. This avoids the [known exFAT build issue](https://github.com/vercel/next.js/discussions/38785)
+when running this checkout on `D:`. Linux/macOS behavior is unchanged.
+
 ---
 
 ## Database Schema
@@ -121,6 +134,15 @@ See [`prisma/schema.prisma`](prisma/schema.prisma) for details.
 Run `npm run check` for backend/architecture tests, dependency checks, TypeScript,
 and lint. Run `npm run build` to validate a production build; it also enforces
 the frontend/backend boundaries.
+
+The website remains on Clerk/Prisma/UploadThing. Supabase LMS access is prepared
+behind a disabled staging flag until the separate identity migration. Read the
+[verified Supabase report](docs/supabase-completion-report.md),
+[operations guide](docs/database-operations.md),
+[identity transition](docs/identity-transition.md), and
+[legacy migration mapping](docs/legacy-data-migration.md).
+`npm run test:lms-http` checks anonymous/token API boundaries; the opt-in
+`npm run test:lms-load` requires dedicated real development sessions.
 
 ---
 

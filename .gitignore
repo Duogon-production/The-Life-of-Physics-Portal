@@ -27,6 +27,10 @@ yarn-error.log*
 # local env files
 .env*.local
 .env
+.env.*
+!.env.example
+!.env.*.example
+.env.keys
 
 # vercel
 .vercel
@@ -35,3 +39,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .neon
+
+# Previous workspace backup contains local credentials and generated files.
+/EDrive_The-Life-of-Physics-Portal.zip
+
+# Private exports, load-test sessions, backups and maintenance reports.
+/.local/
+*.dump
+*.backup

@@ -3,14 +3,17 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"dev": "next dev -H 0.0.0.0 -p 3000",
-		"build": "npm run check:boundaries && next build",
-		"start": "next start",
+		"dev": "node --require ./scripts/windows-filesystem.cjs ./node_modules/next/dist/bin/next dev -H 0.0.0.0 -p 3000",
+		"build": "npm run check:boundaries && node --require ./scripts/windows-filesystem.cjs ./node_modules/next/dist/bin/next build",
+		"start": "node --require ./scripts/windows-filesystem.cjs ./node_modules/next/dist/bin/next start",
 		"lint": "next lint --dir app --dir frontend --dir server --dir shared",
 		"typecheck": "tsc --noEmit",
 		"check:boundaries": "node scripts/check-boundaries.cjs",
 		"test:architecture": "node --test scripts/check-boundaries.test.cjs",
-		"test": "node --test scripts/check-boundaries.test.cjs scripts/backend.test.cjs scripts/countdown.test.cjs",
+		"test:lms-http": "node scripts/lms-http-security.cjs",
+		"test:lms-load": "node scripts/lms-load-test.cjs",
+		"db:legacy-inspect": "node scripts/legacy-migration.cjs --inspect",
+		"test": "node --test scripts/check-boundaries.test.cjs scripts/backend.test.cjs scripts/countdown.test.cjs scripts/windows-filesystem.test.cjs scripts/lms.test.cjs scripts/legacy-migration.test.cjs",
 		"check": "npm test && npm run check:boundaries && npm run typecheck && npm run lint",
 		"postinstall": "prisma generate"
 	},
@@ -37,6 +40,8 @@
 		"@radix-ui/react-slot": "^1.0.2",
 		"@radix-ui/react-tooltip": "^1.0.7",
 		"@react-email/render": "^2.1.0",
+		"@supabase/ssr": "0.12.7",
+		"@supabase/supabase-js": "2.117.2",
 		"@tanstack/react-table": "^8.10.7",
 		"@types/node": "20.8.2",
 		"@types/react": "18.2.25",
@@ -67,14 +72,14 @@
 		"react-quill": "^2.0.0",
 		"recharts": "^2.9.0",
 		"resend": "^6.31.0",
+		"server-only": "0.0.1",
 		"tailwind-merge": "^1.14.0",
 		"tailwindcss": "3.3.3",
 		"tailwindcss-animate": "^1.0.7",
 		"typescript": "5.2.2",
 		"uploadthing": "^7.7.4",
 		"zod": "^3.22.4",
-		"zustand": "^4.4.4",
-		"server-only": "0.0.1"
+		"zustand": "^4.4.4"
 	},
 	"devDependencies": {
 		"prisma": "^5.22.0"
