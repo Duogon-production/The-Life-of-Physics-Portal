@@ -5,6 +5,7 @@ import { BookOpen } from 'lucide-react';
 import CourseProgress from '@/frontend/components/course-progress';
 
 interface CourseCardProps {
+	href?: string;
 	id: string;
 	title: string;
 	imageUrl?: string | null;
@@ -14,6 +15,7 @@ interface CourseCardProps {
 }
 
 const CourseCard = ({
+	href,
 	id,
 	title,
 	imageUrl,
@@ -22,7 +24,7 @@ const CourseCard = ({
 	category,
 }: CourseCardProps) => {
 	return (
-		<Link href={`/courses/${id}`}>
+		<Link href={href || `/courses/${id}`}>
 			<div className="group hover:shadow-sm transition overflow-hidden border rounded-lg p-3 h-full">
 				<div className="relative w-full aspect-video rounded-md overflow-hidden">
 					{imageUrl ? (
@@ -47,7 +49,7 @@ const CourseCard = ({
 							<IconBadge size={'sm'} icon={BookOpen} />
 
 							<span>
-								{`${chaptersLength} ${
+								{chaptersLength === undefined ? 'Chapter count unavailable' : `${chaptersLength} ${
 									chaptersLength === 1 ? 'chapter' : 'chapters'
 								}`}
 							</span>

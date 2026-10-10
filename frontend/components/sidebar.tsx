@@ -3,7 +3,9 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { UserButton, useUser, useClerk } from '@clerk/nextjs';
+import { ApplicationAvatar, useApplicationAuth, useWebsiteNavigation } from '@/frontend/components/providers/application-auth-provider';
+import { isFirebaseStaging } from '@/shared/auth-config';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { api } from '@/frontend/lib/api';
 import {
 	Home,
@@ -29,8 +31,12 @@ interface SidebarProps {
 
 const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 	const pathname = usePathname();
-	const { user: clerkUser } = useUser();
-	const { signOut } = useClerk();
+	const { user: clerkUser, signOut } = useApplicationAuth();
+	const navigation = useWebsiteNavigation();
+	const search = useSearchParams();
+	const router = useRouter();
+	const selectedOrganization = search.get('organization') || '';
+	const firebase = isFirebaseStaging();
 	const { onOpen: onOpenSupport } = useSupportModal();
 
 	const [role, setRole] = useState<string | null>(
@@ -38,6 +44,7 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 	);
 
 	useEffect(() => {
+		if (firebase) return;
 		api
 		.get('/api/user/status')
 		.then((res) => {
@@ -46,9 +53,9 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 			}
 		})
 		.catch(() => {});
-	}, []);
+	}, [firebase]);
 
-	const isAdminOrTeacher = role === 'admin' || role === 'teacher';
+	const isAdminOrTeacher = firebase ? !!navigation?.staffOrganizationIds.some(id => !selectedOrganization || id === selectedOrganization) : role === 'admin' || role === 'teacher';
 
 	const isHomeActive = pathname === '/' || pathname === '/home';
 	const isSelfLearningActive =
@@ -66,7 +73,7 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 	const displayName =
 	clerkUser?.fullName ||
 	clerkUser?.username ||
-	[clerkUser?.firstName, clerkUser?.lastName].filter(Boolean).join(' ') ||
+	navigation?.viewer.displayName ||
 	'Student User';
 
 	return (
@@ -93,9 +100,10 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 		</div>
 
 		{/* 2. TACTILE NAVIGATION LINKS */}
+        {navigation && <div className="px-4 pt-3"><label className="block text-xs text-slate-500" htmlFor="organization">Organization</label><select id="organization" aria-label="Organization" value={selectedOrganization} onChange={e => router.push(e.target.value ? `/home?organization=${e.target.value}` : '/home')} className="mt-1 w-full rounded-lg border border-slate-200 bg-white p-2 text-sm"><option value="">All your organizations</option>{navigation.organizations.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}</select></div>}
 		<div className="p-3 flex flex-col space-y-1.5 overflow-y-auto scrollbar-none flex-1">
 		<Link
-		href="/home"
+		href={firebase && selectedOrganization ? '/home?organization=' + encodeURIComponent(selectedOrganization) : '/home'}
 		onClick={() => onNavigate?.()}
 		className={cn(
 			'relative flex items-center gap-3.5 px-4 py-3.5 min-h-[48px] text-[15px] font-medium rounded-xl transition-all duration-200 ease-out cursor-pointer active:scale-[0.97]',
@@ -114,7 +122,7 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 		</Link>
 
 		<Link
-		href="/self-learning"
+		href={firebase && selectedOrganization ? '/self-learning?organization=' + encodeURIComponent(selectedOrganization) : '/self-learning'}
 		onClick={() => onNavigate?.()}
 		className={cn(
 			'relative flex items-center gap-3.5 px-4 py-3.5 min-h-[48px] text-[15px] font-medium rounded-xl transition-all duration-200 ease-out cursor-pointer active:scale-[0.97]',
@@ -133,7 +141,7 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 		</Link>
 
 		<Link
-		href="/group"
+		href={firebase && selectedOrganization ? '/group?organization=' + encodeURIComponent(selectedOrganization) : '/group'}
 		onClick={() => onNavigate?.()}
 		className={cn(
 			'relative flex items-center gap-3.5 px-4 py-3.5 min-h-[48px] text-[15px] font-medium rounded-xl transition-all duration-200 ease-out cursor-pointer active:scale-[0.97]',
@@ -195,7 +203,7 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 			Admin &amp; Teacher
 			</span>
 			<Link
-			href="/admin/users"
+			href={firebase ? '/group' : '/admin/users'}
 			onClick={() => onNavigate?.()}
 			className={cn(
 				'relative flex items-center gap-3.5 px-4 py-3.5 min-h-[48px] text-[15px] font-medium rounded-xl transition-all duration-200 ease-out cursor-pointer active:scale-[0.97]',
@@ -214,7 +222,7 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 			</Link>
 
 			<Link
-			href="/admin/submissions"
+			href={firebase ? '/unavailable?feature=Homework' : '/admin/submissions'}
 			onClick={() => onNavigate?.()}
 			className={cn(
 				'relative flex items-center gap-3.5 px-4 py-3.5 min-h-[48px] text-[15px] font-medium rounded-xl transition-all duration-200 ease-out cursor-pointer active:scale-[0.97]',
@@ -233,7 +241,7 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 			</Link>
 
 			<Link
-			href="/teacher/courses"
+			href={firebase && selectedOrganization ? '/teacher/courses?organization=' + encodeURIComponent(selectedOrganization) : '/teacher/courses'}
 			onClick={() => onNavigate?.()}
 			className={cn(
 				'relative flex items-center gap-3.5 px-4 py-3.5 min-h-[48px] text-[15px] font-medium rounded-xl transition-all duration-200 ease-out cursor-pointer active:scale-[0.97]',
@@ -259,15 +267,7 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 		<div className="p-3 border-t border-slate-100 bg-slate-50/50 shrink-0 space-y-2">
 		<div className="flex items-center gap-3 p-2 rounded-2xl bg-white border border-slate-200/60 shadow-sm">
 		{/* z-[99999] and pointer-events-auto fixes Clerk popover touch lock inside Radix Sheet */}
-		<UserButton
-		appearance={{
-			elements: {
-				avatarBox: 'h-9 w-9 border-2 border-cyan-500 shadow-sm',
-		 userButtonPopoverCard: 'shadow-xl rounded-2xl border border-slate-200 z-[99999] pointer-events-auto',
-		 userButtonPopoverMain: 'z-[99999] pointer-events-auto',
-			},
-		}}
-		/>
+		<ApplicationAvatar />
 		<div className="flex flex-col min-w-0 flex-1">
 		<span className="text-xs font-bold text-slate-900 truncate leading-tight">
 		{displayName}
@@ -283,7 +283,7 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 			: 'bg-cyan-50 text-cyan-700 border-cyan-200'
 		)}
 		>
-		{role ? role.toUpperCase() : 'STUDENT'}
+		{firebase ? (isAdminOrTeacher ? 'COURSE STAFF' : 'LEARNER') : role ? role.toUpperCase() : 'STUDENT'}
 		</span>
 		</div>
 		</div>
@@ -293,7 +293,7 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 		type="button"
 		onClick={() => {
 			onNavigate?.();
-			signOut(() => window.location.assign('/'));
+			void signOut();
 		}}
 		className="flex items-center gap-3 px-3 py-2.5 text-xs font-medium text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all duration-150 w-full text-left cursor-pointer active:scale-[0.97]"
 		>

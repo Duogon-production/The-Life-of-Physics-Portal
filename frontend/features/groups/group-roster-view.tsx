@@ -20,6 +20,7 @@ import UpcomingSession from '@/frontend/components/upcoming-session';
 
 export const GroupRosterView = ({
 	groupName,
+	phase1 = false,
 	nextSession,
 	peers,
 }: GroupRosterViewProps) => {
@@ -43,7 +44,7 @@ export const GroupRosterView = ({
 							</h1>
 						</div>
 
-						{/* Classroom Location / Link Badges */}
+{!phase1 && <> 						{/* Classroom Location / Link Badges */}
 						<div className="flex flex-wrap items-center gap-2.5">
 							<div className="inline-flex items-center gap-1.5 rounded-xl bg-slate-800/90 border border-slate-700/80 px-3.5 py-2 text-xs font-medium text-slate-200">
 								<MapPin className="h-4 w-4 text-cyan-400 shrink-0" />
@@ -53,15 +54,15 @@ export const GroupRosterView = ({
 								<Video className="h-4 w-4 text-cyan-400 shrink-0" />
 								<span>Live Interactive Stream</span>
 							</div>
-						</div>
+						</div> </>}
 					</div>
 
-					<UpcomingSession
+{phase1 ? <p className="text-sm text-slate-300">Session schedules and homework are awaiting integration.</p> : <> 					<UpcomingSession
 						session={nextSession}
 						groupName={groupName}
 						description="Finish your homework and have your notes ready before class."
 						className="p-4 sm:p-5"
-					/>
+					/> </>}
 				</div>
 			</div>
 
@@ -74,15 +75,15 @@ export const GroupRosterView = ({
 						<div>
 							<h2 className="text-xl font-bold text-slate-950 flex items-center gap-2">
 								<Users className="h-5 w-5 text-cyan-600" />
-								<span>Enrolled Peer Roster</span>
+								<span>{phase1 ? 'Enrollment Roster' : 'Enrolled Peer Roster'}</span>
 							</h2>
 							<p className="mt-1 text-xs sm:text-sm text-slate-500">
-								Live study group members and their latest homework submission status.
+								{phase1 ? 'Only authorized offering staff can view other students. Status is the enrollment status.' : 'Live study group members and their latest homework submission status.'}
 							</p>
 						</div>
 
 						<div className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700 w-fit">
-							<span>{peers.length} Enrolled Students</span>
+							<span>{peers.length} {phase1 ? 'Records on this page' : 'Enrolled Students'}</span>
 						</div>
 					</div>
 
@@ -162,7 +163,7 @@ export const GroupRosterView = ({
 											</div>
 										) : (
 											<span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-500 border border-slate-200/80 text-xs font-medium">
-												<span>No submission yet</span>
+												<span>{phase1 ? peer.enrollmentStatus : 'No submission yet'}</span>
 											</span>
 										)}
 									</div>

@@ -45,11 +45,14 @@ test('Firebase staging never routes legacy APIs to Clerk or Prisma', () => {
   const { default: middleware } = load('middleware.ts', {
     '@clerk/nextjs/server': { clerkMiddleware: () => () => assert.fail('Legacy handler'), createRouteMatcher: () => () => false },
     '@/shared/auth-config': { isFirebaseStaging: () => true },
+    '@/shared/website-routes': load('shared/website-routes.ts', {}),
     'next/server': { NextResponse: { next: () => 'allowed', redirect: url => url.pathname, json: (_, options) => options.status } },
   });
   const request = path => ({ url: `http://localhost${path}`, nextUrl: new URL(`http://localhost${path}`) });
   for (const path of ['/api/uploadthing', '/api/admin/users', '/api/livekit', '/api/courses']) assert.equal(middleware(request(path), {}), 503);
-  assert.equal(middleware(request('/home'), {}), '/lms-staging');
+  assert.equal(middleware(request('/home'), {}), 'allowed');
+  assert.equal(middleware(request('/teacher/create'), {}), '/unavailable');
+  assert.equal(middleware(request('/courses/id/chapters/lesson'), {}), '/unavailable');
   for (const path of ['/sign-in', '/lms-staging', '/api/auth/firebase/session']) assert.equal(middleware(request(path), {}), 'allowed');
 });
 test('same-origin CSRF validation fails closed in production without an exact configured origin', () => {

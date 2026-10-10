@@ -1,3 +1,5 @@
+import { isFirebaseStaging } from '@/shared/auth-config';
+import { WebsiteGroups, type WebsiteSearch } from '../../_components/website-pages';
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { Users, MessageCircle } from 'lucide-react';
@@ -10,7 +12,8 @@ import GroupRosterView from '@/frontend/features/groups/group-roster-view';
 
 
 
-const GroupPage = async () => {
+const GroupPage = async ({ searchParams }: { searchParams: Promise<WebsiteSearch> }) => {
+	if (isFirebaseStaging()) return <WebsiteGroups search={await searchParams} />;
 	const { userId, sessionClaims } = await auth();
 
 	if (!userId) {

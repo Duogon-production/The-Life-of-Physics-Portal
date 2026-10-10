@@ -1,3 +1,5 @@
+import { isFirebaseStaging } from '@/shared/auth-config';
+import { WebsiteCourses, type WebsiteSearch } from '../../_components/website-pages';
 import { getCategories } from '@/server/queries/catalog';
 import Categories from '@/frontend/features/search/categories';
 import SearchInput from '@/frontend/components/search-input';
@@ -14,6 +16,7 @@ interface SearchPageProps {
 }
 
 const SearchPage = async ({ searchParams }: SearchPageProps) => {
+	if (isFirebaseStaging()) return <WebsiteCourses search={await searchParams} />;
 	const { userId } = await auth();
 
 	if (!userId) return redirect('/');

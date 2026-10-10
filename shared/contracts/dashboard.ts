@@ -1,4 +1,5 @@
 export interface StudentLesson {
+	href?: string;
 	id: string;
 	title: string;
 	chapterNumber: number | null;
@@ -30,6 +31,7 @@ export interface SelfLearningChapter {
 }
 
 export interface PeerMember {
+	enrollmentStatus?: string;
 	id: string;
 	name: string;
 	email: string;
@@ -46,6 +48,7 @@ export interface PeerMember {
 }
 
 export interface GroupRosterViewProps {
+	phase1?: boolean;
 	groupName: string;
 	nextSession: {
 		date: string;

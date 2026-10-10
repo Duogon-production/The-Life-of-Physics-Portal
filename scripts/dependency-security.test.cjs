@@ -24,6 +24,7 @@ test('middleware protects student, teacher and API routes, allowing only explici
   const { default: middleware } = load('middleware.ts', {
     'next/server': {},
     '@/shared/auth-config': { isFirebaseStaging: () => false },
+    '@/shared/website-routes': load('shared/website-routes.ts', {}),
     '@clerk/nextjs/server': {
       clerkMiddleware: callback => request => callback({ protect: async () => { protects++; } }, request),
       createRouteMatcher: patterns => request => patterns.some(pattern => new RegExp(`^${pattern}$`).test(new URL(request.url).pathname)),
@@ -85,6 +86,7 @@ test('Supabase client awaits request cookies and passes only the publishable key
   const { getSupabaseServerClient } = load('server/integrations/supabase.ts', {
     '@supabase/supabase-js': {},
     '@/shared/auth-config': { isFirebaseStaging: () => false },
+    '@/shared/website-routes': load('shared/website-routes.ts', {}),
     '@/server/services/firebase-auth': {},
     'next/headers': { cookies: async () => ({ getAll: () => [{ name: 'session', value: 'test' }], set: (...args) => writes.push(args) }) },
     '@/shared/supabase-config': { getSupabaseConfig: () => ({ url: 'https://example.supabase.co', publishableKey: 'sb_publishable_test' }) },

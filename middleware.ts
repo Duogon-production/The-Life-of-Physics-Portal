@@ -1,3 +1,4 @@
+import { isPhaseOneRoute } from '@/shared/website-routes';
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse, type NextRequest, type NextFetchEvent } from 'next/server';
 import { isFirebaseStaging } from '@/shared/auth-config';
@@ -20,10 +21,10 @@ export default function middleware(request: NextRequest, event: NextFetchEvent) 
     if (path === '/lms-staging') return NextResponse.redirect(new URL('/sign-in', request.url));
     return legacyMiddleware(request, event);
   }
-  if (path.startsWith('/sign-in') || path.startsWith('/sign-up') || path === '/lms-staging') return NextResponse.next();
+  if (path.startsWith('/sign-in') || path.startsWith('/sign-up') || path === '/lms-staging' || isPhaseOneRoute(path)) return NextResponse.next();
   // No Firebase UID may enter an unmigrated Clerk/Prisma or UploadThing handler.
   if (path.startsWith('/api/') || path.startsWith('/trpc/')) return NextResponse.json({ error: 'This legacy workflow is unavailable in Firebase staging.' }, { status: 503 });
-  return NextResponse.redirect(new URL('/lms-staging', request.url));
+  return NextResponse.redirect(new URL('/unavailable', request.url));
 }
 
 export const config = {

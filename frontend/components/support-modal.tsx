@@ -1,7 +1,8 @@
 'use client';
 
 import { type ReactNode, useEffect, useState } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useApplicationAuth } from '@/frontend/components/providers/application-auth-provider';
+import { isFirebaseStaging } from '@/shared/auth-config';
 import { api } from '@/frontend/lib/api';
 import { HelpCircle, Send, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -25,7 +26,7 @@ interface SupportModalProps {
 }
 
 const SupportModal = ({ trigger }: SupportModalProps) => {
-	const { user } = useUser();
+	const { user } = useApplicationAuth();
 	const supportModal = useSupportModal();
 
 	const [studentName, setStudentName] = useState('');
@@ -34,10 +35,10 @@ const SupportModal = ({ trigger }: SupportModalProps) => {
 	const [message, setMessage] = useState('');
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
-	const clerkEmail = user?.primaryEmailAddress?.emailAddress ?? '';
+	const clerkEmail = user?.email ?? '';
 	const clerkName =
 		user?.fullName ||
-		[user?.firstName, user?.lastName].filter(Boolean).join(' ') ||
+
 		user?.username ||
 		'';
 
@@ -57,6 +58,10 @@ const SupportModal = ({ trigger }: SupportModalProps) => {
 			return;
 		}
 
+		if (isFirebaseStaging()) {
+			window.location.assign('mailto:support.lop.physics@gmail.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(message));
+			return;
+		}
 		setIsSubmitting(true);
 
 		try {

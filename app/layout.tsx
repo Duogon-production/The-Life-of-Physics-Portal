@@ -1,3 +1,4 @@
+import { ApplicationAuthProvider } from '@/frontend/components/providers/application-auth-provider';
 import { ClerkProvider } from '@clerk/nextjs';
 import { auth } from '@clerk/nextjs/server';
 import './globals.css';
@@ -42,7 +43,7 @@ export default async function RootLayout({
 						enableSystem={false}
 						disableTransitionOnChange
 					>
-						<LoadingProvider>
+						<ApplicationAuthProvider><LoadingProvider>
 							<ScrollToTop />
 
 							<ToastProvider />
@@ -50,7 +51,7 @@ export default async function RootLayout({
 							{children}
 
 							{!firebase && !isStaff && <FacebookMessenger />}
-						</LoadingProvider>
+						</LoadingProvider></ApplicationAuthProvider>
 					</ThemeProvider>
 				</body>
 			</html>

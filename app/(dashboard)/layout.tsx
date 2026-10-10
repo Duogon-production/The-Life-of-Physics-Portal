@@ -1,3 +1,7 @@
+import { isFirebaseStaging } from '@/shared/auth-config';
+import { getWebsiteContext, courseCapability, offeringCapability } from '@/server/services/website';
+import { WebsiteNavigationProvider } from '@/frontend/components/providers/application-auth-provider';
+import { redirect } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
 import Sidebar from '@/frontend/components/sidebar';
 import MobileSidebar from '@/frontend/features/dashboard/mobile-sidebar';
@@ -7,6 +11,25 @@ import WaitlistOverlay from '@/frontend/components/waitlist-overlay';
 import { syncCurrentUser } from '@/server/services/user';
 
 const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
+	if (isFirebaseStaging()) {
+        const context = await getWebsiteContext();
+        if (!context) redirect('/sign-in');
+        const courses = await context.repository.courses();
+        const offerings = await context.repository.offerings(courses.map(c => c.id));
+        const staffOrganizationIds = context.organizations.filter(o =>
+          context.memberships.some(m => m.organization_id === o.id && m.status === 'active' && ['owner','admin'].includes(m.role)) ||
+          courses.some(c => c.organization_id === o.id && (courseCapability(context,c) || offerings.some(f => f.course_id === c.id && offeringCapability(context,c,f.id))))
+        ).map(o => o.id);
+        return <WebsiteNavigationProvider value={{ viewer: context.viewer, organizations: context.organizations.slice(0,100), staffOrganizationIds }}>
+          <div className="min-h-screen bg-slate-50 w-full relative">
+            <MobileSidebar />
+            <aside className="hidden md:block fixed left-4 top-4 bottom-4 w-64 z-50"><Sidebar /></aside>
+            <main className="md:pl-72 pt-2 md:pt-4 min-h-screen bg-slate-50 flex flex-col justify-between">
+              <div className="flex-1 w-full p-4 sm:p-6 md:p-8">{children}</div><Footer />
+            </main><SupportModal />
+          </div>
+        </WebsiteNavigationProvider>;
+    }
 	const { userId } = await auth();
 	let initialIsApproved = true;
 	let initialName: string | null = '';

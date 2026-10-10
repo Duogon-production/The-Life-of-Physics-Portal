@@ -1,3 +1,5 @@
+import { isFirebaseStaging } from '@/shared/auth-config';
+import { WebsiteCourses, type WebsiteSearch } from '../../../_components/website-pages';
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
@@ -9,7 +11,8 @@ import { Button } from '@/frontend/components/ui/button';
 import { DataTable } from '@/frontend/features/teacher/courses/list/data-table';
 import { columns } from '@/frontend/features/teacher/courses/list/columns';
 
-const CoursesPage = async () => {
+const CoursesPage = async ({ searchParams }: { searchParams: Promise<WebsiteSearch> }) => {
+	if (isFirebaseStaging()) return <WebsiteCourses search={await searchParams} teacher />;
 	const { userId } = await auth();
 
 	if (!userId) return redirect('/');

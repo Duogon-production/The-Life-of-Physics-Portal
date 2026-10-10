@@ -1,3 +1,5 @@
+import { isFirebaseStaging } from '@/shared/auth-config';
+import { WebsiteHome, type WebsiteSearch } from '../../_components/website-pages';
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { Clock } from 'lucide-react';
@@ -8,7 +10,8 @@ import { getAdminHomeData, getStudentHomeData } from '@/server/queries/home';
 import { isTeacher } from '@/server/services/teacher';
 import { getDbUser } from '@/server/services/user';
 
-const HomePage = async () => {
+const HomePage = async ({ searchParams }: { searchParams: Promise<WebsiteSearch> }) => {
+	if (isFirebaseStaging()) return <WebsiteHome search={await searchParams} />;
 	const { userId, sessionClaims } = await auth();
 
 	if (!userId) {

@@ -1,5 +1,10 @@
 # Firebase authentication staging integration
 
+The report below describes the earlier authentication-only phase. The subsequent
+[Phase 1 website integration](phase1-website-integration.md) restores the original
+LMS pages, replaces the isolated `/lms-staging` destination, and records updated
+real authenticated acceptance checks and the additive fourteenth migration.
+
 Implementation and verification report, 10 October 2026. Development branch:
 `codex/firebase-auth-integration`. Clerk remains the default. No push, deployment,
 production account cutover, paid infrastructure, provider removal or academic

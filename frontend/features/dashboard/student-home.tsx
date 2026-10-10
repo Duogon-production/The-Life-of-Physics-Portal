@@ -6,7 +6,7 @@ export type { StudentLesson } from '@/shared/contracts/dashboard';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useApplicationAuth } from '@/frontend/components/providers/application-auth-provider';
 import {
 	AlertCircle,
 	ArrowUpRight,
@@ -30,6 +30,8 @@ import UpcomingSession from '@/frontend/components/upcoming-session';
 
 
 interface StudentHomeProps {
+	phase1?: boolean;
+	summaryAvailable?: boolean;
 	lessons: StudentLesson[];
 	groupName: string | null;
 	groupSchedule?: any;
@@ -97,12 +99,14 @@ const getLessonStatus = (lesson: StudentLesson) => {
 };
 
 const StudentHome = ({
+	phase1 = false,
+	summaryAvailable = true,
 	lessons,
 	groupName,
 	groupSchedule,
 	homeworkInfo,
 }: StudentHomeProps) => {
-	const { user } = useUser();
+	const { user } = useApplicationAuth();
 	const [activeSlide, setActiveSlide] = useState(0);
 	const [isPaused, setIsPaused] = useState(false);
 
@@ -205,8 +209,9 @@ const StudentHome = ({
 				</div>
 			</section>
 
+			{phase1 && <p className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-500">Live-session schedules and homework have not been integrated yet. Your published course lessons are listed below.</p>}
 			{/* LIVE SESSION & HOMEWORK REMINDER BANNER */}
-			<section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+{!phase1 && <> 			<section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
 				<div className="flex min-w-0 flex-col justify-between gap-6 xl:flex-row xl:items-center">
 					<UpcomingSession
 						session={nextSession}
@@ -272,7 +277,7 @@ const StudentHome = ({
 						)}
 					</div>
 				</div>
-			</section>
+			</section> </>}
 
 			<section className="space-y-5">
 				<div>
@@ -286,7 +291,7 @@ const StudentHome = ({
 							<div>
 								<p className="text-sm font-medium text-slate-500">Lessons Done</p>
 								<p className="mt-2 text-2xl font-bold text-slate-950">
-									{completedLessons} / {lessons.length}{' '}
+									{summaryAvailable ? `${completedLessons} / ${lessons.length}` : 'Unavailable'}{' '}
 									<span className="text-base font-medium text-slate-500">Lessons</span>
 								</p>
 							</div>
@@ -318,7 +323,7 @@ const StudentHome = ({
 			<section>
 				<div className="mb-4 flex items-center justify-between gap-4">
 					<h2 className="text-xl font-bold text-slate-950">Your Journey</h2>
-					<span className="text-sm text-slate-500">{lessons.length} lessons available</span>
+					<span className="text-sm text-slate-500">{summaryAvailable ? `${lessons.length} lessons available` : 'Open a course to view lessons'}</span>
 				</div>
 
 				<div className="flex gap-4 overflow-x-auto py-2 pb-4">
@@ -363,7 +368,7 @@ const StudentHome = ({
 							);
 
 							return firstChapter ? (
-								<Link className="block h-full" href={`/courses/${lesson.id}/chapters/${firstChapter.id}`} key={lesson.id}>
+								<Link className="block h-full" href={lesson.href || `/courses/${lesson.id}/chapters/${firstChapter.id}`} key={lesson.id}>
 									{card}
 								</Link>
 							) : (
@@ -387,17 +392,17 @@ const StudentHome = ({
 						<div
 							className="grid h-36 w-36 shrink-0 place-items-center rounded-full"
 							style={{
-								background: `conic-gradient(#0284c7 ${progress}%, #e2e8f0 0)`,
+								background: summaryAvailable ? `conic-gradient(#0284c7 ${progress}%, #e2e8f0 0)` : '#e2e8f0',
 							}}
 						>
 							<div className="grid h-[108px] w-[108px] place-items-center rounded-full bg-white text-center">
-								<span className="text-2xl font-bold text-slate-950">{progress}%</span>
+								<span className="text-2xl font-bold text-slate-950">{summaryAvailable ? `${progress}%` : '—'}</span>
 								<span className="text-xs text-slate-500">complete</span>
 							</div>
 						</div>
 						<div>
 							<p className="text-2xl font-bold text-slate-950">
-								{completedLessons} <span className="text-base font-medium text-slate-500">of {lessons.length} lessons</span>
+								{summaryAvailable ? completedLessons : 'Unavailable'} <span className="text-base font-medium text-slate-500">{summaryAvailable ? `of ${lessons.length} lessons` : 'for this overview'}</span>
 							</p>
 							<p className="mt-2 text-sm leading-6 text-slate-500">
 								Every completed lesson moves your overall journey forward.
@@ -431,7 +436,7 @@ const StudentHome = ({
 						) : (
 							<div className="flex min-h-[142px] flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 px-6 text-center">
 								<CircleDashed className="h-8 w-8 text-slate-400" />
-								<p className="mt-3 text-sm font-medium text-slate-700">No upcoming sessions yet</p>
+								<p className="mt-3 text-sm font-medium text-slate-700">{phase1 ? 'Session schedules awaiting integration' : 'No upcoming sessions yet'}</p>
 								<p className="mt-1 text-xs text-slate-500">
 									Your group schedule will appear here when it is available.
 								</p>
