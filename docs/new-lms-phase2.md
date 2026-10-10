@@ -54,7 +54,7 @@ No table, RLS policy or existing record is changed by these migrations. The priv
 - Production build passed in Firebase/Supabase mode. The new worktree required a physical dependency copy because a cross-drive node_modules junction prevented Next.js from resolving build modules. No application or production configuration workaround was introduced.
 - Final application checks passed: 58 tests, architecture boundaries, TypeScript and lint (the same eight existing warnings).
 - Clean Playwright Chromium 153.0.8010.12, Firefox 155.0 and WebKit 26.6 each passed eight smoke checks: sign-in initialization, mobile overflow, three teacher-page sign-in redirects, anonymous write rejection, CSRF rejection and blocking of legacy course writes. No captured JavaScript exceptions or hydration errors.
-- Authenticated teacher-form browser interactions have not been exercised in this phase. Verify organization creation, draft creation, rich-text editing and stale-tab saving with an authorized new-LMS test account before wider staging acceptance.
+- Final integration acceptance now passes real authenticated organization creation, draft creation, rich-text editing, persistence, publishing, stale-tab rejection, tenant isolation, logout and session restoration. See [the final integration validation and approval report](phase1-phase2-integration-validation.md) for the 59 application tests, 181 PostgreSQL assertions, browser coverage, fixture cleanup and proposed local-main fast-forward.
 - Credential-pattern scanning found no credentials/test JWTs in the changed source files. Local environment files, copied dependencies and browser reports remain ignored.
 
 ## Local use
