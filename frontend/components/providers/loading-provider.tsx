@@ -15,118 +15,190 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { AnimatePresence } from 'framer-motion';
 import LoadingOverlay from '@/frontend/components/loading-overlay';
 
+const DEFAULT_MESSAGE = 'Loading page...';
+/** Very quick navigations never flash the overlay. */
+const SHOW_DELAY_MS = 120;
+/** How long the overlay stays after the work ends, so the word can complete. */
+const FINISH_MS = 650;
+/** Only a safety net: never leave the overlay up forever if a navigation is cancelled. */
+const NAV_SAFETY_MS = 20000;
+
+type Sources = { manual: boolean; nav: boolean; route: boolean };
+
 interface LoadingContextValue {
 	isLoading: boolean;
 	message: string;
 	startLoading: (customMessage?: string) => void;
 	stopLoading: () => void;
+	/** Used by app/loading.tsx so the page-level fallback uses this same overlay. */
+	setRouteLoading: (active: boolean) => void;
 }
 
 const LoadingContext = createContext<LoadingContextValue | null>(null);
 
 export const LoadingProvider = ({ children }: { children: ReactNode }) => {
-	const [isLoading, setIsLoading] = useState(false);
-	const [message, setMessage] = useState('Loading page...');
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
-	const timerRef = useRef<number | null>(null);
 
-	// Stop loading when route completes transition
+	const [active, setActive] = useState<Sources>({ manual: false, nav: false, route: false });
+	const [message, setMessage] = useState(DEFAULT_MESSAGE);
+	const [overlay, setOverlay] = useState({ visible: false, done: false });
+
+	const navTarget = useRef<string | null>(null);
+	const showTimer = useRef<number | null>(null);
+	const hideTimer = useRef<number | null>(null);
+	const visibleRef = useRef(false);
+
+	const isLoading = active.manual || active.nav || active.route;
+
 	useEffect(() => {
-		if (timerRef.current) {
-			window.clearTimeout(timerRef.current);
-			timerRef.current = null;
-		}
-		setIsLoading(false);
-	}, [pathname, searchParams]);
+		visibleRef.current = overlay.visible;
+	}, [overlay.visible]);
 
 	const startLoading = useCallback((customMessage = 'Saving changes...') => {
-		if (timerRef.current) {
-			window.clearTimeout(timerRef.current);
-		}
 		setMessage(customMessage);
-		setIsLoading(true);
+		setActive((prev) => ({ ...prev, manual: true }));
 	}, []);
 
 	const stopLoading = useCallback(() => {
-		if (timerRef.current) {
-			window.clearTimeout(timerRef.current);
-			timerRef.current = null;
-		}
-		setIsLoading(false);
+		setActive((prev) => ({ ...prev, manual: false }));
 	}, []);
 
-	// Intercept link clicks globally for route transitions
+	const setRouteLoading = useCallback((isActive: boolean) => {
+		if (isActive) setMessage(DEFAULT_MESSAGE);
+		setActive((prev) => ({ ...prev, route: isActive }));
+	}, []);
+
+	// The navigation finished: the URL changed.
 	useEffect(() => {
-		const handleDocumentClick = (e: MouseEvent) => {
-			const anchor = (e.target as HTMLElement)?.closest('a');
+		setActive((prev) => (prev.nav ? { ...prev, nav: false } : prev));
+	}, [pathname, searchParams]);
+
+	// Detect link navigations.
+	// We wait until Next.js has finished handling the click (it calls preventDefault() when it takes over
+	// a navigation) before showing anything, so the overlay can never get in the way of the click itself.
+	useEffect(() => {
+		const handleClick = (event: MouseEvent) => {
+			const anchor = (event.target as Element | null)?.closest?.('a');
 			if (!anchor) return;
 
 			const href = anchor.getAttribute('href');
-			if (!href) return;
-
-			// Skip external links, hash fragments, protocols, new tabs, downloads
 			if (
+				!href ||
 				href.startsWith('#') ||
-				href.startsWith('mailto:') ||
-				href.startsWith('tel:') ||
-				href.startsWith('javascript:') ||
-				anchor.target === '_blank' ||
+				/^(mailto:|tel:|javascript:)/i.test(href) ||
+				(anchor.target && anchor.target !== '_self') ||
 				anchor.hasAttribute('download') ||
-				e.defaultPrevented ||
-				e.metaKey ||
-				e.ctrlKey ||
-				e.shiftKey ||
-				e.altKey
+				event.button !== 0 ||
+				event.metaKey ||
+				event.ctrlKey ||
+				event.shiftKey ||
+				event.altKey
 			) {
 				return;
 			}
 
+			let target: URL;
 			try {
-				const targetUrl = new URL(href, window.location.href);
-				const currentUrl = new URL(window.location.href);
-
-				// Only trigger for same-origin navigation to a different page/search
-				if (
-					targetUrl.origin === currentUrl.origin &&
-					(targetUrl.pathname !== currentUrl.pathname ||
-						targetUrl.search !== currentUrl.search)
-				) {
-					setMessage('Loading page...');
-					setIsLoading(true);
-
-					// Safety timeout to avoid getting stuck if navigation is cancelled
-					if (timerRef.current) {
-						window.clearTimeout(timerRef.current);
-					}
-					timerRef.current = window.setTimeout(() => {
-						setIsLoading(false);
-						timerRef.current = null;
-					}, 8000);
-				}
+				target = new URL(href, window.location.href);
 			} catch {
-				// invalid URL format, ignore
+				return;
 			}
+			if (target.origin !== window.location.origin) return;
+
+			const targetKey = target.pathname + target.search;
+
+			window.setTimeout(() => {
+				if (!event.defaultPrevented) return;
+				const currentKey = window.location.pathname + window.location.search;
+				if (currentKey === targetKey) return;
+
+				navTarget.current = targetKey;
+				setMessage(DEFAULT_MESSAGE);
+				setActive((prev) => ({ ...prev, nav: true }));
+			}, 0);
 		};
 
-		document.addEventListener('click', handleDocumentClick, { capture: true });
-		return () => {
-			document.removeEventListener('click', handleDocumentClick, {
-				capture: true,
-			});
-		};
+		document.addEventListener('click', handleClick, true);
+		return () => document.removeEventListener('click', handleClick, true);
 	}, []);
 
+	// While a navigation is pending: notice the URL change even if a re-render was missed, and keep a safety net.
+	useEffect(() => {
+		if (!active.nav) return;
+
+		const poll = window.setInterval(() => {
+			const key = window.location.pathname + window.location.search;
+			if (navTarget.current && key === navTarget.current) {
+				setActive((prev) => ({ ...prev, nav: false }));
+			}
+		}, 150);
+		const safety = window.setTimeout(() => {
+			setActive((prev) => ({ ...prev, nav: false }));
+		}, NAV_SAFETY_MS);
+
+		return () => {
+			window.clearInterval(poll);
+			window.clearTimeout(safety);
+		};
+	}, [active.nav]);
+
+	// Overlay lifecycle: short delay before showing, then a quick "finish" before hiding.
+	useEffect(() => {
+		if (isLoading) {
+			if (hideTimer.current !== null) {
+				window.clearTimeout(hideTimer.current);
+				hideTimer.current = null;
+			}
+			if (visibleRef.current) {
+				setOverlay({ visible: true, done: false });
+			} else if (showTimer.current === null) {
+				showTimer.current = window.setTimeout(() => {
+					showTimer.current = null;
+					setOverlay({ visible: true, done: false });
+				}, SHOW_DELAY_MS);
+			}
+			return;
+		}
+
+		if (showTimer.current !== null) {
+			window.clearTimeout(showTimer.current);
+			showTimer.current = null;
+		}
+		if (visibleRef.current && hideTimer.current === null) {
+			setOverlay({ visible: true, done: true });
+			hideTimer.current = window.setTimeout(() => {
+				hideTimer.current = null;
+				setOverlay({ visible: false, done: false });
+			}, FINISH_MS);
+		}
+	}, [isLoading]);
+
+	useEffect(
+		() => () => {
+			if (showTimer.current !== null) window.clearTimeout(showTimer.current);
+			if (hideTimer.current !== null) window.clearTimeout(hideTimer.current);
+		},
+		[]
+	);
+
 	const value = useMemo(
-		() => ({ isLoading, message, startLoading, stopLoading }),
-		[isLoading, message, startLoading, stopLoading]
+		() => ({ isLoading, message, startLoading, stopLoading, setRouteLoading }),
+		[isLoading, message, startLoading, stopLoading, setRouteLoading]
 	);
 
 	return (
 		<LoadingContext.Provider value={value}>
 			{children}
 			<AnimatePresence>
-				{isLoading && <LoadingOverlay message={message} key="global-loading-overlay" />}
+				{overlay.visible && (
+					<LoadingOverlay
+						key="global-loading-overlay"
+						message={message}
+						done={overlay.done}
+						blocking={active.manual}
+					/>
+				)}
 			</AnimatePresence>
 		</LoadingContext.Provider>
 	);

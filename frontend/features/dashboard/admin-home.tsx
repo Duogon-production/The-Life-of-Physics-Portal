@@ -22,8 +22,8 @@ interface AdminHomeProps {
 	phase1?: boolean;
 	adminName?: string | null;
 	metrics: {
-		totalStudents: number;
-		pendingWaitlistCount: number;
+		totalStudents: number | null;
+		pendingWaitlistCount: number | null;
 		pendingHomeworkCount: number | null;
 		activeGroupsCount: number;
 	};
@@ -60,30 +60,30 @@ export const AdminHome = ({
 					<div className="space-y-2">
 						<div className="inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800 border border-amber-200">
 							<ShieldCheck className="h-3.5 w-3.5" />
-							<span>{phase1 ? 'Teaching Overview' : 'Teacher & Administrator Command Center'}</span>
+							<span>Teacher &amp; Administrator Command Center</span>
 						</div>
 						<h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
 							Welcome back, {adminName}!
 						</h1>
 						<p className="text-sm text-slate-500 max-w-2xl leading-relaxed">
-							{phase1 ? 'Your authorized course offerings and enrollments. Course editing and homework workflows are awaiting integration.' : 'Here is an overview of admissions, student progress, homework submissions, and scheduled study sessions for The Life of Physics.'}
+							Here is an overview of admissions, student progress, homework submissions, and scheduled study sessions for EduLabs.
 						</p>
 					</div>
 
 					<div className="flex flex-wrap items-center gap-3 shrink-0">
-						<Link href={phase1 ? '/group' : '/admin/users'}>
+						<Link href="/admin/users">
 							<Button className="bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold shadow-xs">
 								<Users className="h-4 w-4 mr-1.5" />
 								Manage Users &amp; Groups
 							</Button>
 						</Link>
-						<Link href={phase1 ? '/unavailable?feature=Homework' : '/admin/submissions'}>
+						<Link href="/admin/submissions">
 							<Button
 								variant="outline"
 								className="border-slate-200 text-slate-700 hover:bg-slate-100 text-xs font-semibold"
 							>
 								<CheckCircle2 className="h-4 w-4 mr-1.5 text-emerald-600" />
-								Review Homework ({metrics.pendingHomeworkCount ?? 'Unavailable'})
+								Review Homework ({metrics.pendingHomeworkCount ?? "Unavailable"})
 							</Button>
 						</Link>
 					</div>
@@ -94,16 +94,16 @@ export const AdminHome = ({
 			{/* 1. QUICK METRICS CARDS                                         */}
 			{/* ============================================================== */}
 			<section className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-				{/* 1. Total {phase1 ? 'Active Enrollments' : 'Enrolled Students'} */}
-				<Link href={phase1 ? '/group' : '/admin/users'} className="block group">
+				{/* 1. Total Enrolled Students */}
+				<Link href="/admin/users" className="block group">
 					<div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-md active:translate-y-0 cursor-pointer h-full flex flex-col justify-between">
 						<div className="flex items-center justify-between">
 							<div>
 								<p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-									{phase1 ? 'Active Enrollments' : 'Enrolled Students'}
+									Enrolled Students
 								</p>
 								<p className="mt-1.5 text-3xl font-bold text-slate-900">
-									{metrics.totalStudents}
+									{metrics.totalStudents ?? "Unavailable"}
 								</p>
 							</div>
 							<div className="grid h-12 w-12 place-items-center rounded-2xl bg-emerald-50 text-emerald-700 group-hover:bg-emerald-100 transition-colors">
@@ -117,16 +117,16 @@ export const AdminHome = ({
 					</div>
 				</Link>
 
-				{/* 2. {phase1 ? 'Invited Enrollments' : 'Pending Waitlist'} Count */}
-				<Link href={phase1 ? '/group' : '/admin/users'} className="block group">
+				{/* 2. Pending Waitlist Count */}
+				<Link href="/admin/users" className="block group">
 					<div className="rounded-2xl border border-amber-200 bg-amber-50/40 p-5 shadow-xs transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-md active:translate-y-0 cursor-pointer h-full flex flex-col justify-between">
 						<div className="flex items-center justify-between">
 							<div>
 								<p className="text-xs font-semibold uppercase tracking-wider text-amber-800">
-									{phase1 ? 'Invited Enrollments' : 'Pending Waitlist'}
+									Pending Waitlist
 								</p>
 								<p className="mt-1.5 text-3xl font-bold text-amber-950">
-									{metrics.pendingWaitlistCount}
+									{metrics.pendingWaitlistCount ?? "Unavailable"}
 								</p>
 							</div>
 							<div className="grid h-12 w-12 place-items-center rounded-2xl bg-amber-100 text-amber-800 group-hover:bg-amber-200 transition-colors">
@@ -134,14 +134,14 @@ export const AdminHome = ({
 							</div>
 						</div>
 						<div className="mt-4 pt-3 border-t border-amber-200/60 flex items-center justify-between text-xs text-amber-800 font-semibold">
-							<span>{phase1 ? 'Invitation status' : 'Needs Approval'}</span>
+							<span>Needs Approval</span>
 							<ArrowRight className="h-3.5 w-3.5 text-amber-700 group-hover:translate-x-0.5 transition-all" />
 						</div>
 					</div>
 				</Link>
 
 				{/* 3. Homework Submissions Needing Review */}
-				<Link href={phase1 ? '/unavailable?feature=Homework' : '/admin/submissions'} className="block group">
+				<Link href="/admin/submissions" className="block group">
 					<div className="rounded-2xl border border-sky-200 bg-sky-50/40 p-5 shadow-xs transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-md active:translate-y-0 cursor-pointer h-full flex flex-col justify-between">
 						<div className="flex items-center justify-between">
 							<div>
@@ -149,7 +149,7 @@ export const AdminHome = ({
 									Homework to Grade
 								</p>
 								<p className="mt-1.5 text-3xl font-bold text-sky-950">
-									{metrics.pendingHomeworkCount ?? 'Unavailable'}
+									{metrics.pendingHomeworkCount ?? "Unavailable"}
 								</p>
 							</div>
 							<div className="grid h-12 w-12 place-items-center rounded-2xl bg-sky-100 text-sky-800 group-hover:bg-sky-200 transition-colors">
@@ -157,14 +157,14 @@ export const AdminHome = ({
 							</div>
 						</div>
 						<div className="mt-4 pt-3 border-t border-sky-200/60 flex items-center justify-between text-xs text-sky-800 font-semibold">
-							<span>{phase1 ? 'Awaiting integration' : 'Pending in Queue'}</span>
+							<span>Pending in Queue</span>
 							<ArrowRight className="h-3.5 w-3.5 text-sky-700 group-hover:translate-x-0.5 transition-all" />
 						</div>
 					</div>
 				</Link>
 
 				{/* 4. Active Study Groups */}
-				<Link href={phase1 ? '/group' : '/admin/users'} className="block group">
+				<Link href="/admin/users" className="block group">
 					<div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-md active:translate-y-0 cursor-pointer h-full flex flex-col justify-between">
 						<div className="flex items-center justify-between">
 							<div>
@@ -195,7 +195,7 @@ export const AdminHome = ({
 				<div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
 					{/* Action 1 */}
 					<Link
-						href={phase1 ? '/group' : '/admin/users'}
+						href="/admin/users"
 						className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all duration-200 ease-out hover:-translate-y-1 hover:border-amber-300 hover:shadow-md active:translate-y-0"
 					>
 						<div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-amber-50 text-amber-700">
@@ -211,7 +211,7 @@ export const AdminHome = ({
 
 					{/* Action 2 */}
 					<Link
-						href={phase1 ? '/unavailable?feature=Homework' : '/admin/submissions'}
+						href="/admin/submissions"
 						className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all duration-200 ease-out hover:-translate-y-1 hover:border-sky-300 hover:shadow-md active:translate-y-0"
 					>
 						<div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-sky-50 text-sky-700">
@@ -255,16 +255,16 @@ export const AdminHome = ({
 							<h3 className="font-bold text-slate-900 text-base">Latest Student Sign-Ups</h3>
 						</div>
 						<Link
-							href={phase1 ? '/group' : '/admin/users'}
+							href="/admin/users"
 							className="text-xs font-semibold text-sky-700 hover:underline"
 						>
 							View All &rarr;
 						</Link>
 					</div>
 
-					{recentSignups.length === 0 ? (
+					{phase1 ? <p role="status" className="text-sm text-slate-500">Signup activity is awaiting a tenant-scoped backend integration.</p> : recentSignups.length === 0 ? (
 						<div className="py-8 text-center text-xs text-slate-400">
-							{phase1 ? 'Legacy admissions have not been migrated.' : 'No recent sign-ups found.'}
+							No recent sign-ups found.
 						</div>
 					) : (
 						<div className="space-y-3">
@@ -322,16 +322,16 @@ export const AdminHome = ({
 							<h3 className="font-bold text-slate-900 text-base">Latest Homework Submissions</h3>
 						</div>
 						<Link
-							href={phase1 ? '/unavailable?feature=Homework' : '/admin/submissions'}
+							href="/admin/submissions"
 							className="text-xs font-semibold text-sky-700 hover:underline"
 						>
 							View Queue &rarr;
 						</Link>
 					</div>
 
-					{recentSubmissions.length === 0 ? (
+					{phase1 ? <p role="status" className="text-sm text-slate-500">Homework activity is awaiting backend integration.</p> : recentSubmissions.length === 0 ? (
 						<div className="py-8 text-center text-xs text-slate-400">
-							{phase1 ? 'Homework integration is pending.' : 'No recent homework submissions found.'}
+							No recent homework submissions found.
 						</div>
 					) : (
 						<div className="space-y-3">

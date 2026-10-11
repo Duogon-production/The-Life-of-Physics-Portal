@@ -1,3 +1,4 @@
+import { isFirebaseStaging } from '@/shared/auth-config';
 import { auth } from '@clerk/nextjs/server';
 import { ArrowLeft, FileText, LayoutDashboard, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
@@ -18,6 +19,7 @@ const ChapterIdPage = async ({
 	params: Promise<{ courseId: string; chapterId: string }>;
 }) => {
 	const params = await paramsPromise;
+	if (isFirebaseStaging()) return redirect('/unavailable');
 	const { userId } = await auth();
 
 	if (!userId) {

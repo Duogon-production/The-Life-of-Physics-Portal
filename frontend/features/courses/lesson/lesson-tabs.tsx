@@ -1,5 +1,6 @@
 'use client';
 
+import { formatChapterLabel } from '@/shared/chapter-label';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -25,6 +26,8 @@ import { getEmbeddableVideoUrl } from '@/shared/video-embed';
 import { resolveSegmentContentType, type SegmentContentType } from '@/shared/segment';
 import { TextbookWaveTopRight } from '@/frontend/components/textbook-accent';
 
+import HomeworkQuestionsList from '@/frontend/features/courses/lesson/homework-questions-list';
+import type { HomeworkQuestion } from '@/shared/contracts/courses';
 import HomeworkSubmissionForm from '@/frontend/features/courses/lesson/homework-submission-form';
 import VideoPlayer from '@/frontend/features/courses/lesson/video-player';
 
@@ -43,6 +46,7 @@ interface LessonTabsProps {
 	chapterId: string;
 	title: string;
 	chapterNumber?: number | null;
+	chapterType?: string | null;
 	courseTitle?: string;
 	description: string | null;
 	playbackId: string | null | undefined;
@@ -55,6 +59,10 @@ interface LessonTabsProps {
 	isWatched: boolean;
 	userId: string;
 	hasSubmission: boolean;
+	reviewNote?: string | null;
+	submissionStatus?: string | null;
+	homeworkMode?: string | null;
+	homeworkQuestions?: HomeworkQuestion[];
 	attachments: { id: string; name: string; url: string }[];
 	segments: LessonSegmentItem[];
 }
@@ -64,6 +72,7 @@ const LessonTabs = ({
 	chapterId,
 	title,
 	chapterNumber,
+	chapterType,
 	courseTitle,
 	description,
 	playbackId,
@@ -76,6 +85,10 @@ const LessonTabs = ({
 	isWatched,
 	userId,
 	hasSubmission: initialHasSubmission,
+	reviewNote = null,
+	submissionStatus = null,
+	homeworkMode = 'FILE_UPLOAD',
+	homeworkQuestions = [],
 	attachments,
 	segments,
 }: LessonTabsProps) => {
@@ -124,7 +137,7 @@ const LessonTabs = ({
 
 				<div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
 					<span className="rounded-full bg-sky-50 px-2.5 py-1 text-sky-700 border border-sky-200/80">
-						Chapter {chapterNumber ?? '—'}
+						{formatChapterLabel(chapterType, chapterNumber)}
 					</span>
 					{courseTitle && (
 						<>
@@ -314,6 +327,13 @@ const LessonTabs = ({
 						{/* 2. IF CONTENT TYPE == "HOMEWORK_ASSIGNMENT" */}
 						{activeContentType === 'HOMEWORK_ASSIGNMENT' && (
 							<div className="space-y-8">
+								{homeworkMode === 'PLATFORM_QUESTIONS' && (
+									<HomeworkQuestionsList
+										questions={homeworkQuestions}
+										hasSubmission={hasSubmission}
+									/>
+								)}
+
 								{/* Homework Submission Dropzone */}
 								<div className="space-y-4">
 									<div className="flex items-center gap-2 text-slate-900 font-bold text-base">
@@ -325,6 +345,8 @@ const LessonTabs = ({
 										chapterId={chapterId}
 										courseId={courseId}
 										hasSubmission={hasSubmission}
+										reviewNote={reviewNote}
+										submissionStatus={submissionStatus}
 										onSubmitted={onHomeworkSubmitted}
 									/>
 								</div>

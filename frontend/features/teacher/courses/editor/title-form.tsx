@@ -25,6 +25,7 @@ interface TitleFormProps {
 		title: string;
 	};
 	courseId: string;
+	onSave?: (values: {title:string}) => Promise<void>;
 }
 
 const formSchema = z.object({
@@ -33,7 +34,7 @@ const formSchema = z.object({
 	}),
 });
 
-const TitleForm = ({ initialData, courseId }: TitleFormProps) => {
+const TitleForm = ({ initialData, courseId, onSave }: TitleFormProps) => {
 	const [isEditing, setIsEditing] = useState(false);
 	const [title, setTitle] = useState(initialData.title);
 	const [isRefreshPending, startTransition] = useTransition();
@@ -62,14 +63,15 @@ const TitleForm = ({ initialData, courseId }: TitleFormProps) => {
 		startLoading();
 
 		try {
-			await api.patch(`/api/courses/${courseId}`, values);
+			if (onSave) await onSave(values);
+			else await api.patch(`/api/courses/${courseId}`, values);
 
 			toast.success('Lesson updated');
 			startTransition(() => router.refresh());
 		} catch (error) {
 			setTitle(previousTitle);
 			setIsEditing(true);
-			toast.error('Something went wrong');
+			toast.error(error instanceof Error ? error.message : 'Something went wrong');
 		} finally {
 			stopLoading();
 		}

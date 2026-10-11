@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ApplicationAvatar, useApplicationAuth, useWebsiteNavigation } from '@/frontend/components/providers/application-auth-provider';
+import { UserButton, useUser, useClerk } from '@/frontend/components/providers/v2-identity';
+import { useWebsiteNavigation } from '@/frontend/components/providers/application-auth-provider';
 import { isFirebaseStaging } from '@/shared/auth-config';
-import { useSearchParams, useRouter } from 'next/navigation';
 import { api } from '@/frontend/lib/api';
 import {
 	Home,
@@ -17,11 +17,10 @@ import {
 	LogOut,
 	CheckSquare,
 	ShieldCheck,
-	Atom,
 } from 'lucide-react';
 
+import EduLabsMark from '@/frontend/components/edulabs-mark';
 import { cn } from '@/shared/utils';
-import { useSupportModal } from '@/frontend/hooks/use-support-modal';
 
 interface SidebarProps {
 	className?: string;
@@ -31,20 +30,15 @@ interface SidebarProps {
 
 const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 	const pathname = usePathname();
-	const { user: clerkUser, signOut } = useApplicationAuth();
 	const navigation = useWebsiteNavigation();
-	const search = useSearchParams();
-	const router = useRouter();
-	const selectedOrganization = search.get('organization') || '';
-	const firebase = isFirebaseStaging();
-	const { onOpen: onOpenSupport } = useSupportModal();
+	const { user: clerkUser } = useUser();
+	const { signOut } = useClerk();
 
 	const [role, setRole] = useState<string | null>(
 		initialRole ? initialRole.toLowerCase() : null
 	);
 
 	useEffect(() => {
-		if (firebase) return;
 		api
 		.get('/api/user/status')
 		.then((res) => {
@@ -53,9 +47,9 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 			}
 		})
 		.catch(() => {});
-	}, [firebase]);
+	}, []);
 
-	const isAdminOrTeacher = firebase ? !!navigation?.staffOrganizationIds.some(id => !selectedOrganization || id === selectedOrganization) : role === 'admin' || role === 'teacher';
+	const isAdminOrTeacher = isFirebaseStaging() ? !!navigation?.staffOrganizationIds.length : role === 'admin' || role === 'teacher';
 
 	const isHomeActive = pathname === '/' || pathname === '/home';
 	const isSelfLearningActive =
@@ -66,6 +60,8 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 	pathname === '/group' ||
 	pathname === '/groups' ||
 	pathname.startsWith('/group');
+	const isExamsActive = pathname.startsWith('/exams');
+	const isSupportActive = pathname.startsWith('/support');
 	const isTeacherActive = pathname.startsWith('/teacher');
 	const isAdminUsersActive = pathname.startsWith('/admin/users');
 	const isAdminSubmissionsActive = pathname.startsWith('/admin/submissions');
@@ -73,87 +69,84 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 	const displayName =
 	clerkUser?.fullName ||
 	clerkUser?.username ||
-	navigation?.viewer.displayName ||
+	[clerkUser?.firstName, clerkUser?.lastName].filter(Boolean).join(' ') ||
 	'Student User';
 
 	return (
 		<aside
 		className={cn(
-			'h-full w-full bg-white rounded-3xl border border-slate-200/80 shadow-2xl shadow-slate-900/10 flex flex-col justify-between overflow-hidden select-none',
+			'h-full w-full bg-white rounded-[28px] border-[2.5px] border-black shadow-hard flex flex-col justify-between overflow-hidden select-none',
 			className
 		)}
 		>
 		<div className="flex flex-col flex-1 min-h-0">
 		{/* 1. TOP BRANDING HEADER */}
-		<div className="p-4 border-b border-slate-100 flex items-center gap-3 bg-slate-900 text-white shrink-0">
-		<div className="bg-cyan-500/20 p-2 rounded-xl border border-cyan-400/30 shrink-0">
-		<Atom className="h-6 w-6 text-cyan-400 animate-pulse" />
-		</div>
+		<div className="p-4 border-b-[2.5px] border-black flex items-center gap-3 bg-white text-black shrink-0">
+		<EduLabsMark className="h-10 w-10 shrink-0" />
 		<div className="flex flex-col min-w-0">
-		<span className="font-bold text-sm tracking-wide text-white leading-tight truncate">
-		LIFE OF PHYSICS
+		<span className="font-display text-2xl leading-none text-black truncate">
+		EduLabs
 		</span>
-		<span className="text-[10px] font-semibold text-cyan-400">
-		3rd Secondary
+		<span className="mt-1 text-[10px] font-bold uppercase tracking-wider text-slate-600">
+		Learning Platform
 		</span>
 		</div>
 		</div>
 
 		{/* 2. TACTILE NAVIGATION LINKS */}
-        {navigation && <div className="px-4 pt-3"><label className="block text-xs text-slate-500" htmlFor="organization">Organization</label><select id="organization" aria-label="Organization" value={selectedOrganization} onChange={e => router.push(e.target.value ? `/home?organization=${e.target.value}` : '/home')} className="mt-1 w-full rounded-lg border border-slate-200 bg-white p-2 text-sm"><option value="">All your organizations</option>{navigation.organizations.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}</select></div>}
 		<div className="p-3 flex flex-col space-y-1.5 overflow-y-auto scrollbar-none flex-1">
 		<Link
-		href={firebase && selectedOrganization ? '/home?organization=' + encodeURIComponent(selectedOrganization) : '/home'}
+		href="/home"
 		onClick={() => onNavigate?.()}
 		className={cn(
-			'relative flex items-center gap-3.5 px-4 py-3.5 min-h-[48px] text-[15px] font-medium rounded-xl transition-all duration-200 ease-out cursor-pointer active:scale-[0.97]',
+			'relative flex items-center gap-3.5 px-4 py-3 min-h-[48px] text-[15px] font-medium rounded-2xl border-2 border-transparent transition-all duration-200 ease-out cursor-pointer active:translate-x-0.5 active:translate-y-0.5',
 			isHomeActive
-			? 'bg-cyan-500/10 text-cyan-700 border-r-4 border-cyan-500 font-semibold shadow-sm'
-			: 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+			? 'bg-primary text-black border-black font-semibold shadow-hard-sm'
+			: 'text-slate-700 hover:text-black hover:bg-slate-100'
 		)}
 		>
 		<Home
 		className={cn(
 			'w-[22px] h-[22px] shrink-0 transition-colors',
-			isHomeActive ? 'text-cyan-600' : 'text-slate-500'
+			isHomeActive ? 'text-black' : 'text-slate-500'
 		)}
 		/>
 		<span>Home</span>
 		</Link>
 
 		<Link
-		href={firebase && selectedOrganization ? '/self-learning?organization=' + encodeURIComponent(selectedOrganization) : '/self-learning'}
+		href="/self-learning"
 		onClick={() => onNavigate?.()}
 		className={cn(
-			'relative flex items-center gap-3.5 px-4 py-3.5 min-h-[48px] text-[15px] font-medium rounded-xl transition-all duration-200 ease-out cursor-pointer active:scale-[0.97]',
+			'relative flex items-center gap-3.5 px-4 py-3 min-h-[48px] text-[15px] font-medium rounded-2xl border-2 border-transparent transition-all duration-200 ease-out cursor-pointer active:translate-x-0.5 active:translate-y-0.5',
 			isSelfLearningActive
-			? 'bg-cyan-500/10 text-cyan-700 border-r-4 border-cyan-500 font-semibold shadow-sm'
-			: 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+			? 'bg-primary text-black border-black font-semibold shadow-hard-sm'
+			: 'text-slate-700 hover:text-black hover:bg-slate-100'
 		)}
 		>
 		<BookOpen
 		className={cn(
 			'w-[22px] h-[22px] shrink-0 transition-colors',
-			isSelfLearningActive ? 'text-cyan-600' : 'text-slate-500'
+			isSelfLearningActive ? 'text-black' : 'text-slate-500'
 		)}
 		/>
 		<span>Self Learning</span>
 		</Link>
 
 		<Link
-		href={firebase && selectedOrganization ? '/group?organization=' + encodeURIComponent(selectedOrganization) : '/group'}
+		href="/group"
 		onClick={() => onNavigate?.()}
 		className={cn(
-			'relative flex items-center gap-3.5 px-4 py-3.5 min-h-[48px] text-[15px] font-medium rounded-xl transition-all duration-200 ease-out cursor-pointer active:scale-[0.97]',
+			'relative flex items-center gap-3.5 px-4 py-3 min-h-[48px] text-[15px] font-medium rounded-2xl border-2 border-transparent transition-all duration-200 ease-out cursor-pointer active:translate-x-0.5 active:translate-y-0.5',
 			isGroupActive
-			? 'bg-cyan-500/10 text-cyan-700 border-r-4 border-cyan-500 font-semibold shadow-sm'
-			: 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+			? 'bg-primary text-black border-black font-semibold shadow-hard-sm'
+			: 'text-slate-700 hover:text-black hover:bg-slate-100'
 		)}
 		>
 		<Users
 		className={cn(
 			'w-[22px] h-[22px] shrink-0 transition-colors',
-			isGroupActive ? 'text-cyan-600' : 'text-slate-500'
+			isGroupActive ? 'text-black' : 'text-slate-500'
 		)}
 		/>
 		<span>Group</span>
@@ -172,30 +165,43 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 		</span>
 		</div>
 
-		<div
-		aria-disabled="true"
-		className="flex items-center justify-between px-4 py-3.5 min-h-[48px] text-[15px] font-medium text-slate-400 rounded-xl cursor-not-allowed select-none"
+		<Link
+		href="/exams"
+		onClick={() => onNavigate?.()}
+		className={cn(
+			'relative flex items-center gap-3.5 px-4 py-3 min-h-[48px] text-[15px] font-medium rounded-2xl border-2 border-transparent transition-all duration-200 ease-out cursor-pointer active:translate-x-0.5 active:translate-y-0.5',
+			isExamsActive
+			? 'bg-primary text-black border-black font-semibold shadow-hard-sm'
+			: 'text-slate-700 hover:text-black hover:bg-slate-100'
+		)}
 		>
-		<div className="flex items-center gap-3.5">
-		<FileText className="w-[22px] h-[22px] shrink-0 text-slate-400" />
+		<FileText
+		className={cn(
+			'w-[22px] h-[22px] shrink-0 transition-colors',
+			isExamsActive ? 'text-black' : 'text-slate-500'
+		)}
+		/>
 		<span>Exams</span>
-		</div>
-		<span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-slate-100 text-slate-500">
-		Soon
-		</span>
-		</div>
+		</Link>
 
-		<button
-		type="button"
-		onClick={() => {
-			onNavigate?.();
-			onOpenSupport();
-		}}
-		className="flex items-center gap-3.5 px-4 py-3.5 min-h-[48px] text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-xl transition-all duration-150 w-full text-left cursor-pointer active:scale-[0.97]"
+		<Link
+		href="/support"
+		onClick={() => onNavigate?.()}
+		className={cn(
+			'relative flex items-center gap-3.5 px-4 py-3 min-h-[48px] text-[15px] font-medium rounded-2xl border-2 border-transparent transition-all duration-200 ease-out cursor-pointer active:translate-x-0.5 active:translate-y-0.5',
+			isSupportActive
+			? 'bg-primary text-black border-black font-semibold shadow-hard-sm'
+			: 'text-slate-700 hover:text-black hover:bg-slate-100'
+		)}
 		>
-		<HelpCircle className="w-[22px] h-[22px] shrink-0 text-slate-500" />
-		<span>Website Help</span>
-		</button>
+		<HelpCircle
+		className={cn(
+			'w-[22px] h-[22px] shrink-0 transition-colors',
+			isSupportActive ? 'text-black' : 'text-slate-500'
+		)}
+		/>
+		<span>Support</span>
+		</Link>
 
 		{isAdminOrTeacher && (
 			<div className="pt-3 mt-1 border-t border-slate-200/80 flex flex-col space-y-1.5">
@@ -203,57 +209,57 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 			Admin &amp; Teacher
 			</span>
 			<Link
-			href={firebase ? '/group' : '/admin/users'}
+			href="/admin/users"
 			onClick={() => onNavigate?.()}
 			className={cn(
-				'relative flex items-center gap-3.5 px-4 py-3.5 min-h-[48px] text-[15px] font-medium rounded-xl transition-all duration-200 ease-out cursor-pointer active:scale-[0.97]',
+				'relative flex items-center gap-3.5 px-4 py-3 min-h-[48px] text-[15px] font-medium rounded-2xl border-2 border-transparent transition-all duration-200 ease-out cursor-pointer active:translate-x-0.5 active:translate-y-0.5',
 				 isAdminUsersActive
-				 ? 'bg-cyan-500/10 text-cyan-800 border-r-4 border-cyan-500 font-semibold shadow-sm'
-				 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+				 ? 'bg-primary text-black border-black font-semibold shadow-hard-sm'
+				 : 'text-slate-700 hover:text-black hover:bg-slate-100'
 			)}
 			>
 			<Users
 			className={cn(
 				'w-[22px] h-[22px] shrink-0',
-				 isAdminUsersActive ? 'text-cyan-700' : 'text-slate-500'
+				 isAdminUsersActive ? 'text-black' : 'text-slate-500'
 			)}
 			/>
 			<span>Users &amp; Groups</span>
 			</Link>
 
 			<Link
-			href={firebase ? '/unavailable?feature=Homework' : '/admin/submissions'}
+			href="/admin/submissions"
 			onClick={() => onNavigate?.()}
 			className={cn(
-				'relative flex items-center gap-3.5 px-4 py-3.5 min-h-[48px] text-[15px] font-medium rounded-xl transition-all duration-200 ease-out cursor-pointer active:scale-[0.97]',
+				'relative flex items-center gap-3.5 px-4 py-3 min-h-[48px] text-[15px] font-medium rounded-2xl border-2 border-transparent transition-all duration-200 ease-out cursor-pointer active:translate-x-0.5 active:translate-y-0.5',
 				 isAdminSubmissionsActive
-				 ? 'bg-cyan-500/10 text-cyan-800 border-r-4 border-cyan-500 font-semibold shadow-sm'
-				 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+				 ? 'bg-primary text-black border-black font-semibold shadow-hard-sm'
+				 : 'text-slate-700 hover:text-black hover:bg-slate-100'
 			)}
 			>
 			<CheckSquare
 			className={cn(
 				'w-[22px] h-[22px] shrink-0',
-				 isAdminSubmissionsActive ? 'text-cyan-700' : 'text-slate-500'
+				 isAdminSubmissionsActive ? 'text-black' : 'text-slate-500'
 			)}
 			/>
 			<span>Homework Queue</span>
 			</Link>
 
 			<Link
-			href={firebase && selectedOrganization ? '/teacher/courses?organization=' + encodeURIComponent(selectedOrganization) : '/teacher/courses'}
+			href="/teacher/courses"
 			onClick={() => onNavigate?.()}
 			className={cn(
-				'relative flex items-center gap-3.5 px-4 py-3.5 min-h-[48px] text-[15px] font-medium rounded-xl transition-all duration-200 ease-out cursor-pointer active:scale-[0.97]',
+				'relative flex items-center gap-3.5 px-4 py-3 min-h-[48px] text-[15px] font-medium rounded-2xl border-2 border-transparent transition-all duration-200 ease-out cursor-pointer active:translate-x-0.5 active:translate-y-0.5',
 				 isTeacherActive
-				 ? 'bg-cyan-500/10 text-cyan-800 border-r-4 border-cyan-500 font-semibold shadow-sm'
-				 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+				 ? 'bg-primary text-black border-black font-semibold shadow-hard-sm'
+				 : 'text-slate-700 hover:text-black hover:bg-slate-100'
 			)}
 			>
 			<ShieldCheck
 			className={cn(
 				'w-[22px] h-[22px] shrink-0',
-				 isTeacherActive ? 'text-cyan-700' : 'text-slate-500'
+				 isTeacherActive ? 'text-black' : 'text-slate-500'
 			)}
 			/>
 			<span>Teacher Courses</span>
@@ -264,10 +270,18 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 		</div>
 
 		{/* 3. BOTTOM FOOTER WITH USER PROFILE & LOGOUT */}
-		<div className="p-3 border-t border-slate-100 bg-slate-50/50 shrink-0 space-y-2">
-		<div className="flex items-center gap-3 p-2 rounded-2xl bg-white border border-slate-200/60 shadow-sm">
+		<div className="p-3 border-t-[2.5px] border-black bg-slate-50 shrink-0 space-y-2">
+		<div className="flex items-center gap-3 p-2 rounded-2xl bg-white border-2 border-black shadow-hard-sm">
 		{/* z-[99999] and pointer-events-auto fixes Clerk popover touch lock inside Radix Sheet */}
-		<ApplicationAvatar />
+		<UserButton
+		appearance={{
+			elements: {
+				avatarBox: 'h-9 w-9 border-2 border-black shadow-hard-sm',
+		 userButtonPopoverCard: 'shadow-hard rounded-2xl border-2 border-black z-[99999] pointer-events-auto',
+		 userButtonPopoverMain: 'z-[99999] pointer-events-auto',
+			},
+		}}
+		/>
 		<div className="flex flex-col min-w-0 flex-1">
 		<span className="text-xs font-bold text-slate-900 truncate leading-tight">
 		{displayName}
@@ -280,10 +294,10 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 			? 'bg-rose-50 text-rose-700 border-rose-200'
 			: role === 'teacher'
 			? 'bg-amber-50 text-amber-700 border-amber-200'
-			: 'bg-cyan-50 text-cyan-700 border-cyan-200'
+			: 'bg-primary text-black border-black'
 		)}
 		>
-		{firebase ? (isAdminOrTeacher ? 'COURSE STAFF' : 'LEARNER') : role ? role.toUpperCase() : 'STUDENT'}
+		{isFirebaseStaging() ? (isAdminOrTeacher ? 'STAFF' : 'LEARNER') : role ? role.toUpperCase() : 'STUDENT'}
 		</span>
 		</div>
 		</div>
@@ -293,7 +307,7 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 		type="button"
 		onClick={() => {
 			onNavigate?.();
-			void signOut();
+			signOut(() => window.location.assign('/'));
 		}}
 		className="flex items-center gap-3 px-3 py-2.5 text-xs font-medium text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all duration-150 w-full text-left cursor-pointer active:scale-[0.97]"
 		>

@@ -2,7 +2,7 @@
 
 import FileUpload from '@/frontend/components/file-upload';
 import { api } from '@/frontend/lib/api';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, MessageSquare as MessageSquareText } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
@@ -12,6 +12,8 @@ interface HomeworkSubmissionFormProps {
 	courseId: string;
 	chapterId: string;
 	hasSubmission: boolean;
+	reviewNote?: string | null;
+	submissionStatus?: string | null;
 	onSubmitted: () => void;
 }
 
@@ -19,6 +21,8 @@ const HomeworkSubmissionForm = ({
 	courseId,
 	chapterId,
 	hasSubmission,
+	reviewNote = null,
+	submissionStatus = null,
 	onSubmitted,
 }: HomeworkSubmissionFormProps) => {
 	const router = useRouter();
@@ -64,6 +68,21 @@ const HomeworkSubmissionForm = ({
 				<div className="flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 font-medium">
 					<CheckCircle className="h-5 w-5 text-emerald-600 shrink-0" />
 					<span>Homework submitted! You can upload a replacement file anytime if needed.</span>
+				</div>
+			)}
+
+			{hasSubmission && submissionStatus === 'APPROVED' && (
+				<div className="flex items-center gap-2 text-xs font-semibold text-emerald-700">
+					<CheckCircle className="h-4 w-4" /> Approved by your teacher
+				</div>
+			)}
+
+			{reviewNote && (
+				<div className="rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm text-slate-800">
+					<div className="mb-1.5 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sky-800">
+						<MessageSquareText className="h-4 w-4" /> Teacher feedback
+					</div>
+					<p className="whitespace-pre-wrap leading-relaxed">{reviewNote}</p>
 				</div>
 			)}
 

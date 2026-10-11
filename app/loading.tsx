@@ -1,5 +1,5 @@
-import LoadingOverlay from '@/frontend/components/loading-overlay';
+import RouteLoadingSignal from '@/frontend/components/route-loading-signal';
 
-const Loading = () => <LoadingOverlay message="Loading page..." />;
+const Loading = () => <RouteLoadingSignal />;
 
 export default Loading;

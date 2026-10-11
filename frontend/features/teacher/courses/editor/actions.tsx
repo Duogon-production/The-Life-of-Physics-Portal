@@ -13,9 +13,11 @@ interface ActionsProps {
 	disabled: boolean;
 	courseId: string;
 	isPublished: boolean;
+	onPublishChange?: (published:boolean) => Promise<void>;
+	allowDelete?: boolean;
 }
 
-const Actions = ({ disabled, courseId, isPublished }: ActionsProps) => {
+const Actions = ({ disabled, courseId, isPublished, onPublishChange, allowDelete = true }: ActionsProps) => {
 	const router = useRouter();
 	const [isLoading, setIsLoading] = useState(false);
 	const { startLoading, stopLoading } = useGlobalLoading();
@@ -25,7 +27,9 @@ const Actions = ({ disabled, courseId, isPublished }: ActionsProps) => {
 			setIsLoading(true);
 			startLoading();
 
-			if (isPublished) {
+			if (onPublishChange) {
+				await onPublishChange(!isPublished);
+			} else if (isPublished) {
 				await api.patch(`/api/courses/${courseId}/unpublish`);
 
 				toast.success('Lesson unpublished');
@@ -75,7 +79,7 @@ const Actions = ({ disabled, courseId, isPublished }: ActionsProps) => {
 			</Button>
 
 			<ConfirmModal onConfirm={onDelete}>
-				<Button size={'sm'} disabled={isLoading}>
+				<Button size={'sm'} disabled={isLoading || !allowDelete}>
 					<Trash className="w-4 h-4" />
 				</Button>
 			</ConfirmModal>

@@ -7,14 +7,14 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import type { Course } from '@/shared/contracts/courses';
-import Image from 'next/image';
 
 import { Button } from '@/frontend/components/ui/button';
-import FileUpload from '@/frontend/components/file-upload';
+import { Input } from '@/frontend/components/ui/input';
+import { isValidImageUrl } from '@/shared/image-url';
 import { useGlobalLoading } from '@/frontend/components/providers/loading-provider';
 
 interface ImageFormProps {
-	initialData: Course;
+	initialData: Pick<Course, 'imageUrl'>;
 	courseId: string;
 }
 
@@ -26,6 +26,7 @@ const formSchema = z.object({
 
 const ImageForm = ({ initialData, courseId }: ImageFormProps) => {
 	const [isEditing, setIsEditing] = useState(false);
+	const [urlInput, setUrlInput] = useState(initialData.imageUrl ?? '');
 
 	const toggleEdit = () => setIsEditing((prev) => !prev);
 
@@ -33,6 +34,10 @@ const ImageForm = ({ initialData, courseId }: ImageFormProps) => {
 	const { startLoading, stopLoading } = useGlobalLoading();
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
+		if (!isValidImageUrl(values.imageUrl)) {
+			toast.error('Enter a full http(s) image link.');
+			return;
+		}
 		startLoading();
 
 		try {
@@ -78,26 +83,37 @@ const ImageForm = ({ initialData, courseId }: ImageFormProps) => {
 					</div>
 				) : (
 					<div className="relative aspect-video mt-2">
-						<Image
-							fill
-							alt="Upload"
+						{/* eslint-disable-next-line @next/next/no-img-element */}
+						<img
+							alt="Lesson cover"
 							src={initialData.imageUrl}
-							className="object-cover rounded-md"
+							referrerPolicy="no-referrer"
+							className="absolute inset-0 h-full w-full object-cover rounded-md"
 						/>
 					</div>
 				))}
 
 			{isEditing && (
 				<div>
-					<FileUpload
-						endpoint="courseImage"
-						onChange={(url) =>
-							url ? onSubmit({ imageUrl: url }) : undefined
-						}
-					/>
+					<div className="mt-2 flex gap-2">
+						<Input
+							type="url"
+							inputMode="url"
+							placeholder="https://example.com/cover.jpg"
+							value={urlInput}
+							onChange={(event) => setUrlInput(event.target.value)}
+						/>
+						<Button
+							type="button"
+							disabled={!urlInput.trim()}
+							onClick={() => onSubmit({ imageUrl: urlInput.trim() })}
+						>
+							Save
+						</Button>
+					</div>
 
 					<div className="text-xs text-muted-foreground mt-4">
-						16:9 aspect ratio recommended
+						Paste a web link to the image. 16:9 aspect ratio recommended
 					</div>
 				</div>
 			)}

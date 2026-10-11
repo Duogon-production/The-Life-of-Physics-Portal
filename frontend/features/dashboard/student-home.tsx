@@ -5,8 +5,8 @@ export type { StudentLesson } from '@/shared/contracts/dashboard';
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useEffect, useMemo, useState } from 'react';
-import { useApplicationAuth } from '@/frontend/components/providers/application-auth-provider';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useUser } from '@/frontend/components/providers/v2-identity';
 import {
 	AlertCircle,
 	ArrowUpRight,
@@ -18,8 +18,6 @@ import {
 	CircleDashed,
 	Clock,
 	Clock3,
-	LockKeyhole,
-	PlayCircle,
 	Sparkles,
 } from 'lucide-react';
 
@@ -27,6 +25,8 @@ import { cn } from '@/shared/utils';
 import { getUpcomingGroupSessions } from '@/shared/group-schedule';
 import { TextbookWaveTopRight, TextbookWaveBottomLeft } from '@/frontend/components/textbook-accent';
 import UpcomingSession from '@/frontend/components/upcoming-session';
+import { LessonCard, getLessonCardStatus } from '@/frontend/features/courses/lesson-card';
+import { chapterKey } from '@/shared/chapter-label';
 
 
 interface StudentHomeProps {
@@ -46,44 +46,44 @@ const heroSlides = [
 	{
 		image: 'https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?auto=format&fit=crop&w=1600&q=80',
 		eyebrow: 'Welcome to your classroom',
-		title: 'The Life of Physics',
-		description: 'Make every formula, force, and field feel intuitive and clear.',
-		badge: '3rd Secondary',
+		title: 'EduLabs',
+		description: 'Your lessons, homework, and progress, all in one place.',
+		badge: 'Your Grade',
 	},
 	{
 		image: 'https://images.unsplash.com/photo-1507413245164-6160d8298b31?auto=format&fit=crop&w=1600&q=80',
 		eyebrow: 'Chapter by chapter',
-		title: 'Master Optics & Wave Mechanics',
-		description: 'Explore light reflection, refraction, and wave interference step-by-step.',
-		badge: '3rd Secondary',
+		title: 'Course Highlight One',
+		description: 'A short description of this course or topic goes here.',
+		badge: 'Your Grade',
 	},
 	{
 		image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1600&q=80',
 		eyebrow: 'Core foundations',
-		title: 'Electricity Made Simple',
-		description: 'Follow each concept from current and resistance to Kirchhoff’s laws.',
-		badge: '3rd Secondary',
+		title: 'Course Highlight Two',
+		description: 'A short description of this course or topic goes here.',
+		badge: 'Your Grade',
 	},
 	{
 		image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1600&q=80',
-		eyebrow: 'Electromagnetic principles',
-		title: 'Magnetism & Induction in Motion',
-		description: 'See the physics behind magnetic fields, solenoids, and Faraday’s laws.',
-		badge: '3rd Secondary',
+		eyebrow: 'Going deeper',
+		title: 'Course Highlight Three',
+		description: 'A short description of this course or topic goes here.',
+		badge: 'Your Grade',
 	},
 	{
 		image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=1600&q=80',
 		eyebrow: 'Advanced curriculum',
-		title: 'Modern Physics & Quantum World',
-		description: 'Unravel the mysteries of blackbody radiation, photons, and atomic spectra.',
-		badge: '3rd Secondary',
+		title: 'Course Highlight Four',
+		description: 'A short description of this course or topic goes here.',
+		badge: 'Your Grade',
 	},
 	{
 		image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=1600&q=80',
 		eyebrow: 'Comprehensive practice',
 		title: 'Exam Prep & High Scores',
-		description: 'Tackle past exams and textbook exercises with structured guidance.',
-		badge: '3rd Secondary',
+		description: 'Tackle past exams and exercises with structured guidance.',
+		badge: 'Your Grade',
 	},
 ] as const;
 
@@ -99,16 +99,92 @@ const getLessonStatus = (lesson: StudentLesson) => {
 };
 
 const StudentHome = ({
-	phase1 = false,
-	summaryAvailable = true,
 	lessons,
+	summaryAvailable = true,
+	phase1 = false,
 	groupName,
 	groupSchedule,
 	homeworkInfo,
 }: StudentHomeProps) => {
-	const { user } = useApplicationAuth();
+	const { user } = useUser();
 	const [activeSlide, setActiveSlide] = useState(0);
 	const [isPaused, setIsPaused] = useState(false);
+	const [dragOffset, setDragOffset] = useState(0);
+	const [isDragging, setIsDragging] = useState(false);
+	const trackRef = useRef<HTMLDivElement>(null);
+	const dragRef = useRef<{
+		pointerId: number;
+		startX: number;
+		startY: number;
+		axis: 'x' | 'y' | null;
+	} | null>(null);
+
+	const SWIPE_LOCK_PX = 8;
+	const SWIPE_THRESHOLD_PX = 50;
+
+	const goToSlide = (next: number) =>
+		setActiveSlide((next + heroSlides.length) % heroSlides.length);
+
+	const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+		// Only primary button for mouse; any touch/pen contact
+		if (e.pointerType === 'mouse' && e.button !== 0) return;
+		dragRef.current = {
+			pointerId: e.pointerId,
+			startX: e.clientX,
+			startY: e.clientY,
+			axis: null,
+		};
+		setIsPaused(true);
+	};
+
+	const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+		const drag = dragRef.current;
+		if (!drag || drag.pointerId !== e.pointerId) return;
+
+		const dx = e.clientX - drag.startX;
+		const dy = e.clientY - drag.startY;
+
+		if (!drag.axis) {
+			if (Math.abs(dx) < SWIPE_LOCK_PX && Math.abs(dy) < SWIPE_LOCK_PX) return;
+			drag.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+			if (drag.axis === 'x') {
+				// Capture only once we know it's a horizontal swipe so taps still work
+				try {
+					e.currentTarget.setPointerCapture(e.pointerId);
+				} catch {}
+				setIsDragging(true);
+			}
+		}
+
+		if (drag.axis === 'x') {
+			// Add resistance at the first/last edges
+			const atStart = activeSlide === 0 && dx > 0;
+			const atEnd = activeSlide === heroSlides.length - 1 && dx < 0;
+			setDragOffset(atStart || atEnd ? dx * 0.35 : dx);
+		}
+	};
+
+	const endDrag = (e: React.PointerEvent<HTMLDivElement>, cancelled = false) => {
+		const drag = dragRef.current;
+		if (!drag || drag.pointerId !== e.pointerId) return;
+		dragRef.current = null;
+
+		if (drag.axis === 'x') {
+			const dx = e.clientX - drag.startX;
+			if (!cancelled && Math.abs(dx) >= SWIPE_THRESHOLD_PX) {
+				const next = activeSlide + (dx < 0 ? 1 : -1);
+				// Don't wrap with a swipe past the ends; clamp instead
+				setActiveSlide(Math.min(Math.max(next, 0), heroSlides.length - 1));
+			}
+			try {
+				e.currentTarget.releasePointerCapture(e.pointerId);
+			} catch {}
+		}
+
+		setIsDragging(false);
+		setDragOffset(0);
+		setIsPaused(false);
+	};
 
 	useEffect(() => {
 		if (isPaused) return;
@@ -133,6 +209,18 @@ const StudentHome = ({
 	);
 	const nextSession = upcomingSessions[0] || null;
 
+	// Lesson numbers restart at 1 inside each chapter (scoped by chapter type + number),
+	// instead of using the course-wide array index.
+	const lessonNumbers = useMemo(() => {
+		const counters = new Map<string, number>();
+		return lessons.map((lesson) => {
+			const key = lesson.groupKey ?? chapterKey(lesson.chapterType, lesson.chapterNumber);
+			const next = (counters.get(key) ?? 0) + 1;
+			counters.set(key, next);
+			return next;
+		});
+	}, [lessons]);
+
 	return (
 		<div className="mx-auto w-full max-w-[1600px] space-y-8 pt-2">
 			{/* Top Hero Carousel */}
@@ -142,8 +230,18 @@ const StudentHome = ({
 				onMouseLeave={() => setIsPaused(false)}
 			>
 				<div
-					className="flex transition-transform duration-700 ease-out"
-					style={{ transform: `translateX(-${activeSlide * 100}%)` }}
+					ref={trackRef}
+					className={cn(
+						'flex select-none [touch-action:pan-y]',
+						isDragging ? 'cursor-grabbing' : 'cursor-grab transition-transform duration-700 ease-out'
+					)}
+					style={{
+						transform: `translateX(calc(-${activeSlide * 100}% + ${dragOffset}px))`,
+					}}
+					onPointerDown={handlePointerDown}
+					onPointerMove={handlePointerMove}
+					onPointerUp={(e) => endDrag(e)}
+					onPointerCancel={(e) => endDrag(e, true)}
 				>
 					{heroSlides.map((slide, index) => (
 						<div
@@ -156,12 +254,13 @@ const StudentHome = ({
 								alt={slide.title}
 								fill
 								priority={index === 0}
+								draggable={false}
 								sizes="(max-width: 1200px) 100vw, 1600px"
 								className="object-cover"
 							/>
 
 							{/* Dark overlay for readability */}
-							<div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/70 to-slate-950/30 backdrop-brightness-90" />
+							<div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/70 to-slate-950/30 backdrop-brightness-90" />
 
 							{/* Slide Content */}
 							<div className="relative z-10 flex max-w-2xl flex-col gap-3.5">
@@ -202,16 +301,15 @@ const StudentHome = ({
 									: 'w-2.5 bg-white/40 hover:bg-white/80'
 							)}
 							key={slide.title}
-							onClick={() => setActiveSlide(index)}
+							onClick={() => goToSlide(index)}
 							type="button"
 						/>
 					))}
 				</div>
 			</section>
 
-			{phase1 && <p className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-500">Live-session schedules and homework have not been integrated yet. Your published course lessons are listed below.</p>}
 			{/* LIVE SESSION & HOMEWORK REMINDER BANNER */}
-{!phase1 && <> 			<section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+			<section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
 				<div className="flex min-w-0 flex-col justify-between gap-6 xl:flex-row xl:items-center">
 					<UpcomingSession
 						session={nextSession}
@@ -259,10 +357,10 @@ const StudentHome = ({
 								<div className="space-y-1">
 									<span className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-bold text-rose-800">
 										<AlertCircle className="h-3 w-3" />
-										Homework Pending — Upload before your next session!
+										{phase1 ? "Homework integration unavailable" : "Homework Pending — Upload before your next session!"}
 									</span>
 									<p className="text-xs text-slate-600">
-										Submit textbook photos for {homeworkInfo?.chapterTitle || 'current lesson'}.
+										{phase1 ? 'Homework status has not been connected to this LMS.' : <>Submit textbook photos for {homeworkInfo?.chapterTitle || 'current lesson'}.</>}
 									</p>
 									{homeworkInfo?.chapterUrl && (
 										<Link
@@ -277,7 +375,7 @@ const StudentHome = ({
 						)}
 					</div>
 				</div>
-			</section> </>}
+			</section>
 
 			<section className="space-y-5">
 				<div>
@@ -291,7 +389,7 @@ const StudentHome = ({
 							<div>
 								<p className="text-sm font-medium text-slate-500">Lessons Done</p>
 								<p className="mt-2 text-2xl font-bold text-slate-950">
-									{summaryAvailable ? `${completedLessons} / ${lessons.length}` : 'Unavailable'}{' '}
+									{summaryAvailable ? completedLessons : "Unavailable"} / {summaryAvailable ? lessons.length : "Unavailable"}{' '}
 									<span className="text-base font-medium text-slate-500">Lessons</span>
 								</p>
 							</div>
@@ -323,56 +421,27 @@ const StudentHome = ({
 			<section>
 				<div className="mb-4 flex items-center justify-between gap-4">
 					<h2 className="text-xl font-bold text-slate-950">Your Journey</h2>
-					<span className="text-sm text-slate-500">{summaryAvailable ? `${lessons.length} lessons available` : 'Open a course to view lessons'}</span>
+					<span className="text-sm text-slate-500">{summaryAvailable ? lessons.length : "Unavailable"} lessons available</span>
 				</div>
 
 				<div className="flex gap-4 overflow-x-auto py-2 pb-4">
 					{lessons.length ? (
 						lessons.map((lesson, index) => {
-							const status = getLessonStatus(lesson);
 							const firstChapter = lesson.chapters[0];
-							const card = (
-								<article
-									className={cn(
-										'flex h-full min-h-[174px] w-64 shrink-0 flex-col rounded-2xl border bg-white p-5 shadow-sm transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-md active:translate-y-0',
-										firstChapter && 'hover:border-sky-300'
-									)}
-								>
-									<div className="flex items-start justify-between gap-3">
-										<span className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
-											Lesson {index + 1}
-										</span>
-										{status === 'Completed' ? (
-											<CheckCircle2 className="h-5 w-5 text-emerald-500" />
-										) : status === 'Locked' ? (
-											<LockKeyhole className="h-5 w-5 text-slate-400" />
-										) : (
-											<PlayCircle className="h-5 w-5 text-sky-600" />
-										)}
-									</div>
-									<h3 className="mt-5 line-clamp-2 text-base font-semibold text-slate-950">{lesson.title}</h3>
-									<p className="mt-1 text-sm text-slate-500">
-										Chapter {lesson.chapterNumber ?? '—'}
-									</p>
-									<span
-										className={cn(
-											'mt-auto w-fit rounded-full px-2.5 py-1 text-xs font-semibold',
-											status === 'Completed' && 'bg-emerald-50 text-emerald-700',
-											status === 'In Progress' && 'bg-sky-50 text-sky-700',
-											status === 'Locked' && 'bg-slate-100 text-slate-500'
-										)}
-									>
-										{status}
-									</span>
-								</article>
-							);
-
-							return firstChapter ? (
-								<Link className="block h-full" href={lesson.href || `/courses/${lesson.id}/chapters/${firstChapter.id}`} key={lesson.id}>
-									{card}
-								</Link>
-							) : (
-								<div key={lesson.id}>{card}</div>
+							return (
+								<div className="w-72 shrink-0" key={lesson.id}>
+									<LessonCard
+										href={lesson.href === null ? undefined : lesson.href ?? (firstChapter ? `/courses/${lesson.id}/chapters/${firstChapter.id}` : undefined)}
+										chapterType={lesson.chapterType ?? 'Chapter'}
+										chapterNumber={lesson.chapterNumber}
+										lessonNumber={lessonNumbers[index]}
+										title={lesson.title}
+										description={lesson.description}
+										imageUrl={lesson.imageUrl}
+										partsCount={lesson.partsCount === undefined ? lesson.chapters.length : lesson.partsCount}
+										status={lesson.status ?? getLessonCardStatus(lesson.chapters)}
+									/>
+								</div>
 							);
 						})
 					) : (
@@ -392,17 +461,17 @@ const StudentHome = ({
 						<div
 							className="grid h-36 w-36 shrink-0 place-items-center rounded-full"
 							style={{
-								background: summaryAvailable ? `conic-gradient(#0284c7 ${progress}%, #e2e8f0 0)` : '#e2e8f0',
+								background: `conic-gradient(#0284c7 ${summaryAvailable ? `${progress}%` : "Unavailable"}, #e2e8f0 0)`,
 							}}
 						>
 							<div className="grid h-[108px] w-[108px] place-items-center rounded-full bg-white text-center">
-								<span className="text-2xl font-bold text-slate-950">{summaryAvailable ? `${progress}%` : '—'}</span>
+								<span className="text-2xl font-bold text-slate-950">{progress}%</span>
 								<span className="text-xs text-slate-500">complete</span>
 							</div>
 						</div>
 						<div>
 							<p className="text-2xl font-bold text-slate-950">
-								{summaryAvailable ? completedLessons : 'Unavailable'} <span className="text-base font-medium text-slate-500">{summaryAvailable ? `of ${lessons.length} lessons` : 'for this overview'}</span>
+								{summaryAvailable ? completedLessons : "Unavailable"} <span className="text-base font-medium text-slate-500">of {summaryAvailable ? lessons.length : "Unavailable"} lessons</span>
 							</p>
 							<p className="mt-2 text-sm leading-6 text-slate-500">
 								Every completed lesson moves your overall journey forward.
@@ -436,7 +505,7 @@ const StudentHome = ({
 						) : (
 							<div className="flex min-h-[142px] flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 px-6 text-center">
 								<CircleDashed className="h-8 w-8 text-slate-400" />
-								<p className="mt-3 text-sm font-medium text-slate-700">{phase1 ? 'Session schedules awaiting integration' : 'No upcoming sessions yet'}</p>
+								<p className="mt-3 text-sm font-medium text-slate-700">No upcoming sessions yet</p>
 								<p className="mt-1 text-xs text-slate-500">
 									Your group schedule will appear here when it is available.
 								</p>

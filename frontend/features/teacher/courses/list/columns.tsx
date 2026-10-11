@@ -15,7 +15,8 @@ import Link from 'next/link';
 import { Badge } from '@/frontend/components/ui/badge';
 import { cn } from '@/shared/utils';
 
-export const columns: ColumnDef<Course>[] = [
+export type CourseListRow = Pick<Course, 'id' | 'title' | 'isPublished'>;
+export const columns: ColumnDef<CourseListRow>[] = [
 	{
 		accessorKey: 'title',
 		header: ({ column }) => {

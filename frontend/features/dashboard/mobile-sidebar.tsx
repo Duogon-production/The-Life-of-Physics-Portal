@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, BookOpen } from 'lucide-react';
+import { Menu } from 'lucide-react';
 
 import { Sheet, SheetContent, SheetTrigger } from '@/frontend/components/ui/sheet';
 import Sidebar from '@/frontend/components/sidebar';
+import EduLabsMark from '@/frontend/components/edulabs-mark';
 
 interface MobileSidebarProps {
 	initialRole?: string | null;
@@ -14,18 +15,16 @@ export const MobileSidebar = ({ initialRole }: MobileSidebarProps) => {
 	const [open, setOpen] = useState(false);
 
 	return (
-		<div className="md:hidden sticky top-0 z-40 bg-slate-900 text-white px-4 py-3 border-b border-slate-800 flex items-center justify-between shadow-md">
+		<div className="md:hidden sticky top-0 z-40 bg-white text-black px-4 py-3 border-b-[2.5px] border-black flex items-center justify-between">
 		{/* Mobile Branding Logo */}
 		<div className="flex items-center gap-2.5">
-		<div className="bg-cyan-500/20 p-1.5 rounded-xl border border-cyan-400/30 shrink-0">
-		<BookOpen className="h-5 w-5 text-cyan-400" />
-		</div>
+		<EduLabsMark className="h-9 w-9 shrink-0" />
 		<div className="flex flex-col">
-		<span className="font-bold text-sm text-white leading-tight">
-		LIFE OF PHYSICS
+		<span className="font-display text-2xl text-black leading-none">
+		EduLabs
 		</span>
-		<span className="text-[10px] font-semibold text-cyan-400">
-		3rd Secondary
+		<span className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600">
+		Learning Platform
 		</span>
 		</div>
 		</div>
@@ -34,7 +33,7 @@ export const MobileSidebar = ({ initialRole }: MobileSidebarProps) => {
 		<Sheet open={open} onOpenChange={setOpen}>
 		<SheetTrigger
 		aria-label="Open Navigation Menu"
-		className="flex items-center justify-center p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors active:scale-95"
+		className="flex items-center justify-center p-2 rounded-full border-2 border-black bg-white text-black shadow-hard-sm hover:bg-primary transition-all active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
 		>
 		<Menu className="h-6 w-6" />
 		</SheetTrigger>
@@ -45,7 +44,7 @@ export const MobileSidebar = ({ initialRole }: MobileSidebarProps) => {
 		>
 		<Sidebar
 		initialRole={initialRole}
-		className="static h-full w-full border border-slate-200/80 shadow-2xl rounded-3xl overflow-hidden"
+		className="static h-full w-full overflow-hidden"
 		onNavigate={() => setOpen(false)}
 		/>
 		</SheetContent>

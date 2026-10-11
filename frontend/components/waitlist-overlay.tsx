@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useClerk, useUser } from '@clerk/nextjs';
+import { useClerk, useUser } from '@/frontend/components/providers/v2-identity';
 import { api } from '@/frontend/lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -76,7 +76,7 @@ export const WaitlistOverlay = ({
 					if (userIsApproved) {
 						setIsApproved(true);
 						toast.success(
-							'Your account has been approved! Welcome to The Life of Physics.',
+							'Your account has been approved! Welcome to EduLabs.',
 							{
 								duration: 6000,
 								icon: '🎉',

@@ -11,6 +11,7 @@ import {
 	Filter,
 	Layers,
 	Loader2,
+	MessageSquare as MessageSquareText,
 	RefreshCw,
 	Search,
 	ShieldCheck,
@@ -22,6 +23,7 @@ import toast from 'react-hot-toast';
 
 import { Button } from '@/frontend/components/ui/button';
 import { Input } from '@/frontend/components/ui/input';
+import { Textarea } from '@/frontend/components/ui/textarea';
 import {
 	Dialog,
 	DialogContent,
@@ -44,6 +46,7 @@ interface EnrichedSubmission {
 	fileUrl: string;
 	status: 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED';
 	approvedBy: string | null;
+	reviewNote?: string | null;
 	reviewerName?: string | null;
 	createdAt: string;
 	updatedAt: string;
@@ -102,6 +105,21 @@ export const SubmissionsView = () => {
 	// File Preview Modal
 	const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 	const [previewTitle, setPreviewTitle] = useState<string>('');
+	const [previewSubmission, setPreviewSubmission] = useState<EnrichedSubmission | null>(null);
+	const [noteDraft, setNoteDraft] = useState('');
+
+	const openPreview = (sub: EnrichedSubmission) => {
+		setPreviewUrl(sub.fileUrl);
+		setPreviewTitle(`${sub.studentName} — ${sub.chapter.title}`);
+		setPreviewSubmission(sub);
+		setNoteDraft(sub.reviewNote ?? '');
+	};
+
+	const closePreview = () => {
+		setPreviewUrl(null);
+		setPreviewSubmission(null);
+		setNoteDraft('');
+	};
 
 	// Student Profile Mirror Drawer
 	const [mirrorStudentId, setMirrorStudentId] = useState<string | null>(null);
@@ -130,12 +148,13 @@ export const SubmissionsView = () => {
 	}, []);
 
 	// 1-Tap Approve Homework
-	const handleApproveHomework = async (submissionId: string) => {
+	const handleApproveHomework = async (submissionId: string, note?: string) => {
 		try {
 			setActionId(submissionId);
 			await api.patch('/api/admin/submissions', {
 				id: submissionId,
 				status: 'APPROVED',
+				...(note !== undefined ? { note } : {}),
 			});
 
 			toast.success('Homework marked as approved!');
@@ -143,13 +162,41 @@ export const SubmissionsView = () => {
 			// Optimistic local update
 			setSubmissions((prev) =>
 				prev.map((sub) =>
-					sub.id === submissionId ? { ...sub, status: 'APPROVED' } : sub
+					sub.id === submissionId
+						? {
+								...sub,
+								status: 'APPROVED',
+								...(note !== undefined ? { reviewNote: note.trim() || null } : {}),
+							}
+						: sub
 				)
 			);
 			loadSubmissions(true);
 		} catch (error) {
 			console.error(error);
 			toast.error('Failed to update submission status.');
+		} finally {
+			setActionId(null);
+		}
+	};
+
+	// Save feedback only (does not change approval status)
+	const handleSaveNote = async (submissionId: string, note: string) => {
+		try {
+			setActionId(submissionId);
+			await api.patch('/api/admin/submissions', { id: submissionId, note });
+			toast.success('Feedback saved');
+			setSubmissions((prev) =>
+				prev.map((sub) =>
+					sub.id === submissionId ? { ...sub, reviewNote: note.trim() || null } : sub
+				)
+			);
+			setPreviewSubmission((prev) =>
+				prev && prev.id === submissionId ? { ...prev, reviewNote: note.trim() || null } : prev
+			);
+		} catch (error) {
+			console.error(error);
+			toast.error('Failed to save feedback.');
 		} finally {
 			setActionId(null);
 		}
@@ -453,12 +500,7 @@ export const SubmissionsView = () => {
 												<div className="flex items-center gap-2">
 													<button
 														type="button"
-														onClick={() => {
-															setPreviewUrl(sub.fileUrl);
-															setPreviewTitle(
-																`${sub.studentName} — ${sub.chapter.title}`
-															);
-														}}
+														onClick={() => openPreview(sub)}
 														className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition"
 													>
 														<Eye className="h-3.5 w-3.5 text-slate-500" />
@@ -542,7 +584,7 @@ export const SubmissionsView = () => {
 			</section>
 
 			{/* Inline File Preview Modal */}
-			<Dialog open={!!previewUrl} onOpenChange={(open) => !open && setPreviewUrl(null)}>
+			<Dialog open={!!previewUrl} onOpenChange={(open) => !open && closePreview()}>
 				<DialogContent className="sm:max-w-3xl border-slate-200 bg-white text-slate-900 shadow-2xl rounded-2xl p-6">
 					<DialogHeader>
 						<DialogTitle className="text-base font-bold text-slate-900">
@@ -568,6 +610,55 @@ export const SubmissionsView = () => {
 						)}
 					</div>
 
+					{previewSubmission && (
+						<div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
+							<label
+								htmlFor="review-note"
+								className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-600"
+							>
+								<MessageSquareText className="h-3.5 w-3.5" />
+								Feedback note <span className="font-normal normal-case text-slate-400">(optional)</span>
+							</label>
+							<Textarea
+								id="review-note"
+								value={noteDraft}
+								maxLength={4000}
+								onChange={(event) => setNoteDraft(event.target.value)}
+								placeholder="Guidance or corrections for the student..."
+								className="bg-white text-sm"
+							/>
+							<div className="flex flex-wrap justify-end gap-2">
+								<Button
+									type="button"
+									variant="outline"
+									size="sm"
+									disabled={
+										actionId === previewSubmission.id ||
+										noteDraft.trim() === (previewSubmission.reviewNote ?? '')
+									}
+									onClick={() => handleSaveNote(previewSubmission.id, noteDraft)}
+								>
+									Save note only
+								</Button>
+								{previewSubmission.status !== 'APPROVED' && (
+									<Button
+										type="button"
+										size="sm"
+										disabled={actionId === previewSubmission.id}
+										className="bg-emerald-600 text-white hover:bg-emerald-700"
+										onClick={async () => {
+											await handleApproveHomework(previewSubmission.id, noteDraft);
+											closePreview();
+										}}
+									>
+										<Check className="mr-1 h-3.5 w-3.5" />
+										{noteDraft.trim() ? 'Approve with note' : 'Mark as Approved'}
+									</Button>
+								)}
+							</div>
+						</div>
+					)}
+
 					<div className="flex justify-between items-center pt-2">
 						<a
 							href={previewUrl || '#'}
@@ -582,7 +673,7 @@ export const SubmissionsView = () => {
 							type="button"
 							variant="outline"
 							size="sm"
-							onClick={() => setPreviewUrl(null)}
+							onClick={closePreview}
 						>
 							Close Preview
 						</Button>

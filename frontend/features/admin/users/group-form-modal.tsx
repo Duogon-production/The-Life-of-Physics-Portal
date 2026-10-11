@@ -132,8 +132,11 @@ export const GroupFormModal = ({
 			onClose();
 		} catch (error: any) {
 			console.error(error);
+			const message = error?.response?.data;
 			toast.error(
-				error?.response?.data || 'Failed to save group. Please try again.'
+				typeof message === 'string' && message
+					? message
+					: 'Failed to save group. Please try again.'
 			);
 		} finally {
 			setIsSubmitting(false);
@@ -168,7 +171,7 @@ export const GroupFormModal = ({
 							id="group-name"
 							value={name}
 							onChange={(e) => setName(e.target.value)}
-							placeholder="e.g. Group A - Advanced Physics"
+							placeholder="e.g. Group A - Advanced"
 							required
 							className="border-slate-200 bg-slate-50 text-slate-900 focus:bg-white"
 						/>

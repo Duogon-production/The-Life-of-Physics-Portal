@@ -1,3 +1,4 @@
+import { isFirebaseStaging } from '@/shared/auth-config';
 import { getChapter } from '@/server/queries/get-chapter';
 import Banner from '@/frontend/components/banner';
 import { auth } from '@clerk/nextjs/server';
@@ -10,6 +11,7 @@ const ChapterIdPage = async ({
 	params: Promise<{ courseId: string; chapterId: string }>;
 }) => {
 	const params = await paramsPromise;
+	if (isFirebaseStaging()) return redirect('/unavailable');
 	const { userId } = await auth();
 
 	if (!userId) return redirect('/');
@@ -64,11 +66,16 @@ const ChapterIdPage = async ({
 					}))}
 					chapterId={params.chapterId}
 					chapterNumber={course.chapterNumber ?? chapter.position}
+					chapterType="Chapter"
 					courseTitle={course.title}
 					completeOnEnd={completeOnEnd}
 					courseId={params.courseId}
 					description={chapter.description}
 					hasSubmission={!!homeworkSubmission}
+					reviewNote={null}
+					submissionStatus={homeworkSubmission?.status ?? null}
+					homeworkMode="FILE_UPLOAD"
+					homeworkQuestions={[]}
 					isCompleted={!!userProgress?.isCompleted}
 					isWatched={!!userProgress?.isWatched}
 					nextChapterId={nextChapter?.id}

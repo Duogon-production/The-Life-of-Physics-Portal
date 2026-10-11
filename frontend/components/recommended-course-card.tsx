@@ -28,7 +28,7 @@ const RecommendedCourseCard = ({
 					) : (
 						<div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-gradient-to-br from-physics-charcoal to-physics-black text-physics-cyan">
 							<BookOpen className="h-8 w-8" />
-							<span className="text-xs font-medium">The Life of Physics</span>
+							<span className="text-xs font-medium">EduLabs</span>
 						</div>
 					)}
 				</div>

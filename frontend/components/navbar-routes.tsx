@@ -1,6 +1,6 @@
 'use client';
 
-import { UserButton } from '@clerk/nextjs';
+import { UserButton } from '@/frontend/components/providers/v2-identity';
 
 const NavbarRoutes = () => {
 	return (

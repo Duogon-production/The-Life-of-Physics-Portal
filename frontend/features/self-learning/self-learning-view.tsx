@@ -4,17 +4,16 @@ import type { SelfLearningLesson, SelfLearningChapter } from '@/shared/contracts
 export type { SelfLearningLesson, SelfLearningChapter } from '@/shared/contracts/dashboard';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import {
 	BookOpen,
-	CheckCircle2,
 	ChevronDown,
 	ChevronRight,
 	Layers,
-	PlayCircle,
 	Sparkles,
 } from 'lucide-react';
 import { cn } from '@/shared/utils';
+import { chapterKey, formatChapterLabel, formatChapterTitle } from '@/shared/chapter-label';
+import { LessonCard, getLessonCardStatus } from '@/frontend/features/courses/lesson-card';
 
 
 
@@ -24,12 +23,12 @@ interface SelfLearningViewProps {
 
 export const SelfLearningView = ({ chapters }: SelfLearningViewProps) => {
 	// Default open the first active chapter
-	const [expandedChapter, setExpandedChapter] = useState<number | null>(
-		chapters.length > 0 ? chapters[0].number : null
+	const [expandedChapter, setExpandedChapter] = useState<string | null>(
+		chapters.length > 0 ? (chapters[0].id ?? chapterKey(chapters[0].type, chapters[0].number)) : null
 	);
 
-	const toggleChapter = (chapterNum: number) => {
-		setExpandedChapter((prev) => (prev === chapterNum ? null : chapterNum));
+	const toggleChapter = (key: string) => {
+		setExpandedChapter((prev) => (prev === key ? null : key));
 	};
 
 	return (
@@ -45,7 +44,7 @@ export const SelfLearningView = ({ chapters }: SelfLearningViewProps) => {
 						preserveAspectRatio="none"
 					>
 						<path d="M40 0C90 60 140 20 240 80V0H40Z" fill="#1e293b" />
-						<path d="M90 0C130 75 170 25 240 120V0H90Z" fill="#00aeef" fillOpacity="0.8" />
+						<path d="M90 0C130 75 170 25 240 120V0H90Z" fill="#7ed957" fillOpacity="0.8" />
 					</svg>
 				</div>
 				<div className="relative z-10 space-y-2 max-w-2xl">
@@ -57,7 +56,7 @@ export const SelfLearningView = ({ chapters }: SelfLearningViewProps) => {
 						Self Learning Curriculum
 					</h1>
 					<p className="text-sm sm:text-base text-slate-300">
-						Explore your 3rd Secondary Physics lessons organized by chapter. Select an active chapter below to view lessons and homework segments.
+						Explore your lessons organized by chapter. Select an active chapter below to view lessons and homework segments.
 					</p>
 				</div>
 			</div>
@@ -76,7 +75,8 @@ export const SelfLearningView = ({ chapters }: SelfLearningViewProps) => {
 			) : (
 				<div className="space-y-4">
 					{chapters.map((chapter) => {
-						const isExpanded = expandedChapter === chapter.number;
+						const key = (chapter.id ?? chapterKey(chapter.type, chapter.number));
+						const isExpanded = expandedChapter === key;
 						const totalLessons = chapter.lessons.length;
 						const completedLessons = chapter.lessons.filter((l) =>
 							l.chapters.length > 0 && l.chapters.every((c) => c.isCompleted)
@@ -84,7 +84,7 @@ export const SelfLearningView = ({ chapters }: SelfLearningViewProps) => {
 
 						return (
 							<div
-								key={chapter.number}
+								key={key}
 								className={cn(
 									'overflow-hidden rounded-2xl border bg-white shadow-xs transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-md active:translate-y-0',
 									isExpanded
@@ -95,7 +95,7 @@ export const SelfLearningView = ({ chapters }: SelfLearningViewProps) => {
 								{/* Chapter Header Card - Click to Toggle */}
 								<button
 									type="button"
-									onClick={() => toggleChapter(chapter.number)}
+									onClick={() => toggleChapter(key)}
 									className="flex w-full items-center justify-between p-5 sm:p-6 text-left transition-colors cursor-pointer select-none"
 								>
 									<div className="flex items-start sm:items-center gap-4">
@@ -111,25 +111,17 @@ export const SelfLearningView = ({ chapters }: SelfLearningViewProps) => {
 										</div>
 
 										<div className="space-y-1">
-											<div className="flex flex-wrap items-center gap-2">
-												<span className="text-xs font-bold uppercase tracking-wider text-sky-700">
-													CHAPTER {chapter.number}
-												</span>
-												{chapter.subtitle && (
-													<>
-														<span className="text-xs text-slate-400">·</span>
-														<span className="text-xs font-medium text-slate-600">
-															{chapter.subtitle}
-														</span>
-													</>
-												)}
-											</div>
+											<span className="text-xs font-bold uppercase tracking-wider text-sky-700">
+												{formatChapterLabel(chapter.type, chapter.number)}
+											</span>
 											<h2 className="text-lg sm:text-xl font-bold text-slate-900 leading-snug">
-												CHAPTER {chapter.number} - {chapter.title}
+												{formatChapterTitle(chapter.type, chapter.number, chapter.title)}
 											</h2>
-											<p className="text-xs sm:text-sm text-slate-500 line-clamp-1">
-												{chapter.description}
-											</p>
+											{chapter.subtitle && (
+												<p className="text-xs sm:text-sm text-slate-500 line-clamp-2">
+													{chapter.subtitle}
+												</p>
+											)}
 										</div>
 									</div>
 
@@ -154,71 +146,34 @@ export const SelfLearningView = ({ chapters }: SelfLearningViewProps) => {
 								{/* Expanded Lessons List */}
 								{isExpanded && (
 									<div className="border-t border-slate-100 bg-slate-50/50 p-5 sm:p-6 space-y-4">
+										{chapter.description && (
+											<p className="rounded-xl border border-slate-200 bg-white p-4 text-sm leading-relaxed text-slate-600">
+												{chapter.description}
+											</p>
+										)}
 										<div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-500">
 											<span>Published Lessons ({totalLessons})</span>
 											<span>
-												{completedLessons} / {totalLessons} Completed
+												{chapter.progressAvailable === false ? "Select an offering to view progress" : `${completedLessons} / ${totalLessons} Completed`}
 											</span>
 										</div>
 
 										<div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
 											{chapter.lessons.map((lesson, idx) => {
 												const firstSegment = lesson.chapters[0];
-												const isLessonDone =
-													lesson.chapters.length > 0 &&
-													lesson.chapters.every((c) => c.isCompleted);
-												const segmentsCount = lesson.chapters.length;
-
 												return (
-													<div
+													<LessonCard
 														key={lesson.id}
-														className="group flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-2xs transition-all duration-200 ease-out hover:-translate-y-1 hover:border-sky-300 hover:shadow-md active:translate-y-0"
-													>
-														<div className="space-y-2">
-															<div className="flex items-center justify-between text-xs">
-																<span className="font-bold text-sky-700 uppercase tracking-wider">
-																	Lesson {idx + 1}
-																</span>
-																{isLessonDone ? (
-																	<span className="inline-flex items-center gap-1 text-emerald-600 font-semibold text-xs">
-																		<CheckCircle2 className="h-4 w-4" />
-																		<span>Completed</span>
-																	</span>
-																) : (
-																	<span className="text-slate-400 font-medium">
-																		{segmentsCount} {segmentsCount === 1 ? 'segment' : 'segments'}
-																	</span>
-																)}
-															</div>
-
-															<h3 className="text-base font-bold text-slate-900 group-hover:text-sky-700 transition-colors line-clamp-2">
-																{lesson.title}
-															</h3>
-														</div>
-
-														<div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-															<div className="flex items-center gap-1.5 text-xs text-slate-500">
-																<Layers className="h-3.5 w-3.5 text-slate-400" />
-																<span>
-																	{segmentsCount} {segmentsCount === 1 ? 'part' : 'parts'}
-																</span>
-															</div>
-
-															{firstSegment ? (
-																<Link
-																	href={`/courses/${lesson.id}/chapters/${firstSegment.id}`}
-																	className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-slate-800"
-																>
-																	<PlayCircle className="h-3.5 w-3.5" />
-																	<span>Open Lesson</span>
-																</Link>
-															) : (
-																<span className="text-xs text-slate-400 italic">
-																	No segments yet
-																</span>
-															)}
-														</div>
-													</div>
+														href={lesson.href === null ? undefined : lesson.href ?? (firstSegment ? `/courses/${lesson.id}/chapters/${firstSegment.id}` : undefined)}
+														chapterType={lesson.chapterType ?? 'Chapter'}
+														chapterNumber={lesson.chapterNumber}
+														lessonNumber={idx + 1}
+														title={lesson.title}
+														description={lesson.description}
+														imageUrl={lesson.imageUrl}
+														partsCount={lesson.partsCount === undefined ? lesson.chapters.length : lesson.partsCount}
+														status={lesson.status ?? getLessonCardStatus(lesson.chapters)}
+													/>
 												);
 											})}
 										</div>

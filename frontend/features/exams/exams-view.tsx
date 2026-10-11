@@ -1,0 +1,230 @@
+'use client';
+
+import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
+import {
+	CheckCircle2,
+	Clock,
+	FileText,
+	Hourglass,
+	Loader2,
+	Pencil,
+	PlusCircle,
+	RotateCcw,
+	Trash2,
+	Users,
+} from 'lucide-react';
+import toast from 'react-hot-toast';
+
+import { api } from '@/frontend/lib/api';
+import { Button } from '@/frontend/components/ui/button';
+import { ExamBuilder } from '@/frontend/features/exams/exam-builder';
+import { ExamGradingPanel } from '@/frontend/features/exams/exam-grading-panel';
+import type { ExamSummary, StudentExamState } from '@/shared/contracts/exams';
+import { formatDuration } from '@/shared/exams';
+import { cn } from '@/shared/utils';
+
+interface ExamsViewProps {
+	isStaff: boolean;
+}
+
+const STATE_LABEL: Record<StudentExamState, { text: string; className: string }> = {
+	NOT_STARTED: { text: 'Not started', className: 'bg-white' },
+	IN_PROGRESS: { text: 'In progress', className: 'bg-amber-200' },
+	AWAITING_DECISION: { text: 'Choose next step', className: 'bg-amber-200' },
+	SUBMITTED: { text: 'Submitted', className: 'bg-primary' },
+	UNDER_CORRECTION: { text: 'Under Correction', className: 'bg-sky-200' },
+	GRADED: { text: 'Graded', className: 'bg-primary' },
+};
+
+const cardClass = 'rounded-2xl border-2 border-black bg-white p-5 shadow-hard-sm';
+
+export const ExamsView = ({ isStaff }: ExamsViewProps) => {
+	const [exams, setExams] = useState<ExamSummary[]>([]);
+	const [isLoading, setIsLoading] = useState(true);
+	const [mode, setMode] = useState<
+		{ type: 'list' } | { type: 'builder'; examId: string | null } | { type: 'grading'; examId: string }
+	>({ type: 'list' });
+
+	const load = useCallback(async () => {
+		try {
+			const res = await api.get<ExamSummary[]>('/api/exams');
+			setExams(res.data);
+		} catch {
+			toast.error('Failed to load exams.');
+		} finally {
+			setIsLoading(false);
+		}
+	}, []);
+
+	useEffect(() => {
+		load();
+	}, [load]);
+
+	const togglePublish = async (exam: ExamSummary) => {
+		try {
+			await api.patch(`/api/exams/${exam.id}`, { isPublished: !exam.isPublished });
+			toast.success(exam.isPublished ? 'Exam hidden from students.' : 'Exam published.');
+			load();
+		} catch {
+			toast.error('Could not update the exam.');
+		}
+	};
+
+	const remove = async (exam: ExamSummary) => {
+		if (!window.confirm(`Delete "${exam.title}" and all student attempts? This cannot be undone.`)) return;
+		try {
+			await api.delete(`/api/exams/${exam.id}`);
+			toast.success('Exam deleted.');
+			load();
+		} catch {
+			toast.error('Could not delete the exam.');
+		}
+	};
+
+	if (mode.type === 'builder') {
+		return (
+			<ExamBuilder
+				examId={mode.examId}
+				onClose={(changed) => {
+					setMode({ type: 'list' });
+					if (changed) load();
+				}}
+			/>
+		);
+	}
+
+	if (mode.type === 'grading') {
+		return (
+			<ExamGradingPanel
+				examId={mode.examId}
+				onClose={() => {
+					setMode({ type: 'list' });
+					load();
+				}}
+			/>
+		);
+	}
+
+	return (
+		<div className="mx-auto w-full max-w-5xl space-y-6 pb-12">
+			<div className="flex flex-wrap items-center justify-between gap-3 rounded-3xl border-2 border-black bg-white p-5 shadow-hard">
+				<div className="flex items-center gap-3">
+					<div className="flex h-12 w-12 items-center justify-center rounded-2xl border-2 border-black bg-primary">
+						<FileText className="h-6 w-6" />
+					</div>
+					<div>
+						<h1 className="font-display text-3xl leading-none">Exams</h1>
+						<p className="mt-1 text-sm text-slate-600">
+							{isStaff
+								? 'Create exams, set time limits and attempts, and correct written answers.'
+								: 'Take your exams and review your answer history.'}
+						</p>
+					</div>
+				</div>
+				{isStaff && (
+					<Button onClick={() => setMode({ type: 'builder', examId: null })}>
+						<PlusCircle className="mr-2 h-4 w-4" /> New exam
+					</Button>
+				)}
+			</div>
+
+			{isLoading ? (
+				<div className="flex justify-center py-16">
+					<Loader2 className="h-6 w-6 animate-spin text-slate-500" />
+				</div>
+			) : exams.length === 0 ? (
+				<div className={cn(cardClass, 'text-center text-slate-600')}>
+					{isStaff ? 'No exams yet. Create the first one.' : 'No exams are available right now.'}
+				</div>
+			) : (
+				<div className="grid gap-4 md:grid-cols-2">
+					{exams.map((exam) =>
+						isStaff ? (
+							<div key={exam.id} className={cardClass}>
+								<div className="flex items-start justify-between gap-3">
+									<h2 className="text-lg font-bold leading-snug">{exam.title}</h2>
+									<span
+										className={cn(
+											'shrink-0 rounded-full border-2 border-black px-2.5 py-0.5 text-xs font-semibold',
+											exam.isPublished ? 'bg-primary' : 'bg-white'
+										)}
+									>
+										{exam.isPublished ? 'Published' : 'Draft'}
+									</span>
+								</div>
+								<ExamFacts exam={exam} />
+								<div className="mt-3 flex items-center gap-4 text-xs font-medium text-slate-600">
+									<span className="flex items-center gap-1">
+										<Users className="h-3.5 w-3.5" /> {exam.sessionCount ?? 0} students
+									</span>
+									{!!exam.underCorrectionCount && (
+										<span className="flex items-center gap-1 text-sky-800">
+											<Hourglass className="h-3.5 w-3.5" /> {exam.underCorrectionCount} under correction
+										</span>
+									)}
+								</div>
+								<div className="mt-4 flex flex-wrap gap-2">
+									<Button size="sm" variant="outline" onClick={() => setMode({ type: 'builder', examId: exam.id })}>
+										<Pencil className="mr-1.5 h-3.5 w-3.5" /> Edit
+									</Button>
+									<Button size="sm" variant="outline" onClick={() => setMode({ type: 'grading', examId: exam.id })}>
+										<CheckCircle2 className="mr-1.5 h-3.5 w-3.5" /> Written answers
+									</Button>
+									<Button size="sm" variant="secondary" onClick={() => togglePublish(exam)}>
+										{exam.isPublished ? 'Unpublish' : 'Publish'}
+									</Button>
+									<Button size="sm" variant="ghost" aria-label="Delete exam" onClick={() => remove(exam)}>
+										<Trash2 className="h-4 w-4 text-rose-600" />
+									</Button>
+								</div>
+							</div>
+						) : (
+							<Link key={exam.id} href={`/exams/${exam.id}`} className={cn(cardClass, 'block transition-transform hover:-translate-y-0.5')}>
+								<div className="flex items-start justify-between gap-3">
+									<h2 className="text-lg font-bold leading-snug">{exam.title}</h2>
+									{exam.state && (
+										<span
+											className={cn(
+												'shrink-0 rounded-full border-2 border-black px-2.5 py-0.5 text-xs font-semibold',
+												STATE_LABEL[exam.state].className
+											)}
+										>
+											{STATE_LABEL[exam.state].text}
+										</span>
+									)}
+								</div>
+								<ExamFacts exam={exam} />
+								{exam.totalScore !== null && exam.totalScore !== undefined && (
+									<p className="mt-3 text-sm font-bold">
+										Final mark: {exam.totalScore} / {exam.totalPossible}
+									</p>
+								)}
+								{exam.state === 'UNDER_CORRECTION' && (
+									<p className="mt-3 text-sm font-medium text-slate-700">
+										Multiple choice: {exam.mcqScore} / {exam.mcqTotal} · Written part is being corrected.
+									</p>
+								)}
+							</Link>
+						)
+					)}
+				</div>
+			)}
+		</div>
+	);
+};
+
+const ExamFacts = ({ exam }: { exam: ExamSummary }) => (
+	<>
+		{exam.description && <p className="mt-2 line-clamp-2 text-sm text-slate-600">{exam.description}</p>}
+		<div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs font-medium text-slate-700">
+			<span className="flex items-center gap-1">
+				<Clock className="h-3.5 w-3.5" /> {formatDuration(exam.durationMinutes)}
+			</span>
+			<span className="flex items-center gap-1">
+				<RotateCcw className="h-3.5 w-3.5" /> {exam.maxAttempts} attempt{exam.maxAttempts > 1 ? 's' : ''}
+			</span>
+			<span>{exam.questionCount} questions</span>
+		</div>
+	</>
+);

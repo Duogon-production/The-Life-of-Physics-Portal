@@ -9,6 +9,7 @@ export interface Course {
 	imageUrl: string | null;
 	categoryId: string | null;
 	chapterNumber: number | null;
+	chapterType?: string;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -41,8 +42,20 @@ export interface Chapter {
 	solutionVideoUrl: string | null;
 	isFree: boolean;
 	contentType: string | null;
+	homeworkMode?: string;
 	createdAt: Date;
 	updatedAt: Date;
+}
+
+export interface HomeworkQuestion {
+	id: string;
+	chapterId: string;
+	position: number;
+	text: string;
+	imageUrl: string | null;
+	/** Only sent to students after they submit their homework. */
+	answer?: string | null;
+	answerImageUrl?: string | null;
 }
 
 export interface MuxData {
@@ -82,6 +95,7 @@ export type TeacherCourse = Course & { chapters: Chapter[] };
 export type TeacherChapter = Chapter & {
 	muxData: MuxData | null;
 	attachments: Attachment[];
+	homeworkQuestions?: HomeworkQuestion[];
 };
 
 export type CourseEntry = Course & {

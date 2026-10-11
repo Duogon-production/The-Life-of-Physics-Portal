@@ -25,7 +25,7 @@ import { ChaptersList } from '@/frontend/features/teacher/courses/editor/chapter
 import { useGlobalLoading } from '@/frontend/components/providers/loading-provider';
 
 interface ChaptersFormProps {
-	initialData: Course & { chapters: Chapter[] };
+	initialData: { chapters: Chapter[] };
 	courseId: string;
 }
 

@@ -6,7 +6,12 @@ import AdminHome from '@/frontend/features/dashboard/admin-home';
 import CourseCard from '@/frontend/components/course-card';
 import GroupRosterView from '@/frontend/features/groups/group-roster-view';
 import { getWebsiteContext, loadWebsiteScope, courseCapability, offeringCapability } from '@/server/services/website';
-import { studentLessons, validRosterPage } from '@/shared/website-model';
+import { validRosterPage } from '@/shared/website-model';
+import { SelfLearningView } from '@/frontend/features/self-learning/self-learning-view';
+import OriginalCourseDetail from '@/frontend/features/courses/course-detail';
+import { v2Chapters, v2StudentLessons } from '@/shared/v2-learning-model';
+import { V2TeacherCourseList } from '@/frontend/features/teacher/courses/course-list';
+import SearchInput from '@/frontend/components/search-input';
 import { canEditTeacherCourse } from '@/shared/teacher-course';
 
 export type WebsiteSearch = { organization?: string; offering?: string; page?: string; title?: string };
@@ -49,16 +54,21 @@ export async function WebsiteHome({ search = {} }: { search?: WebsiteSearch }) {
     return course && offeringCapability(context, course, o.id);
   });
   const staff = scope.courses.some(c => courseCapability(context, c)) || supported.length > 0 || context.memberships.some(m => m.status === 'active' && ['owner', 'admin'].includes(m.role) && (!search.organization || search.organization === m.organization_id));
-  const [active, invited] = staff ? await Promise.all([context.repository.enrollmentCount(supported.map(o => o.id), 'active'), context.repository.enrollmentCount(supported.map(o => o.id), 'invited')]) : [0, 0];
+
   return <div className="space-y-8"><LimitNotice limited={scope.limited} />
     <nav className="flex flex-wrap gap-4 text-sm text-sky-700" aria-label="Teaching tools"><Link href="/onboarding/organization">Create an organization</Link>{context.memberships.some(m=>m.status==='active'&&['owner','admin','teacher'].includes(m.role))&&<Link href="/teacher/create">Create a course</Link>}</nav>
-    {staff && <AdminHome phase1 adminName={context.viewer.displayName} metrics={{ totalStudents: active, pendingWaitlistCount: invited, pendingHomeworkCount: null, activeGroupsCount: supported.filter(o => o.status === 'active').length }} recentSignups={[]} recentSubmissions={[]} />}
-    <StudentHome phase1 summaryAvailable={!scope.limited} lessons={scope.limited ? [] : studentLessons({ ...scope, offerings: scope.offerings.filter(o => scope.enrollments.some(e => e.offering_id === o.id && e.status === 'active' && (!e.expires_at || Date.parse(e.expires_at) > Date.now()) && (!e.enrolled_at || Date.parse(e.enrolled_at) <= Date.now()))) })} groupName={null} />
+    {staff ? <AdminHome phase1 adminName={context.viewer.displayName} metrics={{ totalStudents: null, pendingWaitlistCount: null, pendingHomeworkCount: null, activeGroupsCount: supported.filter(o => o.status === 'active').length }} recentSignups={[]} recentSubmissions={[]} /> :
+    <StudentHome phase1 summaryAvailable={!scope.limited} lessons={scope.limited ? [] : v2StudentLessons({ ...scope, offerings: scope.offerings.filter(o => scope.enrollments.some(e => e.offering_id === o.id && e.status === 'active' && (!e.expires_at || Date.parse(e.expires_at) > Date.now()) && (!e.enrolled_at || Date.parse(e.enrolled_at) <= Date.now()))) })} groupName={null} />}
     {scope.limited && <p className="text-sm text-slate-500">Open a course for its available lessons. Dashboard lesson progress is not calculated on partial data.</p>}
     <Offerings scope={scope} /><Assessments scope={scope} />
   </div>;
 }
 export async function WebsiteCourses({ search = {}, teacher = false }: { search?: WebsiteSearch; teacher?: boolean }) {
+  if (!teacher) {
+    const { scope } = await scopeFor(search);
+    if (search.offering && !scope.offerings.some(o => o.id === search.offering)) notFound();
+    return <><LimitNotice limited={scope.limited}/><SelfLearningView chapters={scope.limited ? [] : v2Chapters(scope, search.offering)}/><Offerings scope={scope}/></>;
+  }
   const context = await requireWebsiteContext();
   if (Object.values(search).some(v => v !== undefined && (typeof v !== 'string' || v.length > 200)) || (search.organization && !context.organizations.some(o => o.id === search.organization))) notFound();
   let page: number; try { page = validRosterPage(search.page); } catch { notFound(); }
@@ -66,25 +76,25 @@ export async function WebsiteCourses({ search = {}, teacher = false }: { search?
   const courses = rows.slice(0, 100);
   const [modules, offerings] = await Promise.all([context.repository.modules(courses.map(c => c.id)), context.repository.offerings(courses.map(c => c.id))]);
   const visible = courses.filter(c => !teacher || courseCapability(context, c) || offerings.some(o => o.course_id === c.id && offeringCapability(context, c, o.id)));
-  const catalogPath = teacher ? '/teacher/courses' : '/self-learning';
-  const pageUrl = (value: number) => `${catalogPath}?${new URLSearchParams({ page: String(value), ...(search.organization ? { organization: search.organization } : {}), ...(search.title ? { title: search.title } : {}) })}`;
-  return <div className="mx-auto max-w-7xl space-y-6 pb-16 pt-2"><div className="space-y-2"><div className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-800">{teacher ? <ShieldCheck className="h-4 w-4" /> : <BookOpen className="h-4 w-4" />}{teacher ? 'Teacher Portal' : 'Curriculum & Self Learning'}</div><h1 className="text-3xl font-bold">{teacher ? 'Lesson Management' : 'Self Learning Curriculum'}</h1><p className="text-sm text-slate-500">{teacher ? 'Create courses and edit the courses you are authorized to manage.' : 'Explore the published lessons available through your course offerings.'}</p></div>
-    {teacher && <Link className="inline-flex rounded-lg bg-slate-900 px-4 py-2 text-sm text-white" href="/teacher/create">Create a course</Link>}<form className="flex flex-wrap gap-3" action={catalogPath}>{search.organization && <input type="hidden" name="organization" value={search.organization} />}<input aria-label="Search your courses" name="title" defaultValue={search.title} maxLength={200} placeholder="Search your courses" className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm" /><button className="rounded-lg bg-slate-900 px-4 py-2 text-sm text-white">Search</button></form>
-    <div className={panel}><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{visible.map(c => <CourseCard key={c.id} href={teacher && canEditTeacherCourse(context.memberships.find(m=>m.organization_id===c.organization_id)??null,context.courseStaff.find(s=>s.course_id===c.id)??null) ? "/teacher/courses/"+c.id : undefined} id={c.id} title={c.title} category={context.organizations.find(o => o.id === c.organization_id)?.name} chaptersLength={modules.length > 500 ? undefined : modules.filter(m => m.course_id === c.id).length} />)}</div>{!visible.length && <p className="py-12 text-center text-slate-500">No accessible courses on this page. Try another organization or search.</p>}<nav aria-label="Course pages" className="mt-6 flex gap-6 text-sm text-sky-700">{page > 0 && <Link href={pageUrl(page - 1)}>Previous</Link>}{rows.length > 100 && <Link href={pageUrl(page + 1)}>Next</Link>}</nav></div>
-  </div>;
+  const pageUrl = (value: number) => '/teacher/courses?'+new URLSearchParams({page:String(value),...(search.organization?{organization:search.organization}:{}),...(search.title?{title:search.title}:{})});
+  return <><V2TeacherCourseList courses={visible.filter(c => canEditTeacherCourse(context.memberships.find(m=>m.organization_id===c.organization_id)??null, context.courseStaff.find(s=>s.course_id===c.id)??null)).map(c => ({id:c.id,title:c.title,isPublished:c.status==='published'}))}/><nav aria-label="Course pages" className="flex gap-6 text-sm text-sky-700">{page>0&&<Link href={pageUrl(page-1)}>Previous</Link>}{rows.length>100&&<Link href={pageUrl(page+1)}>Next</Link>}</nav></>;
 }
+export async function WebsiteSearchCourses({search={}}:{search?:WebsiteSearch}) {
+ const context=await requireWebsiteContext();
+ if(Object.values(search).some(v=>v!==undefined&&(typeof v!=='string'||v.length>200))||(search.organization&&!context.organizations.some(o=>o.id===search.organization)))notFound();
+ let page:number;try{page=validRosterPage(search.page)}catch{notFound()}
+ const rows=await context.repository.courses(search.organization,page,search.title),courses=rows.slice(0,100);
+ const modules=await context.repository.modules(courses.map(c=>c.id));
+ return <><div className="px-6 pt-6 block md:hidden md:mb-0"><SearchInput/></div><div className="p-6 space-y-4"><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{courses.map(c=><CourseCard key={c.id} id={c.id} title={c.title} category={context.organizations.find(o=>o.id===c.organization_id)?.name} chaptersLength={modules.filter(m=>m.course_id===c.id).length}/>)}</div><p role="status">Search is limited to your authorized courses. Categories are awaiting a backend adapter.</p>{rows.length>100&&<Link href={'/search?'+new URLSearchParams({page:String(page+1),...(search.title?{title:search.title}:{})})}>Next</Link>}</div></>;
+}
+
 export async function WebsiteCourse({ courseId, search = {} }: { courseId: string; search?: WebsiteSearch }) {
   const { context, scope } = await scopeFor(search, courseId);
   const course = scope.courses[0];
   if (search.offering && !scope.offerings.some(o => o.id === search.offering)) notFound();
   const offering = scope.offerings.find(o => o.id === search.offering);
-  return <div className="space-y-6 p-2 sm:p-8"><div className="grid gap-8 sm:grid-cols-2"><div><h1 className="text-3xl font-bold">{course.title}</h1><p className="mt-4 whitespace-pre-wrap text-sm text-slate-600">{course.description || 'No description'}</p><p className="mt-4 text-xs text-slate-500">{context.organizations.find(o => o.id === course.organization_id)?.name} · {course.status}</p></div><div className="grid min-h-40 place-items-center rounded-2xl border bg-white text-cyan-600"><BookOpen className="h-12 w-12" /></div></div>
-    <LimitNotice limited={scope.limited} /><Offerings scope={scope} />
-    <section className={panel}><h2 className="mb-4 text-xl font-bold">Available Lessons{offering ? ` · ${offering.name}` : ''}</h2>{!offering && <p className="mb-4 text-sm text-slate-500">Select a group above to view progress for that specific course run.</p>}
-      {scope.modules.map(m => <div key={m.id} className="border-t py-4"><h3 className="font-semibold">{m.title}</h3>{scope.lessons.filter(l => l.module_id === m.id).map(l => <div key={l.id} className="flex justify-between gap-2 py-2 text-sm"><span>{l.title}</span><span className="text-slate-500">{offering ? scope.progress.find(p => p.offering_id === offering.id && p.lesson_id === l.id)?.status.replace('_', ' ') || 'not started' : 'Published'}{l.estimated_duration_seconds !== null ? ` · ${Math.ceil(l.estimated_duration_seconds / 60)} min` : ''}</span></div>)}</div>)}
-      {!scope.lessons.length && <p className="text-sm text-slate-500">No published lessons available.</p>}<p className="mt-4 text-sm text-slate-500">Video playback, homework and lesson editing are awaiting integration. Existing progress is shown read-only.</p>
-    </section><Assessments scope={scope} />
-  </div>;
+  return <div className="space-y-6"><OriginalCourseDetail initialCourse={course}/><LimitNotice limited={scope.limited}/><Offerings scope={scope}/><SelfLearningView chapters={scope.limited ? [] : v2Chapters(scope, offering?.id)}/><p role="status">Lesson playback, feedback and homework are awaiting backend integration.</p></div>;
+
 }
 export async function WebsiteGroups({ search = {} }: { search?: WebsiteSearch }) {
   const { scope } = await scopeFor(search);
@@ -104,6 +114,6 @@ export async function WebsiteOffering({ offeringId, search = {} }: { offeringId:
   const [enrollments, total] = staff ? await Promise.all([context.repository.roster(offeringId, page), context.repository.enrollmentCount([offeringId])]) : [[], null];
   const mine = (await context.repository.myEnrollments()).find(e => e.offering_id === offeringId);
   return <div className="space-y-6"><Link className="text-sm font-semibold text-sky-700" href={`/courses/${course.id}?offering=${offering.id}`}>View {course.title} lessons &amp; progress →</Link>
-    {staff ? <><GroupRosterView phase1 groupName={offering.name} nextSession={null} peers={enrollments.slice(0, 50).map(e => ({ id: e.id, name: e.profiles?.display_name || 'Learner', email: '', role: 'student', isCurrentUser: e.user_id === context.viewer.id, enrollmentStatus: e.status, latestSubmission: null }))} /><div className={panel}><p>{total} enrollment records · Page {page + 1}</p><nav className="mt-3 flex gap-6" aria-label="Roster pages">{page > 0 && <Link href={`/offerings/${offeringId}?page=${page - 1}`}>Previous</Link>}{enrollments.length > 50 && <Link href={`/offerings/${offeringId}?page=${page + 1}`}>Next</Link>}</nav></div></> : <section className={panel}><h1 className="text-2xl font-bold">{offering.name}</h1><p className="mt-4">Your enrollment: {mine?.status || 'Unavailable'}</p><p className="mt-2 text-sm text-slate-500">Classmate records are private. Live sessions and homework are awaiting integration.</p></section>}
+    {staff ? <><GroupRosterView phase1 groupName={offering.name} nextSession={null} peers={enrollments.slice(0, 50).map(e => ({ id: e.id, name: e.profiles?.display_name || 'Learner', email: '', role: 'student', isCurrentUser: e.user_id === context.viewer.id, enrollmentStatus: e.status, latestSubmission: null }))} /><div className={panel}><p>{total} enrollment records · Page {page + 1}</p><nav className="mt-3 flex gap-6" aria-label="Roster pages">{page > 0 && <Link href={`/offerings/${offeringId}?page=${page - 1}`}>Previous</Link>}{enrollments.length > 50 && <Link href={`/offerings/${offeringId}?page=${page + 1}`}>Next</Link>}</nav></div></> : <><GroupRosterView phase1 groupName={offering.name} nextSession={null} peers={mine?[{id:mine.id,name:context.viewer.displayName,email:context.viewer.email,role:'student',isCurrentUser:true,enrollmentStatus:mine.status,latestSubmission:null}]:[]}/><p role="status" className="text-sm text-slate-500">Only your own enrollment is shown. Classmate records are private. Live sessions and homework are awaiting integration.</p></>}
   </div>;
 }

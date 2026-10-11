@@ -1,0 +1,1374 @@
+{
+  "source_repository": "Duogon-production/test",
+  "source_commit": "e54331015246c746c89804faea9664356c94ae68",
+  "verified_original_files": 195,
+  "directly_copied_files": 185,
+  "comparison": "Source SHA-256 verified against extracted archive before copying; canonical text comparison ignores CRLF/LF only.",
+  "files": [
+    {
+      "path": "app/(auth)/(routes)/sign-in/[[...sign-in]]/page.tsx",
+      "source_sha256": "b3ba417c5d55d6731b6321f2d3b25bb80d3c2aa3cb40147695b70dc912c0e065",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "206fbcddf1632a2ec76247ed2cf1afb0255ceee0eec3a4d351c8b9477947af06"
+    },
+    {
+      "path": "app/(auth)/(routes)/sign-up/[[...sign-up]]/page.tsx",
+      "source_sha256": "41d51b337ca18e54fc6b0a0f60841c341166cf87a412130dfb1bf317df053bf3",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "8345a3a79ba7106cb6bf009f17da5869182859e19ff2d16b05143584efa18261"
+    },
+    {
+      "path": "app/(auth)/layout.tsx",
+      "source_sha256": "fbf39b2f90649fe2d156a6da2e2fd4878d9c81879a3aa3f64bc94ca22585a0e6",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "32e5735d46c9a95acf3da196db15bcd20adff3e71dab9838bbaa25aec733d9e7"
+    },
+    {
+      "path": "app/(dashboard)/(routes)/(root)/page.tsx",
+      "source_sha256": "dc7158fab3b0d6bb5175f5444e2ba57821867b1dde75dda94b78810069a42991",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "4d6b9317f6e619c5981cc29c3d508589132d5ae73128b62c388450cbad84e360"
+    },
+    {
+      "path": "app/(dashboard)/(routes)/admin/layout.tsx",
+      "source_sha256": "ab27f58a3884b098e9161ee2ad216290bbff1f494a09bde26cdf3c3392afa47c",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "54eee0092b620c09103237319746c2b66053c8ff35112373c472505dd9c4658c"
+    },
+    {
+      "path": "app/(dashboard)/(routes)/admin/submissions/page.tsx",
+      "source_sha256": "622b4cc113b54c7a0b8e1190ac4ca2646dbd24336bc0163a473f015ef041f67a",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "98e17ccb1d2ea75c56bf9c165074f064f9793d3cd290b97feb04099d8ea106cb"
+    },
+    {
+      "path": "app/(dashboard)/(routes)/admin/users/page.tsx",
+      "source_sha256": "4b383b231f71fcbe1d69ee2439aa9cc44cdf17bb8c3890074ccf30f7baf4613a",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "018d9c9257d8741785a461d48a235040adc885926d604929032ee3180f719737"
+    },
+    {
+      "path": "app/(dashboard)/(routes)/channel/page.tsx",
+      "source_sha256": "ad620acc6bff9c10ae9dc1352b5d5963280720c63e9bea47529aeb7719704b2f",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "9f648aed859f214a2d666e48b7ac6f80660f96fd795f2ae9f2738396650f7eb9"
+    },
+    {
+      "path": "app/(dashboard)/(routes)/courses/[courseId]/chapters/[chapterId]/page.tsx",
+      "source_sha256": "2fae173873858d0a5392ce655c1d8a31453d27a2ee20576f3fadbcd8623654e2",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "ba3da720480eb4632613f4abd826f9192d3cc66f56c2d596dda91f520041b8bc"
+    },
+    {
+      "path": "app/(dashboard)/(routes)/courses/[courseId]/detail/page.tsx",
+      "source_sha256": "4bbb8f5006ee04899087b8fb4a68ab766200714dc85faab977059aa3a83ced2d",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "4ea28c33315e28d5e98f9ec887a71c2b496138bc48e0ed7164f6bdcdb808b45c"
+    },
+    {
+      "path": "app/(dashboard)/(routes)/courses/[courseId]/layout.tsx",
+      "source_sha256": "41e2712e797da4f0d68d82fcce618a8394dde1bfb4507987bf076d95e6d1e3a1",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "46eb03a82dcc7e888037551546577b5352ebfbc7ce822f4ad2c2d08077167914"
+    },
+    {
+      "path": "app/(dashboard)/(routes)/courses/[courseId]/page.tsx",
+      "source_sha256": "e0f2eb873702752da6687bba3bbba96eddb484a304f08898dde04ab0c863fd16",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "4190857780ae2d2f7b1af132760fff47b9baa150d0bf1a090eb282513b273725"
+    },
+    {
+      "path": "app/(dashboard)/(routes)/dashboard/page.tsx",
+      "source_sha256": "81432f624d1d7db8c405b15200c9b28af712e9951960bb07f7fba4125320e984",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "e791ede90197c6ae646151613cafe7539fc58d782a846664fabc454598129dda"
+    },
+    {
+      "path": "app/(dashboard)/(routes)/exams/[examId]/page.tsx",
+      "source_sha256": "3e549877dfc40a0f74b25832416f64bfbe47e1388236d2224e3e59f50c5ac226",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "8bbc5186f56ffd71e59492c2c12dc581b85ac646e3be8881fe821e6079f630d4"
+    },
+    {
+      "path": "app/(dashboard)/(routes)/exams/page.tsx",
+      "source_sha256": "d2893fa50517896c698ba7b775d0c87f4d9aa281ee0cbd01de6624c44094b99b",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "3bd5ce03d302ceb3540de1e0ce073c435313c0acfcc9a65518c7ff5b8bdf37a5"
+    },
+    {
+      "path": "app/(dashboard)/(routes)/group/page.tsx",
+      "source_sha256": "8e942442350c0e80c5a31c177b2d6d81446a8bdc1eea76c85d0c649e86f31d87",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "96126cd24265e80c076385fd5a751811957ad7db7f4114dea1e12720df94d109"
+    },
+    {
+      "path": "app/(dashboard)/(routes)/groups/page.tsx",
+      "source_sha256": "c05d3b50dce58eb43ba296557032f07664f5fa43f790cef98c7f9000d49bd683",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "5f36921a6f57f43a31868243d93d886b2a8b4b9d0d7b2501b488be820631447a"
+    },
+    {
+      "path": "app/(dashboard)/(routes)/home/page.tsx",
+      "source_sha256": "6695b600f4ae054969421c31f909d757a20f16168cb6b2b337e43c3047a7ff67",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "895b5b718af237150300294d9e05d4fd5453f306b2582c731a60007f8669ab82"
+    },
+    {
+      "path": "app/(dashboard)/(routes)/personalization/page.tsx",
+      "source_sha256": "3f55c39cd4591fd2b1390971bc7290a6b800c8942ba46c52ee74024b92011799",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "d9ccaf7ac6bf99dbe8ce3d7d0add99a2cf7b820f7b92f97adac7844f07ec56f3"
+    },
+    {
+      "path": "app/(dashboard)/(routes)/search/page.tsx",
+      "source_sha256": "a17747e77fdb78b94ac27b2ea042d696d757d2a53a37b352f4bc0e98bb07ec74",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "5ce29362b7c5f5ada57f3b10b577ad1c5ea939ff7a7dddbcfef873263fcfb76e"
+    },
+    {
+      "path": "app/(dashboard)/(routes)/self-learning/page.tsx",
+      "source_sha256": "57c16cdb87f7c55cfdbc118d2e4d67e1e3daf2f3bca507f03619c95b498b23de",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "d926fba59048dc447f5fbe58d5607d29087c5436b0563cbe823e61eaf57e02fb"
+    },
+    {
+      "path": "app/(dashboard)/(routes)/support/page.tsx",
+      "source_sha256": "10de546cd669814beb557be61fe6b0374dd05609b6b349b265c7cba849b5615a",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "17ff26b8a069a8dfe746138b1df03624a62e5b11ff50753bf91670787a1fb1ac"
+    },
+    {
+      "path": "app/(dashboard)/(routes)/teacher/analytics/page.tsx",
+      "source_sha256": "71b345bb4b6389fe7c926e57f63431cac8b3d6d5560ebfebb2d8464329252d3c",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "959a9fc3cb0a055a6bdb83759ef3499675973f0bcbce981ed42744196cfca25b"
+    },
+    {
+      "path": "app/(dashboard)/(routes)/teacher/courses/[courseId]/chapters/[chapterId]/page.tsx",
+      "source_sha256": "e1ca11cf0fb6d2e88af63f489938287151b36c57bc5861d8536bdc629aa9577c",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "51e4fcf0fc02afb87e78732d40fbb3e20268d97151bf924dfd6f8a5421614b21"
+    },
+    {
+      "path": "app/(dashboard)/(routes)/teacher/courses/[courseId]/page.tsx",
+      "source_sha256": "c342ef0ed367ba5dd88d22d0574ab351bfbad7799ce449ed0f6bb3e91d439297",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "2769f5e984bafc52826f45b91f60f68ebcf6b2371cd89b4c3107b24d1716d8a7"
+    },
+    {
+      "path": "app/(dashboard)/(routes)/teacher/courses/page.tsx",
+      "source_sha256": "026ef6d0d8949004be411424f441f0b949a4fec69bc370dba884bca5213119e6",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "3532363beffe228d3d263c858d079b866bf97e14f98c4be938eaf2b1d865afa0"
+    },
+    {
+      "path": "app/(dashboard)/(routes)/teacher/create/page.tsx",
+      "source_sha256": "bd13e3d3185da6f6d77bb72f6997bd7a055f64708830a5b11f9b9567ae94b4a8",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "434714772e7b137ba74bc538fddc52d60b2b6657f570117cd81dbc87a86d58b5"
+    },
+    {
+      "path": "app/(dashboard)/(routes)/teacher/layout.tsx",
+      "source_sha256": "9566a149effa42362b7ea9048c05bb3e503231d3ccf00c5f66495843cfd46969",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "a4ba6a1280cdb983b528518c67d280aee4ef7845229b17787f06d5b05031c2fb"
+    },
+    {
+      "path": "app/(dashboard)/layout.tsx",
+      "source_sha256": "927b0829bf8adb24dd603cc21e81d80f8da286c94ffab4fc325352e2a5a52247",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "bc11f478546b00e4b6572d5f63b8ffc60554964c0f7de3202ca3063e4ebfbaa6"
+    },
+    {
+      "path": "app/globals.css",
+      "source_sha256": "61ecfb83302a207931865254fd2baf4b0f2945d8e8cd77fb4d64889924ef2290",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "7455a0592f95613e020dcb502af8c3e5dd7980b8e525d8a217214543dc179e69"
+    },
+    {
+      "path": "app/icon.svg",
+      "source_sha256": "49b6ad60911059fecac076138ec03abe62a75cfca5e2147eedc50ef9bceb3ef7",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "49b6ad60911059fecac076138ec03abe62a75cfca5e2147eedc50ef9bceb3ef7"
+    },
+    {
+      "path": "app/layout.tsx",
+      "source_sha256": "7190ac090d388137d4cf71bbcf96f44c6d7e9a42c42ff6b0ff4f3e86cb418ebb",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "f8cdbc8b5f30145b2bfac65f57404175839a2cc680a2b54a0262967d3cf3a43d"
+    },
+    {
+      "path": "app/loading.tsx",
+      "source_sha256": "757996f90bc9ccc0a5bfe67e1023ad24e1dcf6a29e6441102ec128d1fe17c8a0",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "3369cc265ca7f4e3fb827bf01ab3a64436d59eb513a19cff3cd4cbc9d5e279a1"
+    },
+    {
+      "path": "app/test-page/page.tsx",
+      "source_sha256": "14129f562164fdc92501b6bd262a78735d65f2b33819390716d40461757a6c7a",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "661905bb5bddb217112356ee7f69290d766eb0a404c7f5e490880d2682fd1375"
+    },
+    {
+      "path": "components.json",
+      "source_sha256": "164a5cfe39f2336f199d292e43d5a05e01f2bc061d6eedc340fcd6680a390831",
+      "copied": false,
+      "status": "protected/reference-only",
+      "source_canonical_sha256": "c58a7e961d075aef0e555af0dfa79b69bba77f7cccac6449be7326c6b17c12b1"
+    },
+    {
+      "path": "frontend/components/action-tooltip.tsx",
+      "source_sha256": "36b3dc6b4338f1114da6dc53136a18a03fdc37065f541bb4c31a26188bea159a",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "ceffb8adc8e9a14dc05c257c9537dffbc3c9e7106590d741a8f7ca09122575af"
+    },
+    {
+      "path": "frontend/components/banner.tsx",
+      "source_sha256": "c9f64449522e0ce97c2f6c05b2a34ea1ae7b4577c2dc3ce4037ca1dbc7c1835c",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "1b5c7a466e7a35f9fd02ba58ad3b188d71fa66e2322279ccf28ccaeb0c6a9589"
+    },
+    {
+      "path": "frontend/components/chat-video-button.tsx",
+      "source_sha256": "1ca59f37e7e2f06c26fa8129e900f3175ac010d139db4be30b91413cd9347f8b",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "d33f4d364120c852b5c874cc2e9bdf38a05bffef871738e06684b99dc8f92fc5"
+    },
+    {
+      "path": "frontend/components/course-card.tsx",
+      "source_sha256": "eec88694a332fab156667511b7730be932b786c3f7c330ead3726efde7483cef",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "e54b8d34c37de777fc062c2a07ded1aae7df60a5d73274be6ea424c0755f1dd3"
+    },
+    {
+      "path": "frontend/components/course-progress.tsx",
+      "source_sha256": "6a8476c0ef81df8c5e7ac56990f01d437667b13105531c0fc91fde530242a1cc",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "0e8c9ed7b9445b06fd3e93ee69f9848ed486366c26cb537fba22e53e9c001189"
+    },
+    {
+      "path": "frontend/components/courses-list.tsx",
+      "source_sha256": "a0e2128071b5488780c7368ede9f483e54f3866c7807659289ba17558ac4a077",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "9417a10024512ea30b96100198e89ae01abdec2ef53a9702bddf3c9a634c0e54"
+    },
+    {
+      "path": "frontend/components/editor.tsx",
+      "source_sha256": "e4bb1f89875efaacb73aa76d8391e5a26be79d7a1290ac3ae24d0a86de83583f",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "fcbecbb480704f88d4e76ce1854a923a74616e90b74339ebf6aa4abae740726b"
+    },
+    {
+      "path": "frontend/components/edulabs-mark.tsx",
+      "source_sha256": "b0dba014f3bfdb680a2c905bb831f1318133efda1baa6ee56325d74f3ecc892b",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "3ec9ee9db17944f01d4f48b08a6a9f767653baa2dba89aee626d9cfb55b928e3"
+    },
+    {
+      "path": "frontend/components/facebook-messenger.tsx",
+      "source_sha256": "c248580f14bca04e011867defc7485d1cf9a964f8cf7696196f35c30af94ce5d",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "e5fbc1688b0651514d86d345f53cd0b4a3aa3d95c86263bdc5279a0c199e839f"
+    },
+    {
+      "path": "frontend/components/file-upload.tsx",
+      "source_sha256": "13cffece93b702e3892cc6b2ee09eab60f4c71738deb9fb9f83146adb6fa7f6e",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "cd9d00873c639ce85671ef9c5f9d4e5ce9c595c3909f18833781626aa34c681a"
+    },
+    {
+      "path": "frontend/components/footer.tsx",
+      "source_sha256": "750f96cae4037acf50ec6697dbcf2222f5bf6d4a32f7d342c6df0bd342d8b83f",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "42536d9a38ef3bf4a9c1b8578bd2052661b533305e7c416d178aae154b002d47"
+    },
+    {
+      "path": "frontend/components/icon-badge.tsx",
+      "source_sha256": "62b3ec48159900f5f50bc13e2dba563716a0b22f8cb50e554643e409adf3242a",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "6a7ba0849b2f7ed26ad3c759679168f3ba36bb8cfd2e536b9fc55d9f347f82c2"
+    },
+    {
+      "path": "frontend/components/intro-splash.tsx",
+      "source_sha256": "c4f793bf49bf125a42a090c827d0bc8f93c6a62c21f512df5b433e3bccc99c25",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "87e96b08ddfc8a0bb8d7cb46a99e0d1ea0a51527ed67f4c7bfd36ba1c539cf3e"
+    },
+    {
+      "path": "frontend/components/loading-overlay.tsx",
+      "source_sha256": "717c895a6bb01bc9962def3bd44440c57f74b4aa21ba6a67daea6bb5ccfc55e2",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "2c4c2b910aca3b260b7d2e56d33cb08df8dd151192fdd07ee914682399ebccf9"
+    },
+    {
+      "path": "frontend/components/logo.tsx",
+      "source_sha256": "26f383fb3b6aa00567a121da94cb8bbf20c141e8ff48f372d595227528c78bd4",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "f6123099f5c4fdfb6a528a1ef6e9fd9f41a2cb2fa103f2e979f170fe05126380"
+    },
+    {
+      "path": "frontend/components/media-room.tsx",
+      "source_sha256": "3e18c3e86b1dc690e5a9ee597290af551170bc4f324ed2773810c5a657964be1",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "a25a1ecf07d4923923644a952d1cec32103889201ce9ed49a77978ee63830d54"
+    },
+    {
+      "path": "frontend/components/modals/add-note-modal.tsx",
+      "source_sha256": "a4941d4bde6e1cace25431519150020e5ad8b04241af880cd8993ecae932f6ce",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "4b33ed0896bf41ae0ce151f5c76cedc44e8b0a056900741b570ae6f1a6aa5413"
+    },
+    {
+      "path": "frontend/components/modals/confirm-modal.tsx",
+      "source_sha256": "995bc83b2c3749988b454a09c69a0d0f6315261a24b5f20126901fe52b92a454",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "b8cdce660293cfbea04fa3678a02506627b85dd47492a7bc5e4cde13be50fed3"
+    },
+    {
+      "path": "frontend/components/navbar-routes.tsx",
+      "source_sha256": "bdf1e1c9101ed07dd5626bd3c0fedf82400542215e5d5ba8ce52e1fa626306c1",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "5d1b4556864645e4545fc9e5bad29edcbc73df8a484b8c7be13fd02272fcfbc2"
+    },
+    {
+      "path": "frontend/components/navbar.tsx",
+      "source_sha256": "0188053d6492ced28cd3ac1082deced9f7e696d724dbce6fc94141576740ef1e",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "35a7fb0a980f41d2600671cc10b44fe70bfd76473bf37f7065380589075d0232"
+    },
+    {
+      "path": "frontend/components/preview.tsx",
+      "source_sha256": "04b80401b3a40392ca69e712010ce15e2ec71312bab09156dbd37820ab34ea63",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "4582844f9e4b375babf6c5626f3dd3445c07972f5d567945a0f27814abe0b830"
+    },
+    {
+      "path": "frontend/components/providers/loading-provider.tsx",
+      "source_sha256": "ecd723e3310f3372f4832a1a3a32314859b215366e882e20e51f94fd7681f7dc",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "a5ebf97bbaeb87125cd9eb3eea238c55104713fc4b31b74ea1b07090cde87a78"
+    },
+    {
+      "path": "frontend/components/providers/toast-provider.tsx",
+      "source_sha256": "37b493071d5ddd8f6aa51a39b9735e4673150b4e25037a0c64c25a580c45e4b3",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "0be1872235ef04d6401aa7c429b75a912759d3e1e0e98783daac76d8dcb9a6bd"
+    },
+    {
+      "path": "frontend/components/recommended-course-card.tsx",
+      "source_sha256": "ce0049cd207c67078d60a4add278f8207bc3f037d2b6a5c396490aa77b776d7b",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "c317ad807368932637bdeb471c9189ff88a43c80e422f2376e4b5270a4073394"
+    },
+    {
+      "path": "frontend/components/recommended-courses.tsx",
+      "source_sha256": "3f693aba72bd65e9d6fc9c5ad0ffbf590889766aa40faaac5454ebd310cddde8",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "22596c2ff085608fb1b4db453dfcb0398b74ce6a0553d57b4acac66d6e03e123"
+    },
+    {
+      "path": "frontend/components/route-loading-signal.tsx",
+      "source_sha256": "95d217051bf27f292b63d16e34d839ae67b1aa77aae1adf5afd33193b14a09da",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "05a35d70e6a4bc6bc4698df21581e930188ef43999589d57836bb95b157b8824"
+    },
+    {
+      "path": "frontend/components/scroll-to-top.tsx",
+      "source_sha256": "09f728aa3b07f350a488e0d84ba7f7a331bbe2091cbd7256fd811d731c9a3eb2",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "0ce98327f085d10cec6008f3f0dfbb38565269c78be6f2db41360509cbe70c5b"
+    },
+    {
+      "path": "frontend/components/search-input.tsx",
+      "source_sha256": "5c7450028d660a48361fa1769ac26aea15cf9b86350b1894f8816ab956d02f53",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "c3980a26d5506a390881bc7072620d35b0d0cce796b016aa468faa25c651b00f"
+    },
+    {
+      "path": "frontend/components/session-countdown.tsx",
+      "source_sha256": "5946ea6a6afcf2ce07e62806b755788ded82492a7fa3633b16867a57c5a1fc20",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "93960547948a711e53c9f3adb7cb65cb4003fd6326281ed44562bd0034c9e13e"
+    },
+    {
+      "path": "frontend/components/sidebar.tsx",
+      "source_sha256": "25a069059970b883e6637df049747dcd4c68fcfbbc0fbf80e9a5b792d742d0c3",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "8fbd268abb8fcf941bffca960dcdd02617b9466ff9af6f6d5a65c20ca3772791"
+    },
+    {
+      "path": "frontend/components/textbook-accent.tsx",
+      "source_sha256": "a74bf49d47912b5f309ccc49af5b88ed349328027ac3df4d7562233deefe7cc0",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "93d9c474dd4382374226e6798d6e4f047b092a4823bcd423ccb56e204eb03089"
+    },
+    {
+      "path": "frontend/components/textbook-frame.tsx",
+      "source_sha256": "fae7c3614f5022e13bbe17db91d454824482b7c4ae6744ea8d29b11a81658336",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "28f58a1e36031b335299e18dc53f67d50aaf8a2f3903f4be54462ff4a2a7c6c6"
+    },
+    {
+      "path": "frontend/components/textbook-header.tsx",
+      "source_sha256": "c64cbedd16b285515dd23b229c3d8d5296953222a92aa922084807b691c48730",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "d9faa1b697c63eb5e619f556c3e41f1eb2f4199e54258a2c5438784184342f34"
+    },
+    {
+      "path": "frontend/components/theme-provider.tsx",
+      "source_sha256": "f39d5dfe646ca57d3daff52470b7e24be0fa0b172e8c081cc6bb6aa4a729dd73",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "484ec9f14cd2cfedad829119d51a52cf5a38c03632af397603ec1650f09d4753"
+    },
+    {
+      "path": "frontend/components/ui/alert-dialog.tsx",
+      "source_sha256": "13b68d913a1842277604e9477870d6677393ad4498e874eea859bf53c1dbc37f",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "f1c7f81a6e668a65775ac8c46fb90612f9ebc76ffbac35096ad03f18db66b57d"
+    },
+    {
+      "path": "frontend/components/ui/badge.tsx",
+      "source_sha256": "be665bd7f99539f0ba05619fd6a88942e9f465832e53a6d8223c074a8b5315a7",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "f4817eb9de0a4003af4c2b7c52f8dddd7b05407160a1e28d54fa6593975e9bc3"
+    },
+    {
+      "path": "frontend/components/ui/button.tsx",
+      "source_sha256": "fa0c67bb090eeb47a7deea8c6e8bc7d35cee774a6b4854b0df2caa1ad06bb800",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "286df9b78878611fff018e5e4ec4207c74d5f072270d992760ea079b212e8c22"
+    },
+    {
+      "path": "frontend/components/ui/card.tsx",
+      "source_sha256": "c333b0f969491343da7644407ca383b0cd0e450e034a07fd277a76e7b21b7952",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "f5433891e04f873a7721ae525d843ec42f77d0dcf6c2344176f94abf19b25160"
+    },
+    {
+      "path": "frontend/components/ui/checkbox.tsx",
+      "source_sha256": "19c37ba02743a7c578f05fb48706cb33ed0e758ddffd37eda0c610083bebe550",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "d678d1c2dd35a54418afb7dc4ca0230ad358b1a29222ebd7f32be9c85a3587c0"
+    },
+    {
+      "path": "frontend/components/ui/combobox.tsx",
+      "source_sha256": "48485b4a802688c3a0baa30ef61f91b268c35d6b643de9953bfcc68a4c1326f3",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "793b31b8fa262f45f408279d3a65f73c33e39f71cf526d61c6b66cfb1c6430a5"
+    },
+    {
+      "path": "frontend/components/ui/command.tsx",
+      "source_sha256": "7bf62dcc41aa0dedd5d97b3088f58d0ad2c8a258dcb8adbcdfd3f7819299e01c",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "312af35140f51185744225ef3d70a2bc837e000801290b50fa38f17766a7a478"
+    },
+    {
+      "path": "frontend/components/ui/dialog.tsx",
+      "source_sha256": "b1c065584ac83ee68a2a84826597dca344978730087715f55892c6a20f92b74a",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "369449e293a31091f6099123d54918f4f4cedd135bafbae932c51d13ecf17baf"
+    },
+    {
+      "path": "frontend/components/ui/dropdown-menu.tsx",
+      "source_sha256": "90b6492098e69ae91929fd9618af8bd5af23b3f6b066754b7fb2a6854d379a3c",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "9879041d5ab27fb35d1e56dfcb73278ced59ca9105e0784d1369299bd9e866ed"
+    },
+    {
+      "path": "frontend/components/ui/form.tsx",
+      "source_sha256": "804e383ed52679bd7bba18f91106684d29d6e42bb18b013600ccdb89f6364407",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "437f59c311c9f569b3aaac116cf1d6c638bb62f76d7aeae94a15b39f537da969"
+    },
+    {
+      "path": "frontend/components/ui/input.tsx",
+      "source_sha256": "c60de999603f5b1da10af4ceb99c573aef0f96bf3bea24e4dd199d703d30793b",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "3a75e3515ed2eb62d81d924a37fd9f6e59d991c5d9126a3813c5da9606ac6890"
+    },
+    {
+      "path": "frontend/components/ui/label.tsx",
+      "source_sha256": "773998c4febbb5aaea4b7f750475edefcb43729927df71fc9acc22b17e4379be",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "c07a20f63b63f519bd199b0acf30bc7a241d50e4099f4796683180686d89d484"
+    },
+    {
+      "path": "frontend/components/ui/popover.tsx",
+      "source_sha256": "ca3f3a3c3aa76327cea4494766f6ad75ede494fd36d21740775e352bf6eadbfd",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "1596ac246543c48f29af3440d11cca22423a2cde759e8208b9cd8e3faf163891"
+    },
+    {
+      "path": "frontend/components/ui/progress.tsx",
+      "source_sha256": "c5a57cf90a4350d41b223d7213a8ffd31fdb2286b381dc90a3f0396ba1d35f83",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "83ff8ab7b4013056569fdbbb5ebf14f75afd850a42477b214d11f359b1dade15"
+    },
+    {
+      "path": "frontend/components/ui/separator.tsx",
+      "source_sha256": "b0ca28ccffc819efa20622eab093d5ea48c443064e04c8b00b612714ed716cab",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "405d0819210b5903c0fe9401a192ee6a8731fd595fb80a66add49f6ceda97a5b"
+    },
+    {
+      "path": "frontend/components/ui/sheet.tsx",
+      "source_sha256": "3794dd593d9fde7beac741ca02919abf281c468172c598a31a5bbb54eb83564a",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "e144355f03a4beb2e1ce25d519a3b61ce88248059669c6f39ce75fa99c1eab7c"
+    },
+    {
+      "path": "frontend/components/ui/skeleton.tsx",
+      "source_sha256": "63d116c66cdd981a324a412174e0f2d5599f45df8567e53ae744fc6c8633d9e0",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "9a6a0d700ff97a4a42a00818dff1a5402af68f3989e6e7150e5c950f180882c1"
+    },
+    {
+      "path": "frontend/components/ui/table.tsx",
+      "source_sha256": "f9e8d5c18ebf4f4057b2982a87b05b2a9de3e7a1e55e08515d5df9e80ea64676",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "db4717a03b3c6d63a6b907abae87a3c304fb1ab91729f6020b5747363b4607c0"
+    },
+    {
+      "path": "frontend/components/ui/textarea.tsx",
+      "source_sha256": "f4a93d6f17bd29aac14e86de7fa22df429bda87d344e9247b49c1c6d60be1a75",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "a21806b0a6abe788b1965648760986b2cb0109432e5cb5f46b73383d1681d4f2"
+    },
+    {
+      "path": "frontend/components/ui/tooltip.tsx",
+      "source_sha256": "b17b5f6c4590f5454949152d466cdfd30e741750ce8a3600500cdf991b2f76a3",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "d375c26908a43b85076d352951ac9c52b573515f632263272e68e4de933c1168"
+    },
+    {
+      "path": "frontend/components/upcoming-session.tsx",
+      "source_sha256": "0cdee93599bd973b3bda8a2b543446332208d33068577cf56e93c3f255f19f9e",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "dcf831ab73e9ecdd2174eb937f3f263fceffeafc1795008724de48e1239130f0"
+    },
+    {
+      "path": "frontend/components/video-player.tsx",
+      "source_sha256": "eddbddfa760921224ebd4ad85727ea2501304640e1d0a25d066e3f7543d07d88",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "13975eaada916b23efeca2259b8aecd8a03e2a283dbc244e09bf75f1fb78e5a7"
+    },
+    {
+      "path": "frontend/components/waitlist-overlay.tsx",
+      "source_sha256": "d388fbc3039c81ad3f988c0938c9910f5b85f42ac79cae320fbf1d47490bfa3d",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "55d5bcfd8221922491ea3ff5f73bea8bc76ec905782a353dc857ea478bd0f6d2"
+    },
+    {
+      "path": "frontend/features/admin/submissions/submissions-view.tsx",
+      "source_sha256": "97b072feaac12137839eb6388f3036884268b5b0f799de25b48597080f51ef86",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "8687eccca19bf517dc3df09faa03558938d9031f916d35a9ba5be24b5861e89c"
+    },
+    {
+      "path": "frontend/features/admin/users/add-students-modal.tsx",
+      "source_sha256": "f2850a694118f79a8ede2c9079725fcf91ec36b43dc2b8e5305f8c37ace29475",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "0d325b926a7770d8a368dff0b5a2a5b9f01aba2399c006c432ffa4d9198e0d12"
+    },
+    {
+      "path": "frontend/features/admin/users/admin-users-view.tsx",
+      "source_sha256": "8cee6b4822a42dcf01f7a6b0531cabdd318515a2391772550dc0295ddde3baf6",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "a0b840b9d560b8a3b8f330f519a7f94cd51fa9ba4fadf78063838f5a6574a70b"
+    },
+    {
+      "path": "frontend/features/admin/users/group-form-modal.tsx",
+      "source_sha256": "4065bcad5207dcc4604eea8424dfdba4f2967a15a026ef530742350b817515d4",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "af96950efb7293e537b058797de7d486a5630ee2ebca98b4a098412513601a4b"
+    },
+    {
+      "path": "frontend/features/admin/users/master-user-directory.tsx",
+      "source_sha256": "57b0c2e816bfaa7bc4b0f61ae4c02be42b6430040f92d9ce828763a0291ed32c",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "87c53a7d024337a2904ce0d47c9362b7a100e3cbffe131ab5fb7fe0422005d42"
+    },
+    {
+      "path": "frontend/features/admin/users/reassign-modal.tsx",
+      "source_sha256": "0bed5d0e33adbd930372af0a07beadcd6304920934f8b6eb95c231deca61933d",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "c35471a8472dfc99f2a574f1479eb273e6b04bbaf7c05e5766baa26c32e92c2b"
+    },
+    {
+      "path": "frontend/features/admin/users/student-mirror-drawer.tsx",
+      "source_sha256": "9ec07f1b217aee02a11aaf1ada46ea935e28d6fde3dc864e609d551dfca33b58",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "f44c6ac7fd798ff4b3a9e7b0d14177e56db45df667bd0837515fc21383cdde9b"
+    },
+    {
+      "path": "frontend/features/courses/feedback/feedback-form.tsx",
+      "source_sha256": "b4a0f9b755f62c73524d8df9e12b1c81fa5399f2ff1841c6bcd608b64f4b706e",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "778f0706d4de3cc634273dc6bfa2eefcb94ca9367a7ada331bca48491167da27"
+    },
+    {
+      "path": "frontend/features/courses/feedback/feedback-item.tsx",
+      "source_sha256": "9aa8afba8edf4abfd0ea3a2f03cf4d6e7f5970b5958c2f6182a2fba1352c31d6",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "733408d14c199cfcca2a6b629b60baa040de00c10845a9f8edfba397613e22b3"
+    },
+    {
+      "path": "frontend/features/courses/lesson-card.tsx",
+      "source_sha256": "3d6961fb2f815c99d471890046c6bf1d3a706dc7531fe527cbd149c977bc51af",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "2f7e2865adce7b684eaa2d97d738f9b58d925d903f2eb6925538af04a7667152"
+    },
+    {
+      "path": "frontend/features/courses/lesson/homework-questions-list.tsx",
+      "source_sha256": "c8abc15ee4f813cb20e7b719e1056a166fa01f1a3017b0ec673fc7dd4196d938",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "a96a3083c5d5a637933b55619b3f77c981db5c50253ae5dea8335c93aeaf07c7"
+    },
+    {
+      "path": "frontend/features/courses/lesson/homework-submission-form.tsx",
+      "source_sha256": "35d208ee8bef021aedade57d1aa134f0adc305a97fdaf491f754d1cc8f89320a",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "8c3462b54ee2cae99aa2b53f05a9d78b7317745e351ca9a71592a49fc32fdf65"
+    },
+    {
+      "path": "frontend/features/courses/lesson/lesson-tabs.tsx",
+      "source_sha256": "aaf4fecb93a790a93371ed730a66072a3c303f87f5226e71d038a66a8351d6ce",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "5bb0cb52f9b9d4c49144971b1a18b53af0a96d2e2244da442b357427ee835a8b"
+    },
+    {
+      "path": "frontend/features/courses/lesson/video-player.tsx",
+      "source_sha256": "80345ebe1a09fab079a6471dc69c17db6c20b355a1385a6f0dc273051e2ca6d4",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "4a23ea31737576dc7275212a7840188b3b7abd1b58c71738ec17ba26a3e0a564"
+    },
+    {
+      "path": "frontend/features/courses/navigation/course-mobile-sidebar.tsx",
+      "source_sha256": "e44c86ac64acfb72a201af3bd23a40c31b29e639e17a96bc61c42818cc5c6d7d",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "c13df38d91fb111aefa57071ccfc2942cf19a44fa1ee7f9dc8d0c057f831d653"
+    },
+    {
+      "path": "frontend/features/courses/navigation/course-navbar.tsx",
+      "source_sha256": "d8c4238333adbf66273cea8adfa91e458d7d011a6e9617f4041204ad48985578",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "1faa81f587967db17671bd1a499ff5a4b04614db13c12d9fefc3aadcbe2396b5"
+    },
+    {
+      "path": "frontend/features/courses/navigation/course-sidebar-item-3.tsx",
+      "source_sha256": "620a44da7f3e68693020b5b9d9765331ce214d6ffa928fad47f20574347955cd",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "99d38b6f0131412c55f31dd21f1e73cf1274c42ff9c22186542a4b309c03876f"
+    },
+    {
+      "path": "frontend/features/courses/navigation/course-sidebar-item.tsx",
+      "source_sha256": "759a4b7420d963032c91a597537c360a57180d41c71ab4691711e6d778ba70c4",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "c99bf59f464c06410ff216efe6816229be574cc6f3957d2248bf99b683d62caa"
+    },
+    {
+      "path": "frontend/features/courses/navigation/course-sidebar.tsx",
+      "source_sha256": "c0a29b26e480bd253f1718cce61d575464fbe4c0e3c0bc380891549109edf31a",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "e294807fa9fa8e8edeeb5bdb6ebb9b3965c97de02376e396d927915b1efad241"
+    },
+    {
+      "path": "frontend/features/dashboard/admin-home.tsx",
+      "source_sha256": "289bba885ee6c1eb7a32f8fd23a3a9501198d733985d58eed65aa3dd31728cb7",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "84f04a83a48343350af3b1625d50644f247720eb02dc367f0a99a94f51cf7e46"
+    },
+    {
+      "path": "frontend/features/dashboard/logo.tsx",
+      "source_sha256": "7f218c34fa202de8e18bb0b98c090d1eb6f71fc4e100999c5c42ecefa0fefc9a",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "4d64018ab046e4d2d0ddaff96c1b4fce2b74f0d8d4a2f74cde4573a28a443e13"
+    },
+    {
+      "path": "frontend/features/dashboard/mobile-sidebar.tsx",
+      "source_sha256": "b9f6cf4b25a36971f136f1a4718f2ab8c1752be5e67ded33119a2b87801572d3",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "9def1a25d47a8a172d07c4136c2989d1c9fc7d4a8eb5d88ce18c80230426a5a6"
+    },
+    {
+      "path": "frontend/features/dashboard/navbar.tsx",
+      "source_sha256": "1f5d102e9d8fe649e33f904583acdf1b6a5392824dd77a354ca88cc3a3c031bd",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "84f6051a1cfe7eb2a0b407adb3c8979ad98becf65bee81055dca811c9f0141d0"
+    },
+    {
+      "path": "frontend/features/dashboard/sidebar-item.tsx",
+      "source_sha256": "9d31b9a69ac2168004e96e64c59b261be8e86f33fdf6518a7782be0b95a18cee",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "540147951e0d511eb09f56e704952fa07d650db3b0519f9a26d60524355ec484"
+    },
+    {
+      "path": "frontend/features/dashboard/sidebar.tsx",
+      "source_sha256": "f85010a8053bde0198275296f7c4756e3f784a55f78f7e6f577dc5cb88c9cf46",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "201814064a51da9845f01a5619efe6c84bfce28f05602dd1b3d41f1da6a1313e"
+    },
+    {
+      "path": "frontend/features/dashboard/student-home.tsx",
+      "source_sha256": "318962056842eb1d7d778a3bc3cdd224955157eac35c1077620e79c8c19abf4d",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "9c243210ef9f2a0a23f19a8666da25edac40853d7878cebdebd84589015f50ea"
+    },
+    {
+      "path": "frontend/features/exams/exam-builder.tsx",
+      "source_sha256": "bc0ba56ee676841349d1b0c793c44bf3ff05156a373773a7cfce92a6ba1b70a1",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "a6bd94781c13cd48618bd0821b13c682c4cb16a3765490ce7877772a0ebe0fb2"
+    },
+    {
+      "path": "frontend/features/exams/exam-grading-panel.tsx",
+      "source_sha256": "b6ec75f01ed34150acfe5949e917a4f8f003e6bcdf9afbdf3a8f2d7c4106b44d",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "30d274f968b1b1e3459abcae0744230dbaf06e49ea0559393828885105806c58"
+    },
+    {
+      "path": "frontend/features/exams/exam-result.tsx",
+      "source_sha256": "7ef92490032ba07959bb8a501122e239e7ff560a17e86437df09559a52104993",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "e924b8684ee4be193cfca778cc78bb9ab2e80567c684f1b86f420296eba01dc7"
+    },
+    {
+      "path": "frontend/features/exams/exam-runner.tsx",
+      "source_sha256": "49fca46734315433dbc6bdf9a98519509a138865f3cb1572bc58d56899ea7239",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "875ca10776ba610366f0d7d5edac1884f8965dff112f44af36e109e9398490c2"
+    },
+    {
+      "path": "frontend/features/exams/exams-view.tsx",
+      "source_sha256": "65673c3b5cfc58cd846a287b0298b80247c1bfc972d4ad5a36a6abe1a90b3f41",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "aed701e552fd7e02869b57a04bbffd4a4f717562867ac2b085ea3ac8c81a0b2e"
+    },
+    {
+      "path": "frontend/features/groups/group-roster-view.tsx",
+      "source_sha256": "8a577d932f957e653f791735c9263b49c351714b1a34be6c3c34d51465104351",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "b0d0f4648540dd109942d3181d744673c32d80a75283b9c56ca7d9a69f7c4c9a"
+    },
+    {
+      "path": "frontend/features/overview/info-card.tsx",
+      "source_sha256": "7ec04e7170778a9b97123e5112e464428714f35f0a2e0f6df39a34b8a33a7ff3",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "1319ea6088a7a325659a0165ed5287478383787aae18c4a692db50665ff4d37b"
+    },
+    {
+      "path": "frontend/features/personalization/dashboard-form.tsx",
+      "source_sha256": "5dfb20acb504d6ffb05bffaed3f4c9ae7c89f73f3718fa6371194a21a10c20c9",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "d1a965991fc84f3c92fc289b63369e1a15d1572b4f223eace29c49995b528e42"
+    },
+    {
+      "path": "frontend/features/search/categories.tsx",
+      "source_sha256": "d63f5fa8f34d2ff3e24e0e4edfd8a79917a5cc592a4be0a4d83b628dcc0e50ee",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "fe049f109a3d1efb13250169973f262ab05e856f144c7a34a7da2dbc79d8679b"
+    },
+    {
+      "path": "frontend/features/search/category-item.tsx",
+      "source_sha256": "4b05d3083e9f0742146502c1874c4a3264d61052b6642ed013c62dd9ab55776e",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "cb36496fcfe972d5e993ee429f7cb8175baaa2c05d6cf5bd8f8fe5d42a9eb339"
+    },
+    {
+      "path": "frontend/features/self-learning/self-learning-view.tsx",
+      "source_sha256": "8d3b146765f1fc9fbeb14f5286641c959cd9a09f78ee2e10748fdb186833fcfc",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "365dfcf7eff4e2071dd0bf9ba1d822a815ef727f2ed95a25f16d65b82d0e43e9"
+    },
+    {
+      "path": "frontend/features/support/avatar.tsx",
+      "source_sha256": "3175c4c624848b5865ad850d26e905f6cf3c57ac8567521d0bbdfaa2fc1394ab",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "d55e0f35bb42a2b6e3119e65a862cdfe0c01df2a2c8958653791f395c413d836"
+    },
+    {
+      "path": "frontend/features/support/new-ticket-modal.tsx",
+      "source_sha256": "f515736501e2f1c71d60aa9384f153eef48a88d6952947a3556ed023865cfa79",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "b8ce418c5f6dd48084cf2e9c4ddc3899ad07a4409d8320fb33b8b4da83fcec0b"
+    },
+    {
+      "path": "frontend/features/support/status-badge.tsx",
+      "source_sha256": "2f6c19ae97831eab9f1090ee133445201a970739e4e0c4e750296f3c77db2be1",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "831c25b948737f25e780aeae3f10e63714463d692329e6ee1534812547f37abf"
+    },
+    {
+      "path": "frontend/features/support/support-chat.tsx",
+      "source_sha256": "5e4550dff2560dc98777381d5718c6dde36388d1eff2f72a47a46113643caaa3",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "8fccb335a8085c9d36185327cd219944a0bb7586dcd9d814c1af4775b5fb6189"
+    },
+    {
+      "path": "frontend/features/support/support-view.tsx",
+      "source_sha256": "0d88aabf101e5bb64bf008a64d374bac83fbb3fad7b53001bd99d3668edef885",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "dc4236b6a783e3be3bf3045abc3a67ae9e07f9781cc7af9ded9a518f91de9d13"
+    },
+    {
+      "path": "frontend/features/teacher/analytics/chart.tsx",
+      "source_sha256": "ab2fd1bb9e285308a2df74ef0fe96431b7a3bbd06d162a0e6dce1cf6d6248c48",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "ed4bf946b94d926f712b68863702055e7d19c464127657664e1e518fc15f81f3"
+    },
+    {
+      "path": "frontend/features/teacher/analytics/data-card.tsx",
+      "source_sha256": "160d5f2ffa7df3cbc185c64b2d6558adfd22358983a3a257539e681d02548c5c",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "9b3b48c31b1c8c4ed1c7490da1d428dbf0a0c436573ceba499230d0e5ef73637"
+    },
+    {
+      "path": "frontend/features/teacher/chapters/editor/attachment-form.tsx",
+      "source_sha256": "69925db3fdbe863424410ddf2191f838fdbd0f324401e85c10e124f7e53cf2ea",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "42c559fc2721a76696cbfa9b1946421cb3eb19b860ed11e079ae2af664a41dd4"
+    },
+    {
+      "path": "frontend/features/teacher/chapters/editor/chapter-actions.tsx",
+      "source_sha256": "7117ef7593e811a2ad5955768e0de7f06ef45c5eb81bf7024f2e62c57a222fd1",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "0f8c8999b7b07262d97ede3074824c1257e56ec5631ee490df54bb4085bb1220"
+    },
+    {
+      "path": "frontend/features/teacher/chapters/editor/chapter-content-type-form.tsx",
+      "source_sha256": "ef87bbbd78a6f202d0bcd027ad54b2075cfdc6b7180031db96ce255f420acd1f",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "46e4159728304fcb7b6892e1e6c71a3511417edb133431f1b0286b67f822e8f7"
+    },
+    {
+      "path": "frontend/features/teacher/chapters/editor/chapter-description-form.tsx",
+      "source_sha256": "3e9e96db4cad6b521159b6597fc3f7c533f68d6fbcb525767f34e7490a29982e",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "135f0a856fe4b7e915a6d15dd3dff6c749589bb20bfc45dd4b98597751fafa60"
+    },
+    {
+      "path": "frontend/features/teacher/chapters/editor/chapter-solution-video-form.tsx",
+      "source_sha256": "ce5a7ca8937d3b0e33f9edf5fc924f643436b956b2b60bc1fc0eb296f4f65cb1",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "a80e8ea36e7f44d7829e0bdfb8506eea1994bd66644c4bd2c2cbfbc05f9efc67"
+    },
+    {
+      "path": "frontend/features/teacher/chapters/editor/chapter-title-form.tsx",
+      "source_sha256": "47a8144b61a97cecec089df3fa169d507c1bd0af96a6b72df8b06361fcbdc1b5",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "60629d2356d645909cb523cc784653e905cf899bcac2524b3b314171b3e5ccc0"
+    },
+    {
+      "path": "frontend/features/teacher/chapters/editor/chapter-video-form.tsx",
+      "source_sha256": "e0d49376a1e4e15829c98375fb02916284c709893efcf4c7ea464874d4a7669a",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "c9bbbc1ddcf6651a18503d8b9e81f996535b3e53b020b291c2eace3662ff058a"
+    },
+    {
+      "path": "frontend/features/teacher/chapters/editor/homework-questions-form.tsx",
+      "source_sha256": "5baee9003e3d5fe189df52ddaace443f686e4946d48e2b8f11d26f22f511082e",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "fd261063870a286d42c9f7d973acc08d71a712f1dc18727bf92e9452027a513e"
+    },
+    {
+      "path": "frontend/features/teacher/courses/editor/actions.tsx",
+      "source_sha256": "988640dea0b129badef7253293e5af8051644698faa66acf3f512b5a4848f932",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "1d2dddd721607cec3f9999bf011c796a2bc828e211964642cb75d1b6c9b49dcd"
+    },
+    {
+      "path": "frontend/features/teacher/courses/editor/attachment-form.tsx",
+      "source_sha256": "7cdeace72897dd7eaad4c7718c113052c77db77ecaf71d852ce2e75c38870996",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "17652f0a84a7cb5413ae5041bca1c3d40e70a56bd0e0a81c23bacf81ea2eaea2"
+    },
+    {
+      "path": "frontend/features/teacher/courses/editor/category-form.tsx",
+      "source_sha256": "fff0e6d527dad3ffd923a4fd9b02cd89fca63a7e38d83621107ffe8775e1601b",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "7b4306284a4f59ac177b8bbfc5f3e8c14f1016f493e22e9fb1d619daa2831ff4"
+    },
+    {
+      "path": "frontend/features/teacher/courses/editor/chapter-naming-form.tsx",
+      "source_sha256": "38166d3bd3e04a3b1737ac1d525c520b4d9123028337ae8f0dc49f01748dc69e",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "82d1bdfff7bb1594fdd797b61b7ddac6ddfa7bc9b44bb677b500928ac4cd1123"
+    },
+    {
+      "path": "frontend/features/teacher/courses/editor/chapters-form.tsx",
+      "source_sha256": "1da8493ee0066afd982ec21e209d5f2000087b2841b7057d34099b2e63f94700",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "d2d732c5383067ed7c067250bbd8142286288950d965438cf07aaa4990705fc3"
+    },
+    {
+      "path": "frontend/features/teacher/courses/editor/chapters-list.tsx",
+      "source_sha256": "0307827aeb1ddc3f937752f8e140e454b3a018a14253384a9dfa1c548ac74bcd",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "fa2f7fd01625e5f68104ff19d3d07ed223fc0fe8ea223c7d7100ba1d5ff8c237"
+    },
+    {
+      "path": "frontend/features/teacher/courses/editor/description-form.tsx",
+      "source_sha256": "09d33d944220a6759b76cb58d8d800eb82c4b18f6af3c5d87bc9b2712ba5d798",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "b03774cb6a3e2f4b96b55e8a7aba7db77e63547630108a996ac81dbc70b8e9c6"
+    },
+    {
+      "path": "frontend/features/teacher/courses/editor/image-form.tsx",
+      "source_sha256": "05b17422d1f71b3ecefe0fa5b67b4a0a4c0b54a87be35c3f357141db44489821",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "c11323f112065660492dfd377f49f3c58e466275d88f735ad3d753f82cc7d6ca"
+    },
+    {
+      "path": "frontend/features/teacher/courses/editor/title-form.tsx",
+      "source_sha256": "db608d9d34e90f2cb5c385819e0c88f4d09c1516911c0052706d2a008e5c2543",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "1cff68b95faedba24fa660ec10e21a7703db3d783e2cf13059d2b765ed3c1b5a"
+    },
+    {
+      "path": "frontend/features/teacher/courses/list/columns.tsx",
+      "source_sha256": "5ab93c7de0a764cc129d4f0ee6bc7be11acd8c189fe6c60461b5032bab87f48c",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "2f0b8a86e8f4d51cd550e5315f8668aa3da1bb6a9e43c8f22aa75465a392e089"
+    },
+    {
+      "path": "frontend/features/teacher/courses/list/data-table.tsx",
+      "source_sha256": "40d062ea22a179fcf54cbdddb3158a5f5fc9ec6945e05e95515e7ec1b2a02fb4",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "95d12367aabf1f54edaab5f42270bee7fab13da8460efa8026411b572facda6f"
+    },
+    {
+      "path": "frontend/hooks/use-debounce.ts",
+      "source_sha256": "c8a6a1a25500fe84fc2b90be19c17badb21afea28a0ea21b21d588f68d6651be",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "db1901de2c52f1df6a5c47e905a1b8b548cb9a96635159d9a8e8f2039607500a"
+    },
+    {
+      "path": "frontend/lib/api.ts",
+      "source_sha256": "d6be658957e96713f3d27779cf57457f6c4a7e6c88938043b131a898bc7f5679",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "412b597cf844abfa3c8938bd7a74c215aa060b484f2cbd3881d56cc4b8cb7faa"
+    },
+    {
+      "path": "frontend/lib/supabase.ts",
+      "source_sha256": "6f2fe16075c451f77df1f5de4b94b02e2a14f6840d846518d894a23d5ba3df44",
+      "copied": false,
+      "status": "protected/reference-only",
+      "source_canonical_sha256": "0b0107c6b6c38001714042df747b7c4eaddf71cdd548183422d9af3f2dd35a5b"
+    },
+    {
+      "path": "frontend/lib/uploadthing.ts",
+      "source_sha256": "f5365f4b96596d15296a1d2750f6ef8c228ce7989ebbc56e7f1c956d68ac925d",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "8969056e8faaef9a6180d138a24c391db780f532384072177bb1d119fdab55a9"
+    },
+    {
+      "path": "next.config.js",
+      "source_sha256": "d520e5de90dfe487d324a4314d3507aceb75272905f4f47be3490585d7394ef5",
+      "copied": false,
+      "status": "protected/reference-only",
+      "source_canonical_sha256": "197fc75cba332cac2f0dbf3cdbfe3b08c3644464ad68369318de058e3f95eb03"
+    },
+    {
+      "path": "package-lock.json",
+      "source_sha256": "3db23058fddea1d2a40cda53ff7f954bb5f7334db57ddd0a0fb57e793a6879ac",
+      "copied": false,
+      "status": "protected/reference-only",
+      "source_canonical_sha256": "89a9d480f05055f17d19c1c2664c5d9f83c3e0e3a4855dbac4c1648497544fc8"
+    },
+    {
+      "path": "package.json",
+      "source_sha256": "c2d6c4bc89c1a4e49a5a6d3bcc9a23807f42bbe8bd8b86524eac019524997acd",
+      "copied": false,
+      "status": "protected/reference-only",
+      "source_canonical_sha256": "e96b73c611cfacef10e1d6a461acfefcbc4e1673788714879d08d9999d71a570"
+    },
+    {
+      "path": "postcss.config.js",
+      "source_sha256": "54a758307a2ce79551eac8e5a0646f6a291b4e5e81e498b07a5d89329c5dd068",
+      "copied": false,
+      "status": "protected/reference-only",
+      "source_canonical_sha256": "251ecddd4672c9cf467547e3dc535de00ad2129df26e7e7ae728fa4e5ac45fc5"
+    },
+    {
+      "path": "public/edulabs-logo.svg",
+      "source_sha256": "49b6ad60911059fecac076138ec03abe62a75cfca5e2147eedc50ef9bceb3ef7",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "49b6ad60911059fecac076138ec03abe62a75cfca5e2147eedc50ef9bceb3ef7"
+    },
+    {
+      "path": "public/header-logo-tight.png",
+      "source_sha256": "c89181f937ba753c14b16234cc7b728273ba7e7bf4746151214792775a578347",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "c89181f937ba753c14b16234cc7b728273ba7e7bf4746151214792775a578347"
+    },
+    {
+      "path": "public/header-logo.png",
+      "source_sha256": "a9efb86490c6177faebb58c7fa8d46f0b1bfa4413adad9d080864cbed8fa7ef4",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "a9efb86490c6177faebb58c7fa8d46f0b1bfa4413adad9d080864cbed8fa7ef4"
+    },
+    {
+      "path": "public/life-of-physics-logo.png",
+      "source_sha256": "b3c1e03e5383e5386e482edd5e737bdac05751cfc04bea30ad5ce0fd7585b9d6",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "b3c1e03e5383e5386e482edd5e737bdac05751cfc04bea30ad5ce0fd7585b9d6"
+    },
+    {
+      "path": "public/logo.svg",
+      "source_sha256": "fa919000c1771cd371ce826cbc026c745831bc2c8eb32ba7291db02bb0493a35",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "1e9bf7fbc006eb93c0035d68317907e5eab46870cef1afcef9ffc62c339434a0"
+    },
+    {
+      "path": "public/next.svg",
+      "source_sha256": "55995dfad6ecb4945a1e856ddca03c5e16aa5bf13fd21b4df6a74ae79357bcfc",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "55995dfad6ecb4945a1e856ddca03c5e16aa5bf13fd21b4df6a74ae79357bcfc"
+    },
+    {
+      "path": "public/textbook-template.png",
+      "source_sha256": "41aed2046d4676897ba32d6b3d97fa0a48bc7f1adc0d66461eb357178ae53572",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "41aed2046d4676897ba32d6b3d97fa0a48bc7f1adc0d66461eb357178ae53572"
+    },
+    {
+      "path": "public/vercel.svg",
+      "source_sha256": "3fa5cd757b418e18afc68ddebad55f443206e410327921ddb2bf1be731658880",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "3fa5cd757b418e18afc68ddebad55f443206e410327921ddb2bf1be731658880"
+    },
+    {
+      "path": "shared/chapter-label.ts",
+      "source_sha256": "955634f06c8b4f1fb081b7a0fd3ee0cc7bea5358db08a9671c8ea3b8eeba3287",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "f383c20270d7fa7d99b0e1d70c5c81733c58a630c9c93412536a83298bc83e03"
+    },
+    {
+      "path": "shared/constants/assets.ts",
+      "source_sha256": "a8f9f7b86395e77e68d7458205485e576e1b7650dd9bb0ba2545cdc5d0da80b2",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "ebb3f0a6965116a4513673600ea32a9bb122134acbb2fca20ce6454cdcb77cc0"
+    },
+    {
+      "path": "shared/constants/contact.ts",
+      "source_sha256": "23a6b3216cb1be97f410fd2b34cd275d8d8f9699be1542734aa030c746d325c8",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "a67bbdec67ce1ca644944794e323619ef384a1954c7aabccda09210ae1aa5922"
+    },
+    {
+      "path": "shared/constants/dashboard-item-id.ts",
+      "source_sha256": "c280633160bc0cbb455eb32e8de768fafd6fb3a8c3307b1012a135e016682194",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "f856e13921f7d96e75c9568b7576fa2cd0c34ec71bb03539d71ce8c536948940"
+    },
+    {
+      "path": "shared/constants/storage.ts",
+      "source_sha256": "c937cea876164990cbd06744710573dc9160c4c26a4aba1b79ecd7e10122ef36",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "6229ecd3d2d7bd1d50541b470c2ef5998b43f4d282caf1d9637ed119fd231cb7"
+    },
+    {
+      "path": "shared/contracts/courses.ts",
+      "source_sha256": "be391d4036e405ca6b525b3bcf91c76696343a9227ba5109f35ff976ed7d99ad",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "3a96fb7504507a1bb25fe63a91ce5ca6c437ba0a68415a76887aa2c17bc85ffd"
+    },
+    {
+      "path": "shared/contracts/dashboard.ts",
+      "source_sha256": "7fd171f75281c6ed383b8f1cf2368a81532818e65720c51c457ddb439f378f8a",
+      "copied": true,
+      "status": "adapted",
+      "source_canonical_sha256": "9f803e3781177502fd3cfa2cff958121fbb2fe1a191c1138543ce4cca0bc9957"
+    },
+    {
+      "path": "shared/contracts/database.types.ts",
+      "source_sha256": "a0f84c631c2c896cb97c85235be0c3806a659e2d8dc39fc7705255968156b3eb",
+      "copied": false,
+      "status": "protected/reference-only",
+      "source_canonical_sha256": "d4f275ece7070c77e12c5dd70350df6f958b91fb90ccadad5c00647fa453c94c"
+    },
+    {
+      "path": "shared/contracts/exams.ts",
+      "source_sha256": "65dd90cea2ad29a51f6c15a1fc9dc2f664625f7d13cec011b2a0c0280734313a",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "11d48bb4357f495843bb38d81f56b1bc33607c9ceea0ae8678169eb8f4a36fd5"
+    },
+    {
+      "path": "shared/contracts/lms.ts",
+      "source_sha256": "e7deee0c2daeb58c1cea369d9420a0d002ad4c4261e221d36f9d01355b0bd696",
+      "copied": false,
+      "status": "protected/reference-only",
+      "source_canonical_sha256": "eceb1e08338bf70301230e79ffc8147f72ce7f8f2b29eb1dfc4c1f8143283be1"
+    },
+    {
+      "path": "shared/contracts/support.ts",
+      "source_sha256": "7935bd04d327cea4b4283acac400fff3b213e499960ac203e380d8dead563c00",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "b0197e89ed7983921f8f54e50a2fa255ac740ae82f0e819ab63a73b46a789387"
+    },
+    {
+      "path": "shared/contracts/uploads.ts",
+      "source_sha256": "0eee0f5a569fac65cab4662350a7b60d169d1ffe20af76cc3f5756981da81dc6",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "24c4438623e71fc8a0c42f640472ba65c1ae593d95a8a26748294f7bec6fbd65"
+    },
+    {
+      "path": "shared/countdown.ts",
+      "source_sha256": "ea28ab5896bfdf546eff11727f2edff131d7c4aee48f927a64725928e39c8dc6",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "39744d4e750c800d7300cdbb32b355c2a23cfa0f5a41e7f92e8fa8831bc7612d"
+    },
+    {
+      "path": "shared/exams.ts",
+      "source_sha256": "bd4933ee9ef77330198600d10a20c6517e5fd48f8aa29fddff99527a669666dd",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "d8d4aad365fb4808ff2a6eabd7ca0c4f23ae6705cbe4bb06b52f1d20aca6b198"
+    },
+    {
+      "path": "shared/group-schedule.ts",
+      "source_sha256": "f7a4692d4e4c7981525e64aceb2e726716e9fadd0d3f5181055053626e832e18",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "ed3f0d58bfca9b41561b430eacee03774df408ba5b0f259caa03d7280f8ed9d5"
+    },
+    {
+      "path": "shared/homework.ts",
+      "source_sha256": "8b55349c893a54a1b116abaae67f262adeafb8709e108337c6c20a8af22a01ad",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "efeb074cdf316f55350e1398b1bb8035b3894a40dfb0a6e4aea9ef4a6e1d4f6d"
+    },
+    {
+      "path": "shared/image-url.ts",
+      "source_sha256": "6664190ab968f989b3d9678104924eb943183f437e413a7b47cd44e7ef949dd7",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "f21c3b919a9eb252d9018e595f6d99aeb5752ed5129f960e46f73a73b2b9cf98"
+    },
+    {
+      "path": "shared/segment.ts",
+      "source_sha256": "57759fb77679b4fbc0e511bbd3126d29b7a9f7ab0c1d181f8b9cc0afbb8030c2",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "b934037ebb4ebb19071f6accbefdf5a3f69a9bbaedfb6a0be867a762e8fd46bb"
+    },
+    {
+      "path": "shared/supabase-config.ts",
+      "source_sha256": "8a1ecb12ee19b756fc6073297f90ad85f77d5ef5fc13f8ea4b9788abfeddfa79",
+      "copied": false,
+      "status": "protected/reference-only",
+      "source_canonical_sha256": "84275b97007aee747e1e48dd9153b016fee01a8c10b576ae6112d09180396b43"
+    },
+    {
+      "path": "shared/support.ts",
+      "source_sha256": "48fd2f2e27daba786845386bb296253a51a7e175cbd4490d2f9473e947446269",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "7d63fa16f8e0aab6d6808e21d4c4c8f4c747b29e16489266d1095c690eedfa15"
+    },
+    {
+      "path": "shared/utils.ts",
+      "source_sha256": "bb59fd961dc7f12d049c08bc0da8153d89e9896a32e887daebf274786acd2464",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "b18aa8a0cdbb5f7c79075ddf9cc5ead28535c29e75b8dcb420ae1986475d5633"
+    },
+    {
+      "path": "shared/video-embed.ts",
+      "source_sha256": "0879cf3c693b1b2f612d929d6bfd36dc7044956de6fa5f4fbeeb7be34b39c7d0",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "1a1159f90be97ee95528138483f16b80bf6a5ac5df8b8db9717b1b065bdba912"
+    },
+    {
+      "path": "tailwind.config.js",
+      "source_sha256": "4583639bdf40d9980f7c1511fa2fbee32c9c835389eb16cfe8e60ada08580af6",
+      "copied": true,
+      "status": "byte-identical",
+      "source_canonical_sha256": "7a55f88be6b1b56f1bdedb4e20e9e02dd6602960ff5cc8029bc3f66cf4b2df8b"
+    },
+    {
+      "path": "tsconfig.json",
+      "source_sha256": "1d3102ab4c11e4e1d3bf3af01db0c5a3801cd73ba0388c3fc6867f5fe60dd922",
+      "copied": false,
+      "status": "protected/reference-only",
+      "source_canonical_sha256": "877438868c0b35911d9f0682515130c9613fd6e054ac6b4bc983cf1c5aedfebb"
+    }
+  ]
+}

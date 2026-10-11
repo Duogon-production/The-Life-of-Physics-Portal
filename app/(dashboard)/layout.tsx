@@ -26,7 +26,7 @@ const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
             <aside className="hidden md:block fixed left-4 top-4 bottom-4 w-64 z-50"><Sidebar /></aside>
             <main className="md:pl-72 pt-2 md:pt-4 min-h-screen bg-slate-50 flex flex-col justify-between">
               <div className="flex-1 w-full p-4 sm:p-6 md:p-8">{children}</div><Footer />
-            </main><SupportModal />
+            </main>
           </div>
         </WebsiteNavigationProvider>;
     }

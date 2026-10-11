@@ -24,8 +24,9 @@ import { Preview } from '@/frontend/components/preview';
 import { useGlobalLoading } from '@/frontend/components/providers/loading-provider';
 
 interface DescriptionFormProps {
-	initialData: Course;
+	initialData: Pick<Course, 'description'>;
 	courseId: string;
+	onSave?: (values: {description:string}) => Promise<void>;
 }
 
 const formSchema = z.object({
@@ -34,7 +35,7 @@ const formSchema = z.object({
 	}),
 });
 
-const DescriptionForm = ({ initialData, courseId }: DescriptionFormProps) => {
+const DescriptionForm = ({ initialData, courseId, onSave }: DescriptionFormProps) => {
 	const [isEditing, setIsEditing] = useState(false);
 
 	const toggleEdit = () => setIsEditing((prev) => !prev);
@@ -55,13 +56,14 @@ const DescriptionForm = ({ initialData, courseId }: DescriptionFormProps) => {
 		startLoading();
 
 		try {
-			await api.patch(`/api/courses/${courseId}`, values);
+			if (onSave) await onSave(values);
+			else await api.patch(`/api/courses/${courseId}`, values);
 
 			toast.success('Lesson updated');
 			toggleEdit();
 			router.refresh();
 		} catch (error) {
-			toast.error('Something went wrong');
+			toast.error(error instanceof Error ? error.message : 'Something went wrong');
 		} finally {
 			stopLoading();
 		}

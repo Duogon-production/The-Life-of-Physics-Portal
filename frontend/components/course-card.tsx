@@ -24,7 +24,7 @@ const CourseCard = ({
 	category,
 }: CourseCardProps) => {
 	return (
-		<Link href={href || `/courses/${id}`}>
+		<Link href={href ?? `/courses/${id}`}>
 			<div className="group hover:shadow-sm transition overflow-hidden border rounded-lg p-3 h-full">
 				<div className="relative w-full aspect-video rounded-md overflow-hidden">
 					{imageUrl ? (
@@ -32,7 +32,7 @@ const CourseCard = ({
 					) : (
 						<div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-gradient-to-br from-physics-charcoal to-physics-black text-physics-cyan">
 							<BookOpen className="h-8 w-8" />
-							<span className="text-xs font-medium">The Life of Physics</span>
+							<span className="text-xs font-medium">EduLabs</span>
 						</div>
 					)}
 				</div>
@@ -49,7 +49,7 @@ const CourseCard = ({
 							<IconBadge size={'sm'} icon={BookOpen} />
 
 							<span>
-								{chaptersLength === undefined ? 'Chapter count unavailable' : `${chaptersLength} ${
+								{`${chaptersLength} ${
 									chaptersLength === 1 ? 'chapter' : 'chapters'
 								}`}
 							</span>

@@ -3,16 +3,18 @@
 import type { OurFileRouter } from '@/shared/contracts/uploads';
 import { UploadDropzone } from '@/frontend/lib/uploadthing';
 import { useGlobalLoading } from '@/frontend/components/providers/loading-provider';
+import { isFirebaseStaging } from '@/shared/auth-config';
 import toast from 'react-hot-toast';
 
 interface FileUploadProps {
 	onChange: (url?: string, metadata?: { size?: number; key?: string; name?: string }) => Promise<void> | void;
-	endpoint: keyof OurFileRouter;
+	endpoint: keyof OurFileRouter | "examAnswerImage";
 }
 
 const FileUpload = ({ onChange, endpoint }: FileUploadProps) => {
 	const { startLoading, stopLoading } = useGlobalLoading();
 
+	if (isFirebaseStaging() || endpoint === "examAnswerImage") return <p role="status">Uploads are awaiting a Supabase Storage integration.</p>;
 	return (
 		<UploadDropzone
 			appearance={{

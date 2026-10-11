@@ -7,7 +7,7 @@ interface WaveProps {
 
 /**
  * Top-Right Textbook Wave: Matches the print textbook cover template
- * Layered dark slate curve (#1e293b) + vibrant deep cyan wave (#00aeef).
+ * Layered dark slate curve (#1e293b) + vibrant deep cyan wave (#7ed957).
  */
 export const TextbookWaveTopRight: React.FC<WaveProps> = ({
 	className = '',
@@ -31,7 +31,7 @@ export const TextbookWaveTopRight: React.FC<WaveProps> = ({
 			/>
 			<path
 				d="M85 0C135 90 175 35 260 140V0H85Z"
-				fill="#00aeef"
+				fill="#7ed957"
 				fillOpacity={opacity}
 			/>
 		</svg>
@@ -64,7 +64,7 @@ export const TextbookWaveBottomLeft: React.FC<WaveProps> = ({
 			/>
 			<path
 				d="M0 140V80C65 80 110 120 175 140H0Z"
-				fill="#00aeef"
+				fill="#7ed957"
 				fillOpacity={opacity}
 			/>
 		</svg>

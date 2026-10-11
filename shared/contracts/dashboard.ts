@@ -1,7 +1,13 @@
 export interface StudentLesson {
-	href?: string;
+	href?: string | null;
+	groupKey?: string;
+	partsCount?: number | null;
+	status?: "Completed" | "In Progress" | "Open Lesson" | "Locked";
 	id: string;
 	title: string;
+	description?: string | null;
+	imageUrl?: string | null;
+	chapterType?: string;
 	chapterNumber: number | null;
 	chapters: {
 		id: string;
@@ -11,8 +17,14 @@ export interface StudentLesson {
 }
 
 export interface SelfLearningLesson {
+	href?: string | null;
+	status?: "Completed" | "In Progress" | "Open Lesson" | "Locked";
+	partsCount?: number | null;
 	id: string;
 	title: string;
+	description?: string | null;
+	imageUrl?: string | null;
+	chapterType?: string;
 	chapterNumber: number | null;
 	chapters: {
 		id: string;
@@ -22,9 +34,16 @@ export interface SelfLearningLesson {
 }
 
 export interface SelfLearningChapter {
+	progressAvailable?: boolean;
+	id?: string;
+	/** Prefix such as "Chapter" or "Month". */
+	type?: string;
 	number: number;
+	/** The chapter's own name, e.g. "Ohm's Law". */
 	title: string;
+	/** Quick short summary. */
 	subtitle: string;
+	/** Optional full description. */
 	description: string;
 	lessonCount: number;
 	lessons: SelfLearningLesson[];
