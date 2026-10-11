@@ -33,17 +33,19 @@ async function scopeFor(search: WebsiteSearch, courseId?: string) {
 function LimitNotice({ limited }: { limited: boolean }) {
   return limited ? <p role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">This overview shows at most 100 courses/offerings and 500 lessons. Narrow your organization or open an individual course. Progress totals are unavailable for truncated data.</p> : null;
 }
-function Offerings({ scope }: { scope: NonNullable<Awaited<ReturnType<typeof loadWebsiteScope>>> }) {
+function Offerings({ scope, hideEmpty = false }: { scope: NonNullable<Awaited<ReturnType<typeof loadWebsiteScope>>>; hideEmpty?: boolean }) {
+  if (hideEmpty && !scope.limited && !scope.offerings.length) return null;
   return <section className={panel}><h2 className="mb-4 flex items-center gap-2 text-xl font-bold"><Users className="h-5 w-5 text-cyan-600" />Your Groups &amp; Offerings</h2>
-    {!scope.offerings.length && <p className="text-sm text-slate-500">No accessible offerings yet. Your teacher will arrange your course enrollment.</p>}
+    {!scope.offerings.length && <p className="text-sm text-slate-500">{scope.limited ? 'Offering data is incomplete. Open an individual course to check its groups.' : 'No accessible offerings yet. Your teacher will arrange your course enrollment.'}</p>}
     <div className="divide-y divide-slate-100">{scope.offerings.map(o => <Link className="flex flex-wrap justify-between gap-2 py-4 text-sm hover:text-sky-700" key={o.id} href={`/offerings/${o.id}`}><span className="font-semibold">{o.name}</span><span>{o.status} · {o.delivery_mode.replace('_', ' ')}{scope.enrollments.find(e => e.offering_id === o.id) ? ` · Your enrollment: ${scope.enrollments.find(e => e.offering_id === o.id)?.status}` : ''}</span></Link>)}</div>
   </section>;
 }
 function Assessments({ scope }: { scope: NonNullable<Awaited<ReturnType<typeof loadWebsiteScope>>> }) {
   const now = Date.now();
   const upcoming = scope.scheduled.filter(s => !s.closes_at || Date.parse(s.closes_at) > now);
+  if (!scope.limited && !upcoming.length) return null;
   return <section className={panel}><h2 className="mb-3 text-xl font-bold">Available &amp; Upcoming Assessments</h2><p className="mb-4 text-xs text-slate-500">Assessment participation is awaiting integration. These are published schedules for accessible offerings.</p>
-    {!upcoming.length && <p className="text-sm text-slate-500">No upcoming published assessments.</p>}
+    {!upcoming.length && <p className="text-sm text-slate-500">{scope.limited ? "Assessment data is incomplete; no empty summary can be determined." : "No upcoming published assessments."}</p>}
     {upcoming.map(s => <div className="border-t py-3 text-sm" key={s.id}><strong>{scope.assessments.find(a => a.id === s.assessment_id)?.title || 'Assessment'}</strong><p>{scope.offerings.find(o => o.id === s.offering_id)?.name} · Opens {s.opens_at ? new Date(s.opens_at).toISOString() : 'any time'} · Closes {s.closes_at ? new Date(s.closes_at).toISOString() : 'without a deadline'}</p></div>)}
   </section>;
 }
@@ -56,18 +58,18 @@ export async function WebsiteHome({ search = {} }: { search?: WebsiteSearch }) {
   const staff = scope.courses.some(c => courseCapability(context, c)) || supported.length > 0 || context.memberships.some(m => m.status === 'active' && ['owner', 'admin'].includes(m.role) && (!search.organization || search.organization === m.organization_id));
 
   return <div className="space-y-8"><LimitNotice limited={scope.limited} />
-    <nav className="flex flex-wrap gap-4 text-sm text-sky-700" aria-label="Teaching tools"><Link href="/onboarding/organization">Create an organization</Link>{context.memberships.some(m=>m.status==='active'&&['owner','admin','teacher'].includes(m.role))&&<Link href="/teacher/create">Create a course</Link>}</nav>
+    {staff && <nav className="flex flex-wrap gap-4 text-sm text-sky-700" aria-label="Teaching tools">{context.memberships.some(m=>m.status==='active'&&['owner','admin','teacher'].includes(m.role))&&<Link href="/teacher/create">Create a course</Link>}</nav>}
     {staff ? <AdminHome phase1 adminName={context.viewer.displayName} metrics={{ totalStudents: null, pendingWaitlistCount: null, pendingHomeworkCount: null, activeGroupsCount: supported.filter(o => o.status === 'active').length }} recentSignups={[]} recentSubmissions={[]} /> :
     <StudentHome phase1 summaryAvailable={!scope.limited} lessons={scope.limited ? [] : v2StudentLessons({ ...scope, offerings: scope.offerings.filter(o => scope.enrollments.some(e => e.offering_id === o.id && e.status === 'active' && (!e.expires_at || Date.parse(e.expires_at) > Date.now()) && (!e.enrolled_at || Date.parse(e.enrolled_at) <= Date.now()))) })} groupName={null} />}
     {scope.limited && <p className="text-sm text-slate-500">Open a course for its available lessons. Dashboard lesson progress is not calculated on partial data.</p>}
-    <Offerings scope={scope} /><Assessments scope={scope} />
+    <Offerings scope={scope} hideEmpty /><Assessments scope={scope} />
   </div>;
 }
 export async function WebsiteCourses({ search = {}, teacher = false }: { search?: WebsiteSearch; teacher?: boolean }) {
   if (!teacher) {
     const { scope } = await scopeFor(search);
     if (search.offering && !scope.offerings.some(o => o.id === search.offering)) notFound();
-    return <><LimitNotice limited={scope.limited}/><SelfLearningView chapters={scope.limited ? [] : v2Chapters(scope, search.offering)}/><Offerings scope={scope}/></>;
+    return <><LimitNotice limited={scope.limited}/><SelfLearningView chapters={scope.limited ? [] : v2Chapters(scope, search.offering)}/><Offerings scope={scope} hideEmpty/></>;
   }
   const context = await requireWebsiteContext();
   if (Object.values(search).some(v => v !== undefined && (typeof v !== 'string' || v.length > 200)) || (search.organization && !context.organizations.some(o => o.id === search.organization))) notFound();

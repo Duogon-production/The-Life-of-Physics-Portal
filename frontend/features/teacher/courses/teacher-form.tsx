@@ -1,7 +1,6 @@
 'use client';
 import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { Button } from '@/frontend/components/ui/button';
 import { Input } from '@/frontend/components/ui/input';
 import { Editor } from '@/frontend/components/editor';
@@ -29,7 +28,7 @@ export function TeacherForm({course,organizations=[],onboarding=false}:{course?:
     } catch(caught) {setError(caught instanceof Error?caught.message:'Unable to save');}
     finally {setBusy(false);}
   }
-  if(!course&&!onboarding&&!organizations.length) return <div className="rounded-2xl border bg-white p-6"><p>No organization permits course creation.</p><Link className="text-sky-700 underline" href="/onboarding/organization">Create your organization</Link></div>;
+  if(!course&&!onboarding&&!organizations.length) return <div className="rounded-2xl border bg-white p-6"><p>No organization permits course creation.</p><p>Course access is arranged by EduLabs staff.</p></div>;
   return <form onSubmit={save} className="space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
     {!course&&!onboarding&&<label className="block space-y-2">Organization<select className="block w-full rounded-md border p-2" value={organization} onChange={e=>setOrganization(e.target.value)} disabled={busy}>{organizations.map(o=><option key={o.id} value={o.id}>{o.name}</option>)}</select></label>}
     <label className="block space-y-2">{onboarding?'Organization name':'Course title'}<Input required maxLength={200} value={title} onChange={e=>setTitle(e.target.value)} disabled={busy}/></label>
