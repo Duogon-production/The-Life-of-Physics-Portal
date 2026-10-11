@@ -70,8 +70,9 @@ foundation schema and migration 17, run the rollback suites using psql with
 - `node scripts/firebase-sql-suite.cjs` renders Firebase versions of the seeded
   authorization/hardening suites into ignored `.local`; rendering is not execution.
 
-Do not send these mutation-based tests to the connected database before approval,
-even though they roll back. Claims are simulated; signature verification is covered
+These suites were approved, executed and rolled back in development for Step 02B-S.
+Future mutation-based executions require authorization even though they roll back.
+Claims are simulated; signature verification is covered
 by separate application authentication tests. Database test success must be reported
 only after actual execution. Keep the manual provisioning psql script separate from
 automatically discovered migrations and rollback tests; it intentionally commits.

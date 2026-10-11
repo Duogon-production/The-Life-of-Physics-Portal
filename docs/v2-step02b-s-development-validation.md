@@ -2,8 +2,11 @@
 
 Date: 2026-10-11. Target: `gmvouqgjbtbkbhrdruzu` (the owner-approved development
 project, healthy PostgreSQL 17). Branch: `codex/v2-step02b-s-org-security`.
-HEAD remains `3d73c49c826dd71bd8fa3399ee72f8caab2bcb22`; all changes are uncommitted.
-No production, deployment, push, merge or Step 02C work was performed.
+At validation time, HEAD was `3d73c49c826dd71bd8fa3399ee72f8caab2bcb22` and
+the changes were uncommitted. They were subsequently committed as
+`8b578ca5e10dcb389eeb403df20df1e0c1fcf419` and pushed for review in PR #1.
+Migration 17 is applied and verified in development. Production configuration and
+Step 02C were outside this validation; no manual deployment was performed.
 
 ## Applied migration
 
@@ -159,4 +162,7 @@ and require protected operational access. Manual provisioning needs explicit ten
 and owner approval; an automated staff operator workflow is outside this slice.
 All production project states are untouched and unverified by this development run.
 Existing advisor notices and untested real-browser/concurrency scenarios remain as
-described above. Stop for owner review before committing, merging, pushing or Step 02C.
+described above. The validation originally stopped for owner review. The owner
+subsequently approved commit/push and authorized merging PR #1 into
+`collab/v2-integrated-ui` after documentation, Vercel and scope checks pass.
+Production changes and Step 02C remain outside that authorization.

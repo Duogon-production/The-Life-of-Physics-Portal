@@ -7,23 +7,26 @@ current status. The preparation and approval text below is retained as history.
 The owner approved preparation and local validation of this proposal. The exact
 two revokes are now migration 17,
 `supabase/migrations/20261011184623_restrict_organization_creation.sql`.
-The regression suite and fixture updates are implemented. **Application to the
-connected development database still requires separate authorization.** The
+The regression suite and fixture updates are implemented. Application to the
+connected development database required separate authorization, which was later
+granted and successfully completed. The
 remainder records the reviewed proposal and test scope; actual validation results
 are recorded in `v2-step02b-s-validation.md`.
 
 Reviewed on 2026-10-11 against commit
 `3d73c49c826dd71bd8fa3399ee72f8caab2bcb22`, on isolated branch
-`codex/v2-step02b-s-org-security`. No database changes or fixture writes have been
-performed. This document is a proposal, not a claim that the vulnerability is fixed.
+`codex/v2-step02b-s-org-security`. At that proposal checkpoint no database changes
+or fixture writes had been performed. The historical findings and plan below
+describe that pre-fix state; the linked development validation records the fix.
 
 ## Findings
 
 Read-only inspection at proposal time of development project
 `gmvouqgjbtbkbhrdruzu` confirmed the 16 foundation migrations were applied and the
-canceled legacy ledger was absent. Migration 17 remains local and unapplied.
+canceled legacy ledger was absent. Migration 17 was local and unapplied then;
+it is now applied and verified in the approved development project.
 
-| Entry point | Current behavior |
+| Entry point | Behavior at the historical pre-fix review |
 | --- | --- |
 | `/onboarding/organization` | Returns not found; student onboarding is disabled. |
 | `POST /api/teacher/organizations` | Returns 403 through `managedOrganizationPOST`. |
@@ -73,9 +76,9 @@ future private-schema exposure. PUBLIC is included to prevent implicit execution
 
 The original draft was outside the migration runner pending preparation approval.
 It has now been promoted using `supabase migration new` with CLI 2.81.3 via npx.
-No project dependency or lockfile was changed. The migration is now discoverable
-by the runner: **do not run db push/migration up against connected development
-until database application is separately approved**.
+No project dependency or lockfile was changed. At preparation, the migration was
+discoverable by the runner but application was held pending separate approval.
+That approval was later granted; migration 17 is now applied in development.
 
 ## Trusted provisioning boundary
 
@@ -98,7 +101,7 @@ service-role credential is added to the browser or new application route. This i
 manual trusted provisioning, not an operator management UI. A future automated
 staff workflow needs separate approval and explicit platform authorization.
 
-## Regression test plan — execute only after approval
+## Historical regression test plan — approved and executed in development
 
 Add a standalone `supabase/tests/organization-provisioning.sql` rollback suite.
 Run as the authorized development administrator; create random, synthetic
@@ -160,10 +163,12 @@ is necessary for the two grants, but keep existing student-route regression cove
 2. Generate migration 17; add the planned regression suite and update obsolete test
    setup/documentation on this branch. Done; local validation is recorded separately.
 3. Review the diff, recheck live definitions/grants/history for drift, and apply only
-   the approved migration to the connected development project.
+   the approved migration to the connected development project. Completed.
 4. Run rollback database regressions and application checks; report actual results
-   and any genuine findings. Stop for review; no merge, push or deployment.
+   and any genuine findings. Completed; all eight executions passed and rolled back.
+   The original stop-for-review boundary was honored before later Git approval.
 
-The vulnerability remains open until step 3. No UI, production configuration,
-database data, shared branch or existing feature branch has been changed by this
-proposal. This proposal does not audit or implement the complete permissions engine.
+At proposal time the vulnerability remained open until step 3. Step 3 has since
+closed it in development. The proposal itself changed no UI, production
+configuration, database data or shared branch. This slice does not audit or
+implement the complete permissions engine.

@@ -5,7 +5,10 @@
 > [development verification](v2-step02b-s-development-validation.md).
 
 Date: 2026-10-11. Branch: `codex/v2-step02b-s-org-security`.
-HEAD remains `3d73c49c826dd71bd8fa3399ee72f8caab2bcb22`; changes are uncommitted.
+At this historical preparation checkpoint, HEAD was
+`3d73c49c826dd71bd8fa3399ee72f8caab2bcb22` and changes were uncommitted.
+They were subsequently committed as `8b578ca5e10dcb389eeb403df20df1e0c1fcf419`
+and pushed in PR #1 after successful approved development application/testing.
 No connected-database SQL, migration application, provisioning, deployment,
 merge or push was performed during this preparation turn.
 
@@ -74,7 +77,9 @@ application, API tests requiring a live database, and Supabase advisors. No loca
 Docker, PostgreSQL server or psql executable is available; connected development
 mutation is explicitly outside current authorization. SQL assertions are prepared
 but must not be represented as passing database authorization tests. The connected
-database still has the previously confirmed RPC vulnerability until application.
+database still had the previously confirmed RPC vulnerability at this preparation
+checkpoint. The later authorized development application closed it, as recorded
+in `v2-step02b-s-development-validation.md`.
 
 ## Prepared database regression coverage
 
@@ -107,11 +112,12 @@ authenticated EXECUTE on exactly the same two signatures. Do not grant PUBLIC/an
 or modify service_role. Restoring those grants reopens the known vulnerability;
 prefer keeping the security fix and correcting trusted provisioning instead.
 
-## Next approval
+## Historical next approval — subsequently granted and completed
 
-Request authorization to apply **only migration 17** to the connected Supabase
+The preparation report requested authorization to apply **only migration 17** to the connected Supabase
 development project and execute the synthetic rollback regression suites there.
 First recheck live history/ACLs for drift; then verify changed privileges, unchanged
 tenant policies, retained teacher operations and advisor findings. A successful
 development verification is required before calling the database fix validated.
-No production change, merge, push or deployment is included.
+That authorization was subsequently granted and development verification passed.
+These were the historical execution boundaries, not an outstanding approval request.
