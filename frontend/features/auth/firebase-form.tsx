@@ -58,7 +58,7 @@ export function FirebaseForm({ register = false }: { register?: boolean }) {
     }
   });
   return <section className="w-full max-w-md rounded-2xl border bg-white p-8 shadow-sm text-slate-900">
-    <h1 className="text-2xl font-semibold">The Life of Physics</h1>
+    <h1 className="text-2xl font-semibold">EduLabs</h1>
     <p className="mt-2 mb-6 text-slate-500">{register ? 'Create your learning account' : 'Sign in to continue'}</p>
     <form onSubmit={event => { event.preventDefault(); void submit(); }} className="space-y-4">
       <label className="block">Email<input disabled={busy || loading} required type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} className="mt-1 w-full rounded-lg border p-3" /></label>

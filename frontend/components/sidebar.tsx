@@ -184,9 +184,12 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 		<span>Exams</span>
 		</Link>
 
-		<Link
-		href="/support"
-		onClick={() => onNavigate?.()}
+		<a role="link"
+		href={isFirebaseStaging() ? undefined : "/support"}
+        aria-disabled={isFirebaseStaging() || undefined}
+        tabIndex={0}
+        title={isFirebaseStaging() ? "EduLabs platform help is not yet available." : undefined}
+		onClick={() => { if (!isFirebaseStaging()) onNavigate?.(); }}
 		className={cn(
 			'relative flex items-center gap-3.5 px-4 py-3 min-h-[48px] text-[15px] font-medium rounded-2xl border-2 border-transparent transition-all duration-200 ease-out cursor-pointer active:translate-x-0.5 active:translate-y-0.5',
 			isSupportActive
@@ -200,8 +203,8 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 			isSupportActive ? 'text-black' : 'text-slate-500'
 		)}
 		/>
-		<span>Support</span>
-		</Link>
+		<span>{isFirebaseStaging() ? "Help — soon" : "Support"}</span>
+		</a>
 
 		{isAdminOrTeacher && (
 			<div className="pt-3 mt-1 border-t border-slate-200/80 flex flex-col space-y-1.5">
