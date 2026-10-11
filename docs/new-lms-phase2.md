@@ -1,5 +1,10 @@
 # New LMS — Phase 2 teacher editor
 
+> Historical implementation record. Step 02B disabled self-service organization
+> onboarding. Step 02B-S migration 17 now revokes its RPC grants in the approved
+> development project. Current provisioning instructions:
+> [organization-provisioning.md](organization-provisioning.md).
+
 ## Direction and boundaries
 
 This is a NEW LMS. Firebase Authentication establishes identity and Supabase PostgreSQL is the source of truth for application data and tenant permissions. The original website contributes its adapted design and reusable UI components only.

@@ -17,11 +17,8 @@ insert into pg_temp.teacher_test_results values(label); end $$;
 set local role authenticated;
 select pg_temp.claim('owner');
 insert into teacher_test_users values('owner',public.onboard_firebase_profile());
-select set_config('teacher_test.org',public.create_organization('Phase 2 disposable A','phase2-a-'||current_setting('teacher_test.run'))::text,true);
-select pg_temp.ok(private.has_org_role(current_setting('teacher_test.org')::uuid,array['owner']),'organization creator becomes contextual owner');
 select pg_temp.claim('other');
 insert into teacher_test_users values('other',public.onboard_firebase_profile());
-select set_config('teacher_test.other_org',public.create_organization('Phase 2 disposable B','phase2-b-'||current_setting('teacher_test.run'))::text,true);
 select pg_temp.claim('teacher');
 insert into teacher_test_users values('teacher',public.onboard_firebase_profile());
 select pg_temp.claim('assistant');
@@ -29,9 +26,31 @@ insert into teacher_test_users values('assistant',public.onboard_firebase_profil
 select pg_temp.claim('student');
 insert into teacher_test_users values('student',public.onboard_firebase_profile());
 reset role;
+-- Trusted administrator fixture setup. Each organization and first owner are one
+-- statement inside this suite's transaction; neither is created by a student RPC.
+with organization as (
+ insert into public.organizations(name,slug,created_by)
+ select 'Phase 2 disposable A','phase2-a-'||current_setting('teacher_test.run'),id
+ from teacher_test_users where label='owner' returning id,created_by
+), membership as (
+ insert into public.organization_memberships(organization_id,user_id,role,status,joined_at)
+ select id,created_by,'owner','active',now() from organization returning organization_id
+)
+select set_config('teacher_test.org',organization_id::text,true) from membership;
+with organization as (
+ insert into public.organizations(name,slug,created_by)
+ select 'Phase 2 disposable B','phase2-b-'||current_setting('teacher_test.run'),id
+ from teacher_test_users where label='other' returning id,created_by
+), membership as (
+ insert into public.organization_memberships(organization_id,user_id,role,status,joined_at)
+ select id,created_by,'owner','active',now() from organization returning organization_id
+)
+select set_config('teacher_test.other_org',organization_id::text,true) from membership;
 insert into public.organization_memberships(organization_id,user_id,role,status)
 select current_setting('teacher_test.org')::uuid,id,label,'active' from teacher_test_users where label in ('teacher','assistant');
 set local role authenticated;
+select pg_temp.claim('owner');
+select pg_temp.ok(private.has_org_role(current_setting('teacher_test.org')::uuid,array['owner']),'trusted provisioning gives contextual owner');
 select pg_temp.claim('teacher');
 select set_config('teacher_test.course',public.create_teacher_course(current_setting('teacher_test.org')::uuid,'Disposable physics','physics')::text,true);
 select pg_temp.ok((select status='draft' and visibility='private' from public.courses where id=current_setting('teacher_test.course')::uuid),'new course is private draft');

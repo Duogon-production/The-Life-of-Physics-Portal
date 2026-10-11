@@ -37,8 +37,14 @@ organization. A person can be a teacher in A and admin in B. Ordinary students
 need no organization membership. Suspending a profile, membership or organization
 removes current staff access through authorization helpers.
 
-`create_organization(name, slug)` atomically creates an organization and its first
-owner for an active authenticated user. Direct organization inserts are denied.
+Managed provisioning reserves organization creation for trusted EduLabs staff.
+Migration 17 (`20261011184623_restrict_organization_creation.sql`) revokes end-user
+execution of both `create_organization(text,text)` layers. It was applied only to
+development project `gmvouqgjbtbkbhrdruzu` after explicit owner approval; its
+rollback authorization suites passed. Direct organization
+inserts by end users are already denied. Staff create an organization and its
+initial active owner in one administrative transaction; see
+`organization-provisioning.md`. Tenant ownership does not grant platform access.
 Owners manage other owners; admins manage non-owner memberships. A trigger prevents
 removing the last active owner. Account/organization status changes require a
 trusted administrative workflow; the self-profile API cannot activate itself.
