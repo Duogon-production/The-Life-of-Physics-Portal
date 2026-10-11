@@ -67,9 +67,9 @@ select public.submit_assessment_attempt(current_setting('test.attempt')::uuid);
 select pg_temp.expect_error(format('select public.get_assessment_results(%L::uuid)',current_setting('test.attempt')),'42501','results withheld until finalized grading');
 select pg_temp.expect_error(format('select public.save_assessment_response(%L::uuid,%L::uuid,%L::jsonb)',current_setting('test.attempt'),'80000000-0000-0000-0000-000000000001','{"option_ids":["90000000-0000-0000-0000-000000000002"]}'),'42501','submitted answers are immutable');
 select pg_temp.expect_error(format('select public.grade_assessment_response(%L::uuid,2)',current_setting('test.response')),'42501','student cannot invoke grader');
--- Test legitimate organization bootstrap: identities have contextual roles.
-select set_config('test.created_org',public.create_organization('Temporary test tenant','temporary-rls-test')::text,true);
-select pg_temp.assert_true(private.has_org_role(current_setting('test.created_org')::uuid,array['owner']),'atomic organization bootstrap gives contextual owner');
+-- Managed provisioning: a student cannot bootstrap a tenant through either layer.
+select pg_temp.expect_error($sql$select public.create_organization('Temporary test tenant','temporary-rls-test')$sql$,'42501','student cannot create organization through public RPC');
+select pg_temp.expect_error($sql$select private.create_organization('Temporary test tenant','temporary-rls-test')$sql$,'42501','student cannot invoke private organization creator');
 
 -- Organization A owner has no role in B.
 select set_config('request.jwt.claims','{"iss":"https://gmvouqgjbtbkbhrdruzu.supabase.co/auth/v1","aud":"authenticated","sub":"10000000-0000-0000-0000-000000000001","role":"authenticated"}',true);

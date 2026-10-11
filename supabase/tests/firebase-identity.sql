@@ -1,6 +1,7 @@
 -- DEVELOPMENT ONLY. Simulated gateway claims test PostgreSQL authorization, not
 -- Firebase signature verification. Real-token HTTP tests are a separate suite.
 begin;
+select set_config('firebase_test.unknown','unknown-firebase-'||gen_random_uuid()::text,true);
 create temp table test_results(name text primary key, passed boolean not null);
 grant select,insert on test_results to authenticated,anon;
 create function pg_temp.assert_true(value boolean,name text) returns void language plpgsql set search_path='' as $$
@@ -14,7 +15,10 @@ create function pg_temp.firebase_claims(subject text) returns void language plpg
 begin perform set_config('request.jwt.claims',jsonb_build_object('iss','https://securetoken.google.com/diagonproduction','aud','diagonproduction','role','authenticated','email_verified',true,'auth_time',floor(extract(epoch from now()))::bigint,'sub',subject)::text,true); end $$;
 
 insert into private.external_identities(profile_id,provider,issuer,subject,verified_at)
-select id,'firebase','https://securetoken.google.com/diagonproduction','firebase-fixture-'||right(id::text,12),now() from public.profiles;
+select p.id,'firebase','https://securetoken.google.com/diagonproduction','firebase-fixture-'||right(p.id::text,12),now()
+from public.profiles p join auth.users u on u.id=p.id
+where p.id between '10000000-0000-0000-0000-000000000001'::uuid and '10000000-0000-0000-0000-000000000007'::uuid
+ and u.email like '%@example.invalid' and u.banned_until='infinity'::timestamptz and u.encrypted_password='';
 set local role authenticated;
 select pg_temp.firebase_claims('firebase-fixture-000000000005');
 select pg_temp.assert_true(public.current_profile_id()='10000000-0000-0000-0000-000000000005','string subject resolves stable UUID');
@@ -35,7 +39,7 @@ select pg_temp.firebase_claims('firebase-fixture-000000000002');
 select pg_temp.assert_true(private.has_org_role('20000000-0000-0000-0000-000000000001',array['teacher']) and private.has_org_role('20000000-0000-0000-0000-000000000002',array['admin']),'Firebase supports different contextual roles');
 select pg_temp.assert_true(private.can_edit_course('30000000-0000-0000-0000-000000000001'),'Firebase assigned teacher can author');
 
-select pg_temp.firebase_claims('unknown-firebase-subject');
+select pg_temp.firebase_claims(current_setting('firebase_test.unknown'));
 select pg_temp.assert_true(public.current_profile_id() is null,'unmapped identity fails closed');
 select pg_temp.assert_true((select count(*)=0 from public.courses),'unmapped identity sees no courses');
 select set_config('test.new_profile',public.onboard_firebase_profile()::text,true);
@@ -51,7 +55,8 @@ select pg_temp.assert_true(public.current_profile_id() is null,'suspended profil
 select pg_temp.expect_denied('select public.onboard_firebase_profile()','suspended profile cannot re-onboard');
 reset role;
 update public.profiles set status='active' where id=current_setting('test.new_profile')::uuid;
-update private.external_identities set status='disabled' where subject='unknown-firebase-subject';
+update private.external_identities set status='disabled'
+where issuer='https://securetoken.google.com/diagonproduction' and subject=current_setting('firebase_test.unknown');
 set local role authenticated;
 select pg_temp.assert_true(public.current_profile_id() is null,'disabled mapping fails closed');
 select pg_temp.expect_denied('select public.onboard_firebase_profile()','disabled identity cannot recreate profile');
