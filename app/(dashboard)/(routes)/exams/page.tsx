@@ -4,9 +4,10 @@ import { redirect } from 'next/navigation';
 
 import { ExamsView } from '@/frontend/features/exams/exams-view';
 import { isAdminOrTeacher } from '@/server/services/teacher';
+import { WebsiteExams } from '../../_components/website-exams';
 
 const ExamsPage = async () => {
-	if (isFirebaseStaging()) return redirect('/unavailable');
+	if (isFirebaseStaging()) return <WebsiteExams />;
 	const { userId, sessionClaims } = await auth();
 	if (!userId) return redirect('/');
 

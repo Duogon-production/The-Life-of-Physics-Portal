@@ -4,9 +4,10 @@ import { redirect } from 'next/navigation';
 
 import { ExamRunner } from '@/frontend/features/exams/exam-runner';
 import { isAdminOrTeacher } from '@/server/services/teacher';
+import { WebsiteExam } from '../../../_components/website-exams';
 
 const ExamPage = async ({ params }: { params: Promise<{ examId: string }> }) => {
-	if (isFirebaseStaging()) return redirect('/unavailable');
+	if (isFirebaseStaging()) return <WebsiteExam examId={(await params).examId} />;
 	const { userId, sessionClaims } = await auth();
 	if (!userId) return redirect('/');
 

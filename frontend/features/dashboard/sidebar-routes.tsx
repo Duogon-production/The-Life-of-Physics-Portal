@@ -46,7 +46,7 @@ const studentRoutes: SidebarRoute[] = [
 	{
 		icon: BookOpen,
 		label: 'Exams',
-		badge: 'Coming Soon',
+		href: '/exams',
 	},
 ];
 
