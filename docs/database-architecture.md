@@ -101,7 +101,9 @@ activating enrollments. Cancel/suspend/archive records instead of deleting histo
 single/multiple choice, true/false, numeric, short text, essay and file upload.
 True/false uses two options. Points and scores use bounded decimal `numeric`.
 
-The approved student workflow is:
+The following describes the pre-Step-03A foundation, still applied in development.
+The approved, locally implemented migration-18 workflow supersedes it for exams
+and quizzes once applied; see the Step 03A implementation link at the end.
 
 1. `start_assessment_attempt(offering_assessment_id)` checks enrollment, publishing,
    opening/closing times and attempt limits. It resumes an unexpired in-progress
@@ -340,3 +342,26 @@ capacity, latency, CPU or memory guarantee is claimed.
 - Add submission revisions/regrading records and immutable course revisions when
   their actual product workflows are specified. Grade correction currently requires
   a reviewed trusted workflow; students/instructors cannot reopen finalized grades.
+## Step 03A exam security (applied to development)
+
+Migration 18 adds private per-student exam participation and complete-paper
+outcomes, enforces retry decisions and separates grading, total release and
+correct-answer review release. Attempt grades are no longer direct authenticated
+table projections; contextual staff and released students use checked RPCs.
+See [implementation and validation](step03a-exams-implementation.md) for the exact
+current status, RPCs and tests. Migration 18 is applied to development project
+`gmvouqgjbtbkbhrdruzu`. Atomic exam authoring migration 19 was subsequently
+approved and applied as `20261012053751_atomic_exam_authoring.sql`; development
+history now contains exactly 19 migrations. The SQL is unchanged from the reviewed
+file; its filename follows the version assigned by Supabase MCP.
+
+Migration 20, `20261012063114_complete_exam_workflows.sql`, is prepared and tested
+locally only. It adds all-format authoring, atomic answer snapshots, used-paper
+cloning, submission pagination and atomic audited grade corrections. Its private
+RLS-enabled audit table has no application table grants. Checked contextual staff
+RPCs append corrections; released students see only their own reason/time/totals.
+Application roles cannot update/delete audit records. A separately authorized
+privileged attempt deletion cascades its audit records, permitting scoped synthetic
+cleanup; this is not an application deletion capability. All migrations 1–19,
+tenant RLS, trusted provisioning and Firebase identity remain intact. This current
+section supersedes historical statements above about grade-correction availability.

@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import FileUpload from '@/frontend/components/file-upload';
 import { api } from '@/frontend/lib/api';
 import { Button } from '@/frontend/components/ui/button';
+import { Input } from '@/frontend/components/ui/input';
 import { Textarea } from '@/frontend/components/ui/textarea';
 import { ExamResultView } from '@/frontend/features/exams/exam-result';
 import type { ExamRunQuestion, ExamRunState } from '@/shared/contracts/exams';
@@ -23,6 +24,7 @@ import { cn } from '@/shared/utils';
 
 const errorMessage = (error: unknown, fallback: string) => {
 	const data = (error as { response?: { data?: unknown } })?.response?.data;
+	if (data && typeof data === 'object' && 'error' in data && typeof data.error === 'string') return data.error;
 	return typeof data === 'string' && data ? data : fallback;
 };
 
@@ -36,21 +38,21 @@ const formatClock = (totalSeconds: number) => {
 	return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
 };
 
-export const ExamRunner = ({ examId }: { examId: string }) => {
+export const ExamRunner = ({ examId, secure = false }: { examId: string; secure?: boolean }) => {
 	const [state, setState] = useState<ExamRunState | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [isBusy, setIsBusy] = useState(false);
 
 	const load = useCallback(async () => {
 		try {
-			const res = await api.get<ExamRunState>(`/api/exams/${examId}`);
+			const res = secure ? await api.post<ExamRunState>(`/api/secure-exams/${examId}/state`, {}) : await api.get<ExamRunState>(`/api/exams/${examId}`);
 			setState(res.data);
 		} catch (error) {
 			toast.error(errorMessage(error, 'Could not load the exam.'));
 		} finally {
 			setIsLoading(false);
 		}
-	}, [examId]);
+	}, [examId, secure]);
 
 	useEffect(() => {
 		load();
@@ -59,7 +61,7 @@ export const ExamRunner = ({ examId }: { examId: string }) => {
 	const start = async () => {
 		try {
 			setIsBusy(true);
-			const res = await api.post<ExamRunState>(`/api/exams/${examId}/start`);
+			const res = await api.post<ExamRunState>(secure ? `/api/secure-exams/${examId}/start` : `/api/exams/${examId}/start`, {});
 			setState(res.data);
 		} catch (error) {
 			toast.error(errorMessage(error, 'Could not start the exam.'));
@@ -71,7 +73,7 @@ export const ExamRunner = ({ examId }: { examId: string }) => {
 	const decide = async (decision: 'FINALIZE' | 'RETRY') => {
 		try {
 			setIsBusy(true);
-			await api.post(`/api/exams/${examId}/decision`, { decision });
+			await api.post(secure ? `/api/secure-exams/${examId}/decision` : `/api/exams/${examId}/decision`, { decision, ...(secure ? { revision: state?.revision } : {}) });
 			await load();
 		} catch (error) {
 			toast.error(errorMessage(error, 'Could not continue.'));
@@ -99,7 +101,7 @@ export const ExamRunner = ({ examId }: { examId: string }) => {
 		);
 	}
 
-	if (state.status === 'FINALIZED') return <ExamResultView examId={examId} />;
+	if (state.status === 'FINALIZED') return <ExamResultView examId={examId} secure={secure} />;
 
 	if (state.status === 'AWAITING_DECISION') {
 		return (
@@ -115,15 +117,15 @@ export const ExamRunner = ({ examId }: { examId: string }) => {
 						</div>
 					</div>
 					<div className="flex flex-col gap-2 sm:flex-row">
-						<Button variant="outline" className="flex-1" disabled={isBusy} onClick={() => decide('FINALIZE')}>
+						<Button variant="outline" className="flex-1" disabled={isBusy || (secure && !state.canDecide)} onClick={() => decide('FINALIZE')}>
 							View my final mark
 						</Button>
-						<Button className="flex-1" disabled={isBusy} onClick={() => decide('RETRY')}>
+						<Button className="flex-1" disabled={isBusy || (secure && !state.canDecide)} onClick={() => decide('RETRY')}>
 							<RotateCcw className="mr-2 h-4 w-4" /> Take 2nd attempt
 						</Button>
 					</div>
 					<p className="text-xs text-slate-600">
-						Taking the 2nd attempt replaces your 1st attempt as your final answers. Your multiple-choice answers start blank; written answers are kept.
+						{secure ? 'Taking the 2nd attempt replaces your 1st attempt as your final answers. All answers start blank; Attempt 2 determines your final score even if it is lower. Both attempts are saved for later review.' : 'Taking the 2nd attempt replaces your 1st attempt as your final answers. Your multiple-choice answers start blank; written answers are kept.'}
 					</p>
 				</div>
 			</div>
@@ -148,7 +150,7 @@ export const ExamRunner = ({ examId }: { examId: string }) => {
 								: 'You have 1 attempt only.'}
 						</li>
 					</ul>
-					<Button size="lg" className="w-full" disabled={isBusy} onClick={start}>
+					<Button size="lg" className="w-full" disabled={isBusy || (secure && !state.canStart)} onClick={start}>
 						{isBusy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
 						Start exam
 					</Button>
@@ -157,7 +159,7 @@ export const ExamRunner = ({ examId }: { examId: string }) => {
 		);
 	}
 
-	return <AttemptView key={`${state.attemptNumber}`} examId={examId} state={state} onFinished={load} />;
+	return <AttemptView key={`${state.attemptId ?? state.attemptNumber}`} examId={examId} state={state} secure={secure} onFinished={load} />;
 };
 
 // ---------------------------------------------------------------------------
@@ -165,10 +167,12 @@ export const ExamRunner = ({ examId }: { examId: string }) => {
 const AttemptView = ({
 	examId,
 	state,
+	secure,
 	onFinished,
 }: {
 	examId: string;
 	state: ExamRunState;
+	secure: boolean;
 	onFinished: () => Promise<void>;
 }) => {
 	const [answers, setAnswers] = useState<ExamAnswers>(state.answers);
@@ -179,6 +183,23 @@ const AttemptView = ({
 	answersRef.current = answers;
 	const dirtyRef = useRef(false);
 	const submittingRef = useRef(false);
+	const revisionRef = useRef(state.revision ?? 0);
+	const queueRef = useRef<Promise<unknown>>(Promise.resolve());
+	const pendingSaveRef = useRef(0);
+	const conflictRef = useRef(false);
+	const [saveError, setSaveError] = useState<string | null>(null);
+	const saveSecure = useCallback((snapshot: ExamAnswers, action: 'answers' | 'submit' = 'answers') => {
+		pendingSaveRef.current += 1;
+		const work = queueRef.current.catch(() => undefined).then(async () => {
+			if (conflictRef.current) throw new Error('Exam changed in another tab. Reload before continuing.');
+			const { data } = await api.post<ExamRunState>(`/api/secure-exams/${examId}/${action}`, { attemptId: state.attemptId, revision: revisionRef.current, answers: snapshot });
+			revisionRef.current = data.revision ?? revisionRef.current;
+			setSaveError(null);
+			return data;
+		}).catch(error => { if ((error as { response?: { status?: number } }).response?.status === 409) conflictRef.current = true; throw error; }).finally(() => { pendingSaveRef.current -= 1; });
+		queueRef.current = work;
+		return work;
+	}, [examId, state.attemptId]);
 
 	// Server clock offset so a wrong device clock can't shorten or extend the timer.
 	const offsetRef = useRef(new Date(state.serverNow).getTime() - Date.now());
@@ -190,7 +211,8 @@ const AttemptView = ({
 			submittingRef.current = true;
 			setIsSubmitting(true);
 			try {
-				await api.post(`/api/exams/${examId}/submit`, { answers: answersRef.current });
+				if (secure) await saveSecure(answersRef.current, 'submit');
+				else await api.post(`/api/exams/${examId}/submit`, { answers: answersRef.current });
 				if (auto) toast('Time is up — your answers were submitted.');
 			} catch (error) {
 				toast.error(errorMessage(error, 'Could not submit. Please try again.'));
@@ -200,7 +222,7 @@ const AttemptView = ({
 				await onFinished();
 			}
 		},
-		[examId, onFinished]
+		[examId, onFinished, secure, saveSecure]
 	);
 
 	// Countdown
@@ -221,12 +243,26 @@ const AttemptView = ({
 		if (!dirtyRef.current) return;
 		const id = setTimeout(() => {
 			dirtyRef.current = false;
-			api.put(`/api/exams/${examId}/answers`, { answers: answersRef.current }).catch(() => {
+			const snapshot = answersRef.current;
+			(secure ? saveSecure(snapshot) : api.put(`/api/exams/${examId}/answers`, { answers: snapshot })).catch((error) => {
 				dirtyRef.current = true;
+				setSaveError(errorMessage(error, 'Answers could not be saved. Keep this tab open and retry.'));
 			});
 		}, 1200);
 		return () => clearTimeout(id);
-	}, [answers, examId]);
+	}, [answers, examId, secure, saveSecure]);
+
+	useEffect(() => {
+		if (!secure) return;
+		const id = setInterval(() => {
+			if (!dirtyRef.current || submittingRef.current || conflictRef.current) return;
+			dirtyRef.current = false;
+			saveSecure(answersRef.current).catch((error) => { dirtyRef.current = true; setSaveError(errorMessage(error, 'Answers are not saved. Please retry.')); });
+		}, 5000);
+		const warn = (event: BeforeUnloadEvent) => { if (dirtyRef.current || pendingSaveRef.current > 0) { event.preventDefault(); event.returnValue = ''; } };
+		window.addEventListener('beforeunload', warn);
+		return () => { clearInterval(id); window.removeEventListener('beforeunload', warn); };
+	}, [secure, saveSecure]);
 
 	const setAnswer = (questionId: string, patch: Record<string, unknown>) => {
 		dirtyRef.current = true;
@@ -235,7 +271,9 @@ const AttemptView = ({
 
 	const unanswered = state.questions.filter((q) => {
 		const a = answers[q.id];
-		return q.type === 'MCQ' ? typeof a?.choice !== 'number' : !a?.text?.trim() && !a?.imageUrl;
+		if(q.questionType==='multiple_choice')return !a?.choices?.length;
+        if(q.questionType==='numeric')return typeof a?.value!=='number';
+        return q.type === 'MCQ' ? typeof a?.choice !== 'number' : !a?.text?.trim() && !a?.imageUrl;
 	}).length;
 
 	const onSubmitClick = () => {
@@ -249,6 +287,7 @@ const AttemptView = ({
 
 	return (
 		<div className="mx-auto w-full max-w-3xl space-y-4 pb-24">
+			{saveError && <p role="alert" className="rounded-xl border-2 border-black bg-rose-100 p-3 text-sm">{saveError} Reload to resolve a stale tab; unsaved changes will be lost.</p>}
 			<div className="sticky top-2 z-30 flex items-center justify-between gap-3 rounded-2xl border-2 border-black bg-white p-3 shadow-hard-sm md:top-4">
 				<div className="min-w-0">
 					<p className="truncate text-sm font-bold">{state.exam.title}</p>
@@ -264,7 +303,7 @@ const AttemptView = ({
 					)}
 				>
 					<Clock className="h-4 w-4" />
-					{secondsLeft === null ? 'No limit' : formatClock(secondsLeft)}
+					{secondsLeft === null ? 'No Time Limit' : formatClock(secondsLeft)}
 				</div>
 			</div>
 
@@ -273,6 +312,11 @@ const AttemptView = ({
 					key={q.id}
 					index={index}
 					question={q}
+					secure={secure}
+					uploadPhoto={async (file) => {
+						const { data } = await api.post<{ imageKey: string; imageUrl: string }>(`/api/secure-exams/${examId}/photo`, file, { headers: { 'Content-Type': file.type, 'x-exam-attempt': state.attemptId, 'x-exam-question': q.id } });
+						return data;
+					}}
 					answer={answers[q.id]}
 					disabled={isSubmitting}
 					onChange={(patch) => setAnswer(q.id, patch)}
@@ -292,12 +336,16 @@ const AttemptView = ({
 const QuestionCard = ({
 	index,
 	question: q,
+	secure,
+	uploadPhoto,
 	answer,
 	disabled,
 	onChange,
 }: {
 	index: number;
 	question: ExamRunQuestion;
+	secure: boolean;
+	uploadPhoto: (file: File) => Promise<{ imageKey: string; imageUrl: string }>;
 	answer?: ExamAnswers[string];
 	disabled: boolean;
 	onChange: (patch: Record<string, unknown>) => void;
@@ -315,16 +363,17 @@ const QuestionCard = ({
 			<img src={q.imageUrl} alt="" className="max-h-64 rounded-xl border-2 border-black object-contain" />
 		)}
 
-		{q.type === 'MCQ' ? (
+		{q.questionType==='numeric'?<label className="block text-sm font-semibold">Numeric answer<Input type="number" step="any" value={answer?.value??''} disabled={disabled} onChange={event=>onChange({value:event.target.value===''?null:Number(event.target.value)})} /></label>:q.type === 'MCQ' ? (
 			<div className="space-y-2">
 				{(q.choices ?? []).map((choice, cIndex) => {
-					const selected = answer?.choice === cIndex;
+					const selected = q.questionType==='multiple_choice' ? answer?.choices?.includes(cIndex)===true : answer?.choice === cIndex;
 					return (
 						<button
 							key={cIndex}
 							type="button"
 							disabled={disabled}
-							onClick={() => onChange({ choice: cIndex })}
+							aria-pressed={selected}
+                            onClick={() => q.questionType==='multiple_choice'?onChange({choices:selected?(answer?.choices??[]).filter(i=>i!==cIndex):[...(answer?.choices??[]),cIndex]}):onChange({ choice: cIndex })}
 							className={cn(
 								'flex w-full items-center gap-3 rounded-xl border-2 px-3 py-2.5 text-left text-sm transition-colors',
 								selected ? 'border-black bg-primary font-semibold' : 'border-slate-300 bg-white hover:border-black'
@@ -350,7 +399,7 @@ const QuestionCard = ({
 					disabled={disabled}
 					maxLength={MAX_WRITTEN_ANSWER_TEXT}
 					onChange={(e) => onChange({ text: e.target.value })}
-					placeholder="Type a short answer, or upload a photo of your handwritten answer below."
+					placeholder={secure && !q.photoAllowed ? 'Type your written answer.' : 'Type a short answer, or upload a photo of your handwritten answer below.'}
 				/>
 				{answer?.imageUrl ? (
 					<div className="relative inline-block">
@@ -359,6 +408,7 @@ const QuestionCard = ({
 						<button
 							type="button"
 							aria-label="Remove photo"
+						disabled={disabled}
 							onClick={() => onChange({ imageUrl: null, imageKey: null })}
 							className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full border-2 border-black bg-white shadow-hard-sm"
 						>
@@ -367,12 +417,12 @@ const QuestionCard = ({
 					</div>
 				) : (
 					<div className="rounded-xl border-2 border-dashed border-slate-300 bg-slate-50/60 p-3">
-						<FileUpload
+						{secure ? q.photoAllowed ? <input type="file" aria-label="Upload handwritten answer" accept="image/png,image/jpeg,image/webp" disabled={disabled} onChange={async (event) => { const file=event.target.files?.[0]; if(!file)return; event.target.value=''; if(file.size>5*1024*1024){toast.error('Photo exceeds 5 MB');return;} try{onChange(await uploadPhoto(file));}catch(error){toast.error(errorMessage(error,'Photo upload failed.'));} }} /> : <p className="text-xs text-slate-600">This question accepts a typed answer.</p> : <FileUpload
 							endpoint="examAnswerImage"
 							onChange={(url, meta) => {
 								if (url) onChange({ imageUrl: url, imageKey: meta?.key ?? null });
 							}}
-						/>
+						/>}
 					</div>
 				)}
 			</div>

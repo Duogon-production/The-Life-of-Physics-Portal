@@ -62,7 +62,7 @@ select pg_temp.assert_true(public.start_assessment_attempt('a0000000-0000-0000-0
 select pg_temp.expect_error($sql$update public.assessment_attempts set score=999,status='graded'$sql$,'42501','student cannot assign grade');
 select pg_temp.expect_error(format('select public.save_assessment_response(%L::uuid,%L::uuid,%L::jsonb)',current_setting('test.other_attempt'),'80000000-0000-0000-0000-000000000001','{"option_ids":["90000000-0000-0000-0000-000000000001"]}'),'42501','student cannot answer peer attempt');
 select pg_temp.expect_error(format('select public.save_assessment_response(%L::uuid,%L::uuid,%L::jsonb)',current_setting('test.attempt'),'80000000-0000-0000-0000-000000000001','{"option_ids":["90000000-0000-0000-0000-000000000001"],"awarded_points":2}'),'23514','response rejects extra grading payload');
-select set_config('test.response',public.save_assessment_response(current_setting('test.attempt')::uuid,'80000000-0000-0000-0000-000000000001','{"option_ids":["90000000-0000-0000-0000-000000000001"]}')::text,true);
+select set_config('test.response',public.save_assessment_response(current_setting('test.attempt')::uuid,'80000000-0000-0000-0000-000000000001','{"option_ids":["90000000-0000-0000-0000-000000000002"]}')::text,true);
 select public.submit_assessment_attempt(current_setting('test.attempt')::uuid);
 select pg_temp.expect_error(format('select public.get_assessment_results(%L::uuid)',current_setting('test.attempt')),'42501','results withheld until finalized grading');
 select pg_temp.expect_error(format('select public.save_assessment_response(%L::uuid,%L::uuid,%L::jsonb)',current_setting('test.attempt'),'80000000-0000-0000-0000-000000000001','{"option_ids":["90000000-0000-0000-0000-000000000002"]}'),'42501','submitted answers are immutable');
@@ -94,6 +94,10 @@ select pg_temp.assert_true((select title='Admin updated title' from public.cours
 select pg_temp.assert_true(jsonb_array_length(public.get_assessment_answer_keys('70000000-0000-0000-0000-000000000001'))=1,'assigned instructor can retrieve grading keys');
 select pg_temp.expect_error(format('select public.grade_assessment_response(%L::uuid,3)',current_setting('test.response')),'23514','grade cannot exceed question points');
 select public.grade_assessment_response(current_setting('test.response')::uuid,2,'Correct');
+select pg_temp.expect_error(format('select public.finalize_assessment_grade(%L::uuid)',current_setting('test.attempt')),'23514','grading cannot finalize pending retry');
+select set_config('request.jwt.claims','{"iss":"https://gmvouqgjbtbkbhrdruzu.supabase.co/auth/v1","aud":"authenticated","sub":"10000000-0000-0000-0000-000000000005","role":"authenticated"}',true);
+select public.decide_exam_retry('a0000000-0000-0000-0000-000000000001','decline',(public.sync_exam_participation('a0000000-0000-0000-0000-000000000001')->>'revision')::bigint);
+select set_config('request.jwt.claims','{"iss":"https://gmvouqgjbtbkbhrdruzu.supabase.co/auth/v1","aud":"authenticated","sub":"10000000-0000-0000-0000-000000000002","role":"authenticated"}',true);
 select public.finalize_assessment_grade(current_setting('test.attempt')::uuid);
 select pg_temp.assert_true((public.get_assessment_results(current_setting('test.attempt')::uuid)->>'score')::numeric=2,'instructor can finalize legitimate grade');
 
@@ -106,9 +110,7 @@ select set_config('request.jwt.claims','{"iss":"https://gmvouqgjbtbkbhrdruzu.sup
 select pg_temp.assert_true((public.get_assessment_results(current_setting('test.attempt')::uuid)->>'score')::numeric=2,'student can read released own grade');
 select pg_temp.expect_error(format('select public.get_assessment_results(%L::uuid)',current_setting('test.other_attempt')),'42501','student cannot retrieve peer results');
 select pg_temp.expect_error('select awarded_points,feedback from public.assessment_responses','42501','direct grade fields require results RPC');
-select set_config('test.attempt2',public.start_assessment_attempt('a0000000-0000-0000-0000-000000000001')::text,true);
-select public.submit_assessment_attempt(current_setting('test.attempt2')::uuid);
-select pg_temp.expect_error($sql$select public.start_assessment_attempt('a0000000-0000-0000-0000-000000000001')$sql$,'42501','max attempts enforced');
+select pg_temp.expect_error($sql$select public.start_assessment_attempt('a0000000-0000-0000-0000-000000000001')$sql$,'42501','permanent decline blocks second attempt');
 
 -- Submission uploads require tenant/owner/enrollment-bound metadata.
 insert into public.media_assets(id,organization_id,uploaded_by,offering_id,kind,mime_type,original_filename,bucket,object_path)

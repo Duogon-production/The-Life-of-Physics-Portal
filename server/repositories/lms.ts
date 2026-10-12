@@ -44,7 +44,7 @@ export function createSupabaseLmsRepository(client: SupabaseClient<Database>, ve
     scheduledAssessments: (id, p) => read(client.from('offering_assessments').select('*').eq('offering_id', id).order('id').range(...pageRange(p))),
     questions: id => read(client.from('assessment_questions').select('*').eq('assessment_id', id).order('position').limit(500)),
     options: id => read(client.from('assessment_options').select('id,question_id,text,position').eq('question_id', id).order('position').limit(100)),
-    attempts: (id, p) => read(client.from('assessment_attempts').select('*').eq('offering_assessment_id', id).eq('user_id', verifiedProfileId).order('attempt_number').range(...pageRange(p))),
+    attempts: (id, p) => read(client.from('assessment_attempts').select('id,offering_assessment_id,user_id,attempt_number,started_at,deadline_at,submitted_at,status,created_at,updated_at').eq('offering_assessment_id', id).eq('user_id', verifiedProfileId).order('attempt_number').range(...pageRange(p))),
     responses: (id, p) => read(client.from('assessment_responses').select('id,attempt_id,question_id,response,media_asset_id,updated_at').eq('attempt_id', id).order('question_id').range(...pageRange(p))),
     media: (id, p) => read(client.from('media_assets').select('*').eq('organization_id', id).order('id').range(...pageRange(p))),
     registerMedia: value => read(client.from('media_assets').insert({

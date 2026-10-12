@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import Link from 'next/link';
 import {
 	AlertTriangle,
@@ -43,7 +44,7 @@ const STATE: Record<ExamListState, { text: string; className: string; icon: Luci
 
 const utc = (iso: string | null) => (iso ? `${new Date(iso).toISOString().slice(0, 16).replace('T', ' ')} UTC` : null);
 
-function Header({ isStaff }: { isStaff: boolean }) {
+function Header({ isStaff, action }: { isStaff: boolean; action?: ReactNode }) {
 	return (
 		<div className="flex flex-wrap items-center justify-between gap-3 rounded-3xl border-2 border-black bg-white p-5 shadow-hard">
 			<div className="flex items-center gap-3">
@@ -54,11 +55,12 @@ function Header({ isStaff }: { isStaff: boolean }) {
 					<h1 className="font-display text-3xl leading-none">Exams</h1>
 					<p className="mt-1 text-sm text-slate-600">
 						{isStaff
-							? 'Read-only overview of the exams scheduled for your offerings.'
+							? 'Create exams, manage submissions and release results for your offerings.'
 							: 'Your scheduled exams, attempts and available results.'}
 					</p>
 				</div>
 			</div>
+            {action}
 		</div>
 	);
 }
@@ -94,10 +96,10 @@ function releasedMark(exam: ExamListItem) {
 	return graded ? `${graded.score} / ${graded.maxScore}` : null;
 }
 
-export function ExamsListView({ items, isStaff, truncated }: { items: ExamListItem[]; isStaff: boolean; truncated: boolean }) {
+export function ExamsListView({ items, isStaff, truncated, action }: { items: ExamListItem[]; isStaff: boolean; truncated: boolean; action?: ReactNode }) {
 	return (
 		<div className="mx-auto w-full max-w-5xl space-y-6 pb-12">
-			<Header isStaff={isStaff} />
+			<Header isStaff={isStaff} action={action} />
 			{truncated && (
 				<p role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
 					This list is partial because it reached a safety limit. Some exams may not be shown.

@@ -19,19 +19,26 @@ async function examsContext() {
     const course = courses.find(c => c.id === o.course_id);
     return !!course && offeringCapability(context, course, o.id);
   });
-  return { repository, isStaff };
+  return { repository, isStaff, context, courses, offerings };
 }
 
 export async function loadExamList() {
   const ctx = await examsContext();
   if (!ctx) return null;
   const result = await ctx.repository.list({ studentView: !ctx.isStaff });
-  return { ...result, isStaff: ctx.isStaff };
+  const authoringOfferings=ctx.offerings.filter(o=>{const c=ctx.courses.find(c=>c.id===o.course_id);if(!c)return false;const member=ctx.context.memberships.find(m=>m.organization_id===c.organization_id&&m.status==='active');if(!member)return false;const admin=['owner','admin'].includes(member.role),staff=ctx.context.courseStaff.find(s=>s.course_id===c.id);const edits=admin||!!staff&&['owner','instructor','editor'].includes(staff.role);const manages=admin||!!staff&&['owner','instructor'].includes(staff.role)||ctx.context.offeringStaff.some(s=>s.offering_id===o.id&&s.role==='instructor');return edits&&manages;}).map(o=>({id:o.id,name:o.name,courseTitle:ctx.courses.find(c=>c.id===o.course_id)!.title}));
+  return { ...result, isStaff: ctx.isStaff, authoringOfferings };
 }
 
 export async function loadExam(scheduleId: string) {
   const ctx = await examsContext();
   if (!ctx) return null;
   const exam = await ctx.repository.get(scheduleId, { studentView: !ctx.isStaff });
-  return { exam, isStaff: ctx.isStaff };
+  const offering = ctx.offerings.find(o => o.id === exam?.offeringId);
+  const course = ctx.courses.find(c => c.id === offering?.course_id);
+  const membership=course?ctx.context.memberships.find(m=>m.organization_id===course.organization_id&&m.status==='active'):undefined;
+  const assigned=course?ctx.context.courseStaff.find(s=>s.course_id===course.id):undefined;
+  const admin=!!membership&&['owner','admin'].includes(membership.role);
+  const canAuthor=!!course&&!!offering&&!!membership&&(admin||!!assigned&&['owner','instructor','editor'].includes(assigned.role))&&(admin||!!assigned&&['owner','instructor'].includes(assigned.role)||ctx.context.offeringStaff.some(s=>s.offering_id===offering.id&&s.role==='instructor'));
+  return { exam, canAuthor, isStaff: !!course && !!offering && offeringCapability(ctx.context, course, offering.id) };
 }

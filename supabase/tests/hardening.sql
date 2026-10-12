@@ -19,6 +19,7 @@ select set_config('request.jwt.claims','{"iss":"https://gmvouqgjbtbkbhrdruzu.sup
 select pg_temp.expect_error($sql$select public.set_assessment_answer_key('b2000000-0000-0000-0000-000000000004','{"kind":"numeric","value":12.5,"absolute_tolerance":-1}')$sql$,'23514','Negative numeric tolerance rejected');
 select pg_temp.expect_error($sql$select public.set_assessment_answer_key('b2000000-0000-0000-0000-000000000004','{"kind":"numeric","value":"12.5","absolute_tolerance":0}')$sql$,'23514','String numeric key rejected');
 select public.set_assessment_answer_key('b2000000-0000-0000-0000-000000000004','{"kind":"numeric","value":12.5,"absolute_tolerance":0.01}');
+select public.set_assessment_answer_key('b2000000-0000-0000-0000-000000000006','{"kind":"numeric","value":1,"absolute_tolerance":0}');
 select set_config('request.jwt.claims','{"iss":"https://gmvouqgjbtbkbhrdruzu.supabase.co/auth/v1","aud":"authenticated","sub":"10000000-0000-0000-0000-000000000005","role":"authenticated"}',true);
 select set_config('test.attempt',public.start_assessment_attempt('b4000000-0000-0000-0000-000000000001')::text,true);
 select pg_temp.assert_true(public.start_assessment_attempt('b4000000-0000-0000-0000-000000000001')=current_setting('test.attempt')::uuid,'Repeated start is idempotent');
@@ -44,7 +45,7 @@ select pg_temp.assert_true((select awarded_points=2 from public.assessment_respo
 select pg_temp.assert_true((select awarded_points=0 from public.assessment_responses where attempt_id=current_setting('test.attempt')::uuid and question_id='b2000000-0000-0000-0000-000000000003'),'Wrong true false scores zero');
 select pg_temp.assert_true((select awarded_points=2 from public.assessment_responses where attempt_id=current_setting('test.attempt')::uuid and question_id='b2000000-0000-0000-0000-000000000004'),'Numeric tolerance boundary included');
 select pg_temp.assert_true((select awarded_points is null from public.assessment_responses where attempt_id=current_setting('test.attempt')::uuid and question_id='b2000000-0000-0000-0000-000000000005'),'Essay stays manual');
-select pg_temp.assert_true((select awarded_points is null from public.assessment_responses where attempt_id=current_setting('test.attempt')::uuid and question_id='b2000000-0000-0000-0000-000000000006'),'Numeric without key stays manual');
+select pg_temp.assert_true((select awarded_points=2 from public.assessment_responses where attempt_id=current_setting('test.attempt')::uuid and question_id='b2000000-0000-0000-0000-000000000006'),'Validated numeric key grades automatically');
 set local role authenticated;
 select set_config('request.jwt.claims','{"iss":"https://gmvouqgjbtbkbhrdruzu.supabase.co/auth/v1","aud":"authenticated","sub":"10000000-0000-0000-0000-000000000002","role":"authenticated"}',true);
 select pg_temp.expect_error($sql$select public.finalize_assessment_grade(current_setting('test.attempt')::uuid)$sql$,'23514','Unmarked responses block finalization');
@@ -87,6 +88,7 @@ select pg_temp.assert_true(not private.can_upload_media('lms-submissions','20000
 select public.abandon_media_upload('b5000000-0000-0000-0000-000000000001');
 select public.abandon_media_upload('b5000000-0000-0000-0000-000000000001');
 select pg_temp.assert_true((select status='archived' from public.media_assets where id='b5000000-0000-0000-0000-000000000001'),'Repeated abandon is idempotent');
+select public.decide_exam_retry('b4000000-0000-0000-0000-000000000001','accept',(public.sync_exam_participation('b4000000-0000-0000-0000-000000000001')->>'revision')::bigint);
 select set_config('test.retry',public.start_assessment_attempt('b4000000-0000-0000-0000-000000000001')::text,true);
 select pg_temp.expect_error($sql$select public.save_assessment_response(current_setting('test.retry')::uuid,'b2000000-0000-0000-0000-000000000005',jsonb_build_object('text',repeat('x',65536)))$sql$,'23514','Oversized persisted response rejected');
 select pg_temp.expect_error($sql$select public.save_assessment_response(current_setting('test.retry')::uuid,'b2000000-0000-0000-0000-000000000007','{}','b5000000-0000-0000-0000-000000000001')$sql$,'23514','Abandoned file cannot be submitted');
@@ -94,7 +96,7 @@ reset role;
 select pg_temp.assert_true((select count(*)=1 from private.expired_media_uploads where id='b5000000-0000-0000-0000-000000000001'),'Cleanup queue includes unreferenced abandoned asset');
 select pg_temp.expect_error($sql$insert into public.lessons(module_id,title,position) values('ffffffff-ffff-ffff-ffff-ffffffffffff','Invalid parent',0)$sql$,'23503','Unknown module rejected by foreign key');
 insert into public.assessments(id,course_id,title,type,status) values('b6000000-0000-0000-0000-000000000001','30000000-0000-0000-0000-000000000001','Future test','quiz','published');
-insert into public.offering_assessments(id,offering_id,assessment_id,opens_at,closes_at,published) values('b7000000-0000-0000-0000-000000000001','60000000-0000-0000-0000-000000000001','b6000000-0000-0000-0000-000000000001',now()+interval '1 hour',now()+interval '2 hours',true);
+insert into public.offering_assessments(id,offering_id,assessment_id,max_attempts,opens_at,closes_at,published) values('b7000000-0000-0000-0000-000000000001','60000000-0000-0000-0000-000000000001','b6000000-0000-0000-0000-000000000001',1,now()+interval '1 hour',now()+interval '2 hours',true);
 set local role authenticated;
 select pg_temp.expect_error($sql$select public.start_assessment_attempt('b7000000-0000-0000-0000-000000000001')$sql$,'42501','Not yet open assessment denied');
 reset role;
@@ -102,7 +104,11 @@ update public.offering_assessments set opens_at=now()-interval '2 hours',closes_
 set local role authenticated;
 select pg_temp.expect_error($sql$select public.start_assessment_attempt('b7000000-0000-0000-0000-000000000001')$sql$,'42501','Closed assessment denied');
 reset role;
-insert into public.assessment_attempts(id,offering_assessment_id,user_id,attempt_number,started_at,deadline_at,max_score) values('b8000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000005',1,now()-interval '2 hours',now()-interval '1 hour',2);
+-- This deliberately expired direct fixture exercises the retained practice
+-- workflow. Exam expiry is tested through real start/sync in the new suite.
+insert into public.assessments(id,course_id,title,type,status) values('b6000000-0000-0000-0000-000000000002','30000000-0000-0000-0000-000000000001','Practice expiry','practice','published');
+insert into public.offering_assessments(id,offering_id,assessment_id,published) values('b7000000-0000-0000-0000-000000000002','60000000-0000-0000-0000-000000000001','b6000000-0000-0000-0000-000000000002',true);
+insert into public.assessment_attempts(id,offering_assessment_id,user_id,attempt_number,started_at,deadline_at,max_score) values('b8000000-0000-0000-0000-000000000001','b7000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000005',1,now()-interval '2 hours',now()-interval '1 hour',2);
 set local role authenticated;
 select pg_temp.expect_error($sql$select public.save_assessment_response('b8000000-0000-0000-0000-000000000001','80000000-0000-0000-0000-000000000001','{"option_ids":["90000000-0000-0000-0000-000000000001"]}')$sql$,'42501','Expired attempt cannot accept answers');
 select public.submit_assessment_attempt('b8000000-0000-0000-0000-000000000001');

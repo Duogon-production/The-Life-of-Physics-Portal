@@ -34,7 +34,10 @@ export interface ExamSummary {
 }
 
 /** A question as shown to a student while taking the exam. The answer key is never included. */
+export type SecureQuestionType = 'single_choice' | 'multiple_choice' | 'true_false' | 'numeric' | 'short_text' | 'essay' | 'file_upload';
 export interface ExamRunQuestion {
+	questionType?: SecureQuestionType;
+	photoAllowed?: boolean;
 	id: string;
 	position: number;
 	type: ExamQuestionType;
@@ -45,6 +48,11 @@ export interface ExamRunQuestion {
 }
 
 export interface ExamRunState {
+	/** Supabase optimistic concurrency and server-owned attempt identity. */
+	revision?: number;
+	attemptId?: string | null;
+	canStart?: boolean;
+	canDecide?: boolean;
 	role: 'student';
 	exam: {
 		id: string;
@@ -65,6 +73,11 @@ export interface ExamRunState {
 }
 
 export interface ExamEditableQuestion {
+	questionType?: SecureQuestionType;
+	correctChoices?: number[] | null;
+	numericValue?: number | null;
+	numericTolerance?: number | null;
+	photoAllowed?: boolean;
 	id?: string;
 	type: ExamQuestionType;
 	text: string;
@@ -75,6 +88,9 @@ export interface ExamEditableQuestion {
 }
 
 export interface ExamEditable {
+	kind?: 'exam' | 'quiz';
+	offeringId?: string;
+	updatedAt?: string;
 	role: 'staff';
 	id: string;
 	title: string;
@@ -88,11 +104,18 @@ export interface ExamEditable {
 }
 
 export interface ResultAttemptPick {
+	choices?: number[];
+	value?: number | null;
+	text?: string | null;
 	attemptNumber: number;
 	choice: number | null;
 }
 
 export interface ExamResultQuestion {
+	questionType?: SecureQuestionType;
+	correctChoices?: number[];
+	numericKey?: {value:number;absolute_tolerance:number} | null;
+	feedback?: string | null;
 	id: string;
 	position: number;
 	type: ExamQuestionType;
@@ -109,13 +132,19 @@ export interface ExamResultQuestion {
 	writtenScore: number | null;
 }
 
+export interface GradeChange {id:string;changedAt:string;reason:string;previousScore:number|null;score:number|null;staffId?:string|null}
 export interface ExamResult {
+	gradeChanges?: GradeChange[];
+	resultReleased?: boolean;
+	reviewReleased?: boolean;
+	finalScore?: number | null;
+	finalPossible?: number | null;
 	examId: string;
 	title: string;
 	attemptsUsed: number;
 	maxAttempts: 1 | 2;
-	mcqScore: number;
-	mcqTotal: number;
+	mcqScore: number | null;
+	mcqTotal: number | null;
 	writtenStatus: WrittenStatus;
 	writtenScore: number | null;
 	writtenTotal: number;
@@ -125,6 +154,12 @@ export interface ExamResult {
 }
 
 export interface GradingEntry {
+	allScores?: Record<string,number>;
+	gradeChanges?: GradeChange[];
+	revision?: number;
+	userId?: string;
+	resultReleased?: boolean;
+	reviewReleased?: boolean;
 	sessionId: string;
 	studentName: string;
 	studentEmail: string;
@@ -139,6 +174,8 @@ export interface GradingEntry {
 }
 
 export interface GradingPayload {
+	nextCursor?: string | null;
+	allQuestions?: GradingPayload['writtenQuestions'];
 	exam: { id: string; title: string };
 	writtenQuestions: { id: string; position: number; text: string; imageUrl: string | null; points: number }[];
 	entries: GradingEntry[];

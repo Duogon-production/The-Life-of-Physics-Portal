@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { ArrowLeft, ExternalLink, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -14,22 +14,24 @@ import { cn } from '@/shared/utils';
 interface ExamGradingPanelProps {
 	examId: string;
 	onClose: () => void;
+	secure?: boolean;
 }
 
-export const ExamGradingPanel = ({ examId, onClose }: ExamGradingPanelProps) => {
+export const ExamGradingPanel = ({ examId, onClose, secure = false }: ExamGradingPanelProps) => {
 	const [data, setData] = useState<GradingPayload | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
+ const [after,setAfter]=useState<string|null>(null),[previous,setPrevious]=useState<(string|null)[]>([]),[loadError,setLoadError]=useState(false);
 
 	const load = useCallback(async () => {
 		try {
-			const res = await api.get<GradingPayload>(`/api/exams/${examId}/grading`);
-			setData(res.data);
+			const res = secure ? await api.post<GradingPayload>(`/api/secure-exams/${examId}/grading`, {after}) : await api.get<GradingPayload>(`/api/exams/${examId}/grading`);
+			setData(res.data);setLoadError(false);
 		} catch {
-			toast.error('Could not load written answers.');
+			setLoadError(true);toast.error('Could not load submissions.');
 		} finally {
 			setIsLoading(false);
 		}
-	}, [examId]);
+	}, [examId, secure, after]);
 
 	useEffect(() => {
 		load();
@@ -42,7 +44,7 @@ export const ExamGradingPanel = ({ examId, onClose }: ExamGradingPanelProps) => 
 			</button>
 			<h1 className="font-display text-3xl">{data?.exam.title ?? 'Written answers'}</h1>
 
-			{isLoading ? (
+			{loadError?<p role="alert" className="rounded-xl border-2 border-black bg-rose-100 p-3 text-sm">Submissions could not be loaded. Please retry.<Button onClick={load}>Retry</Button></p>:isLoading ? (
 				<div className="flex justify-center py-16">
 					<Loader2 className="h-6 w-6 animate-spin text-slate-500" />
 				</div>
@@ -50,15 +52,16 @@ export const ExamGradingPanel = ({ examId, onClose }: ExamGradingPanelProps) => 
 				<div className="rounded-2xl border-2 border-black bg-white p-6 text-center text-slate-600 shadow-hard-sm">
 					No finished submissions with written questions yet.
 				</div>
-			) : data.writtenQuestions.length === 0 ? (
+			) : data.writtenQuestions.length === 0 && !secure ? (
 				<div className="rounded-2xl border-2 border-black bg-white p-6 text-center text-slate-600 shadow-hard-sm">
 					This exam has no written questions.
 				</div>
 			) : (
 				data.entries.map((entry) => (
-					<GradingCard key={entry.sessionId} examId={examId} entry={entry} questions={data.writtenQuestions} onSaved={load} />
+					<GradingCard key={`${entry.sessionId}-${entry.revision}`} examId={examId} entry={entry} questions={data.writtenQuestions} allQuestions={data.allQuestions??data.writtenQuestions} secure={secure} onSaved={load} />
 				))
 			)}
+            {secure&&<div className="flex justify-between gap-2"><Button variant="outline" disabled={previous.length===0||isLoading} onClick={()=>{setAfter(previous.at(-1)??null);setPrevious(p=>p.slice(0,-1));setIsLoading(true);}}>Previous submissions</Button><Button variant="outline" disabled={!data?.nextCursor||isLoading} onClick={()=>{setPrevious(p=>[...p,after]);setAfter(data?.nextCursor??null);setIsLoading(true);}}>Next submissions</Button></div>}
 		</div>
 	);
 };
@@ -66,23 +69,31 @@ export const ExamGradingPanel = ({ examId, onClose }: ExamGradingPanelProps) => 
 const GradingCard = ({
 	examId,
 	entry,
-	questions,
+	secure,
+	questions: writtenQuestions,
+    allQuestions,
 	onSaved,
 }: {
 	examId: string;
 	entry: GradingEntry;
+	secure: boolean;
 	questions: GradingPayload['writtenQuestions'];
+ allQuestions: GradingPayload['writtenQuestions'];
 	onSaved: () => void;
 }) => {
-	const [scores, setScores] = useState<Record<string, string>>(() =>
-		Object.fromEntries(questions.map((q) => [q.id, entry.writtenScores[q.id] !== undefined ? String(entry.writtenScores[q.id]) : '']))
+	const [correcting,setCorrecting]=useState(false),[reason,setReason]=useState('');
+ const requestId=useRef<string|null>(null);
+ const questions=correcting?allQuestions:writtenQuestions;
+ const [scores, setScores] = useState<Record<string, string>>(() =>
+		Object.fromEntries(allQuestions.map((q) => [q.id, entry.allScores?.[q.id] !== undefined ? String(entry.allScores[q.id]) : entry.writtenScores[q.id] !== undefined ? String(entry.writtenScores[q.id]) : '']))
 	);
 	const [note, setNote] = useState(entry.reviewNote ?? '');
 	const [isSaving, setIsSaving] = useState(false);
 	const pending = entry.writtenStatus === 'UNDER_CORRECTION';
 
 	const save = async () => {
-		const parsed: Record<string, number> = {};
+		if(correcting&&!reason.trim()){toast.error('Enter a reason for the correction.');return;}
+        const parsed: Record<string, number> = {};
 		for (const q of questions) {
 			const value = scores[q.id];
 			if (value === '' || value === undefined || Number.isNaN(Number(value))) {
@@ -93,7 +104,8 @@ const GradingCard = ({
 		}
 		try {
 			setIsSaving(true);
-			await api.patch(`/api/exams/${examId}/grading/${entry.sessionId}`, { scores: parsed, reviewNote: note });
+			if (secure) await api.post(`/api/secure-exams/${examId}/grade`, { attemptId: entry.sessionId, revision: entry.revision, scores: parsed, reviewNote: note, requestId:requestId.current??(requestId.current=crypto.randomUUID()),...(correcting?{reason}: {}) });
+			else await api.patch(`/api/exams/${examId}/grading/${entry.sessionId}`, { scores: parsed, reviewNote: note });
 			toast.success('Marks saved.');
 			onSaved();
 		} catch (error) {
@@ -102,6 +114,11 @@ const GradingCard = ({
 		} finally {
 			setIsSaving(false);
 		}
+	};
+	const release = async (review: boolean) => {
+		try { setIsSaving(true); await api.post(`/api/secure-exams/${examId}/${review ? 'release-review' : 'release'}`, { attemptId: entry.sessionId, revision: entry.revision }); onSaved(); }
+		catch { toast.error('Release is unavailable or the submission changed. Reload and retry.'); }
+		finally { setIsSaving(false); }
 	};
 
 	return (
@@ -143,6 +160,7 @@ const GradingCard = ({
 								max={q.points}
 								step="0.5"
 								value={scores[q.id] ?? ''}
+							disabled={secure && entry.resultReleased && !correcting}
 								onChange={(e) => setScores((prev) => ({ ...prev, [q.id]: e.target.value }))}
 								className="w-24"
 							/>
@@ -152,11 +170,14 @@ const GradingCard = ({
 				);
 			})}
 
-			<Textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Feedback for the student (optional)" />
-			<Button onClick={save} disabled={isSaving}>
+            {secure&&entry.resultReleased&&<><Button variant="outline" onClick={()=>{setCorrecting(v=>!v);requestId.current=null;}}>Correct published marks</Button>{correcting&&<label className="block text-sm font-semibold">Correction reason (visible to the student)<Textarea value={reason} onChange={e=>setReason(e.target.value)} maxLength={5000} /></label>}</>}
+            {entry.gradeChanges&&entry.gradeChanges.length>0&&<div className="rounded-xl border-2 border-black bg-sky-50 p-3 text-sm"><p className="font-bold">Grading history</p>{entry.gradeChanges.map(c=><p key={c.id}>{c.reason}: {c.previousScore??'Pending'} → {c.score??'Pending'}</p>)}</div>}
+			<Textarea value={note} disabled={secure && entry.resultReleased} onChange={(e) => setNote(e.target.value)} placeholder="Feedback for the student (optional)" />
+			<Button onClick={save} disabled={isSaving || (secure && ((entry.resultReleased&&!correcting) || questions.length === 0))}>
 				{isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-				{pending ? 'Save marks' : 'Update marks'}
+				{correcting?'Save audited correction':pending ? 'Save marks' : 'Update marks'}
 			</Button>
+			{secure && <div className="flex flex-wrap gap-2"><Button disabled={isSaving || pending || entry.resultReleased} onClick={() => release(false)}>{entry.resultReleased ? 'Mark released' : 'Release final mark'}</Button><Button variant="outline" disabled={isSaving || !entry.resultReleased || entry.reviewReleased} onClick={() => release(true)}>{entry.reviewReleased ? 'Review released' : 'Release answer review'}</Button></div>}
 		</div>
 	);
 };

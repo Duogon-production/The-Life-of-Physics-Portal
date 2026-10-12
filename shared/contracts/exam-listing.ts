@@ -5,10 +5,8 @@
  * assessment scheduled for one course offering). `id` below is therefore the
  * offering_assessment id, which is what `start_assessment_attempt` expects.
  *
- * Everything here is derived ONLY from data a student can already read through
- * RLS (offering_assessments, assessments, own assessment_attempts, question
- * counts). Retry decisions, finalization and answer review are NOT represented
- * because the backend has no contract for them yet (see CHANGELOG_FOR_MERGE.md).
+ * Content uses caller RLS; own attempt summaries use the checked release RPC.
+ * The read-only V2 pages stay in place while the secure runner remains inactive.
  */
 
 export type ExamAttemptStatus = 'in_progress' | 'submitted' | 'graded' | 'void';
@@ -19,7 +17,8 @@ export interface ExamAttemptSummary {
 	startedAt: string;
 	deadlineAt: string | null;
 	submittedAt: string | null;
-	/** Only meaningful when status === 'graded' (staff-finalized). */
+	/** Database release authorization, independent of grading completion. */
+	resultReleased?: boolean;
 	score: number | null;
 	maxScore: number | null;
 }
@@ -31,7 +30,7 @@ export interface ExamAttemptSummary {
  * - TIME_EXPIRED:     in-progress attempt past its server deadline (the backend
  *                     closes and grades it the next time a start is requested)
  * - SUBMITTED:        at least one attempt submitted, results not yet released
- * - GRADED:           a staff-finalized attempt exists (results released)
+ * - GRADED:           the database explicitly authorized the final result release
  * - ATTEMPTS_USED:    reserved: attempt limit reached and nothing else to show
  * - NOT_OPEN_YET / CLOSED: outside opens_at/closes_at and no attempt to show
  */
@@ -101,7 +100,7 @@ export function deriveExamListState(
 	input: {
 		opensAt: string | null;
 		closesAt: string | null;
-		attempts: Pick<ExamAttemptSummary, 'status' | 'deadlineAt'>[];
+		attempts: Pick<ExamAttemptSummary, 'status' | 'deadlineAt' | 'resultReleased'>[];
 	},
 	now: number
 ): ExamListState {
@@ -109,8 +108,8 @@ export function deriveExamListState(
 	if (live) {
 		return live.deadlineAt && Date.parse(live.deadlineAt) <= now ? 'TIME_EXPIRED' : 'IN_PROGRESS';
 	}
-	if (input.attempts.some((a) => a.status === 'graded')) return 'GRADED';
-	if (input.attempts.some((a) => a.status === 'submitted')) return 'SUBMITTED';
+	if (input.attempts.some((a) => a.status === 'graded' && a.resultReleased === true)) return 'GRADED';
+	if (input.attempts.some((a) => a.status === 'submitted' || a.status === 'graded')) return 'SUBMITTED';
 	if (input.opensAt && Date.parse(input.opensAt) > now) return 'NOT_OPEN_YET';
 	if (input.closesAt && Date.parse(input.closesAt) <= now) return 'CLOSED';
 	return 'NOT_STARTED';
