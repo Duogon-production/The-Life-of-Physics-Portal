@@ -1,5 +1,22 @@
 # Concurrent database regression tests
 
+## Current Step 03A local verification
+
+Run `npm run test:exam-sql:postgres` using the isolated localhost PostgreSQL
+runtime described in `docs/step03a-exams-implementation.md`. It creates a fresh,
+uniquely named test database, replays all 20 local migrations, rolls back nine SQL
+suites (387 assertions), and runs ten independent-session races with verified PostgreSQL lock waits.
+Migration 20 is applied to the authorized development project. The new races
+cover competing audited grade corrections and atomic answer snapshots. Add
+`--timers` to exercise a real 60-second deadline; that check also passed.
+It then removes only that database. Never point this harness at Supabase.
+
+The historical instructions below record the pre-Step-03A tests. **Do not execute
+their setup/cleanup against migration 18**: the workflow now requires retry
+decisions and protected participation/outcome records. They are retained as history.
+
+## Historical development verification (before migration 18)
+
 Executed on development project `gmvouqgjbtbkbhrdruzu` on 2026-10-10 through two concurrent official MCP calls per stage. These use real PostgreSQL transactions and `authenticated` database roles, with simulated JWT claims; they are not real-login HTTP capacity tests.
 
 The fixture INSERT must fail on an existing ID. Do not reuse/delete an unrelated fixture. Only the rows newly created by this test are cleaned up. No auth users, existing courses, enrollments or academic records are removed.
