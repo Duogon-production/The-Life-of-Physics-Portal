@@ -11,17 +11,16 @@ import { attemptLabel, choiceLabel } from '@/shared/exams';
 import { cn } from '@/shared/utils';
 
 /** Final mark plus the visual answer history. Only rendered after the student finalised. */
-export const ExamResultView = ({ examId }: { examId: string }) => {
+export const ExamResultView = ({ examId, secure = false }: { examId: string; secure?: boolean }) => {
 	const [result, setResult] = useState<ExamResult | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
-		api
-			.get<ExamResult>(`/api/exams/${examId}/result`)
+		(secure ? api.post<ExamResult>(`/api/secure-exams/${examId}/result`, {}) : api.get<ExamResult>(`/api/exams/${examId}/result`))
 			.then((res) => setResult(res.data))
 			.catch(() => toast.error('Could not load your result.'))
 			.finally(() => setIsLoading(false));
-	}, [examId]);
+	}, [examId, secure]);
 
 	if (isLoading) {
 		return (
@@ -31,11 +30,23 @@ export const ExamResultView = ({ examId }: { examId: string }) => {
 		);
 	}
 	if (!result) return null;
+	if (secure) return (
+		<div className="mx-auto w-full max-w-3xl space-y-5 pb-16">
+			<Link href="/exams" className="flex items-center gap-2 text-sm font-semibold text-slate-700 hover:text-black"><ArrowLeft className="h-4 w-4" /> All exams</Link>
+			<div className="space-y-3 rounded-3xl border-2 border-black bg-white p-6 shadow-hard">
+				<h1 className="font-display text-3xl leading-tight">{result.title}</h1>
+				{result.resultReleased ? <p className="text-3xl font-extrabold">Final mark: {result.finalScore} / {result.finalPossible}</p> : <p className="flex items-center gap-2 text-lg font-extrabold"><Hourglass className="h-5 w-5" />{result.writtenStatus === 'UNDER_CORRECTION' ? 'Under Correction' : 'Results have not been released yet.'}</p>}
+				{result.gradeChanges&&result.gradeChanges.length>0&&<div className="space-y-2 rounded-xl border-2 border-black bg-sky-50 p-3 text-sm"><p className="font-bold">Grading history</p>{result.gradeChanges.map(change=><p key={change.id}>{change.reason} — {change.previousScore??'Pending'} → {change.score??'Pending'} ({new Date(change.changedAt).toLocaleString()})</p>)}</div>}
+                {!result.reviewReleased && <p className="text-sm text-slate-600">Answer history and teacher feedback will appear after your teacher releases the review.</p>}
+			</div>
+			{result.reviewReleased && <><Legend />{result.questions.map(q => <ExamQuestionHistory key={q.id} question={q} />)}</>}
+		</div>
+	);
 
 	const graded = result.writtenStatus === 'GRADED';
 	const hasWritten = result.writtenStatus !== 'NONE';
-	const total = result.mcqScore + (result.writtenScore ?? 0);
-	const possible = result.mcqTotal + result.writtenTotal;
+	const total = (result.mcqScore ?? 0) + (result.writtenScore ?? 0);
+	const possible = (result.mcqTotal ?? 0) + result.writtenTotal;
 
 	return (
 		<div className="mx-auto w-full max-w-3xl space-y-5 pb-16">
@@ -88,7 +99,7 @@ export const ExamResultView = ({ examId }: { examId: string }) => {
 			<Legend />
 
 			{result.questions.map((q) => (
-				<QuestionHistory key={q.id} question={q} />
+				<ExamQuestionHistory key={q.id} question={q} />
 			))}
 		</div>
 	);
@@ -108,9 +119,9 @@ const Legend = () => (
 	</div>
 );
 
-const QuestionHistory = ({ question: q }: { question: ExamResultQuestion }) => {
+export const ExamQuestionHistory = ({ question: q }: { question: ExamResultQuestion }) => {
 	const summary = q.picks
-		.map((pick) => `${attemptLabel(pick.attemptNumber)}: ${pick.choice === null ? 'No answer' : `Choice ${choiceLabel(pick.choice)}`}`)
+		.map((pick) => `${attemptLabel(pick.attemptNumber)}: ${q.questionType==='multiple_choice'?(pick.choices?.length?pick.choices.map(choiceLabel).join(', '):'No answer'):pick.choice === null||pick.choice<0 ? 'No answer' : `Choice ${choiceLabel(pick.choice)}`}`)
 		.join(' · ');
 
 	return (
@@ -131,8 +142,8 @@ const QuestionHistory = ({ question: q }: { question: ExamResultQuestion }) => {
 				<>
 					<div className="space-y-2">
 						{(q.choices ?? []).map((choice, index) => {
-							const isCorrect = index === q.correctChoice;
-							const picksHere = q.picks.filter((pick) => pick.choice === index);
+							const isCorrect = q.correctChoices?.includes(index) ?? index === q.correctChoice;
+							const picksHere = q.picks.filter((pick) => q.questionType==='multiple_choice'?pick.choices?.includes(index):pick.choice === index);
 							const isWrongPick = !isCorrect && picksHere.length > 0;
 							return (
 								<div
@@ -172,7 +183,8 @@ const QuestionHistory = ({ question: q }: { question: ExamResultQuestion }) => {
 				</>
 			) : (
 				<div className="space-y-2 rounded-xl border-2 border-slate-200 bg-slate-50 p-3">
-					<p className="text-xs font-bold uppercase tracking-wider text-slate-600">Your written answer</p>
+					<p className="text-xs font-bold uppercase tracking-wider text-slate-600">{q.questionType==='numeric'?'Your numeric answer':'Your written answer'}</p>
+                    {q.questionType==='numeric'&&<><p className="rounded-lg border-2 border-emerald-600 bg-emerald-100 p-2 text-sm">Correct answer: {q.numericKey?.value} (tolerance ±{q.numericKey?.absolute_tolerance})</p>{q.picks.map(pick=><p key={pick.attemptNumber} className={cn('rounded-lg border-2 p-2 text-sm',pick.value!=null&&q.numericKey&&Math.abs(pick.value-q.numericKey.value)<=q.numericKey.absolute_tolerance?'border-emerald-600 bg-emerald-100':'border-rose-600 bg-rose-100')}><strong>{attemptLabel(pick.attemptNumber)}</strong>: {pick.value??'No answer'}</p>)}</>}
 					{q.written?.text && <p className="whitespace-pre-wrap text-sm">{q.written.text}</p>}
 					{q.written?.imageUrl && (
 						// eslint-disable-next-line @next/next/no-img-element
@@ -192,6 +204,7 @@ const QuestionHistory = ({ question: q }: { question: ExamResultQuestion }) => {
 					</p>
 				</div>
 			)}
+            {q.feedback&&<p className="rounded-xl border-2 border-black bg-sky-50 p-3 text-sm">Teacher feedback: {q.feedback}</p>}
 		</div>
 	);
 };

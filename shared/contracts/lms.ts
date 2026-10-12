@@ -5,6 +5,7 @@ export type LmsRow<T extends keyof Tables> = Tables[T]['Row'];
 export type PageRequest = { page?: number; pageSize?: number };
 export type AnswerOption = Pick<LmsRow<'assessment_options'>, 'id' | 'question_id' | 'text' | 'position'>;
 export type StudentResponse = Pick<LmsRow<'assessment_responses'>, 'id' | 'attempt_id' | 'question_id' | 'response' | 'media_asset_id' | 'updated_at'>;
+export type SafeAttempt = Pick<LmsRow<'assessment_attempts'>, 'id' | 'offering_assessment_id' | 'user_id' | 'attempt_number' | 'started_at' | 'deadline_at' | 'submitted_at' | 'status' | 'created_at' | 'updated_at'>;
 export type AssessmentResults = {
   attempt_id: string;
   status: 'in_progress' | 'submitted' | 'graded' | 'void';
@@ -28,7 +29,7 @@ export interface LmsRepository {
   scheduledAssessments(offeringId: string, page?: PageRequest): Promise<LmsRow<'offering_assessments'>[]>;
   questions(assessmentId: string): Promise<LmsRow<'assessment_questions'>[]>;
   options(questionId: string): Promise<AnswerOption[]>;
-  attempts(scheduledAssessmentId: string, page?: PageRequest): Promise<LmsRow<'assessment_attempts'>[]>;
+  attempts(scheduledAssessmentId: string, page?: PageRequest): Promise<SafeAttempt[]>;
   responses(attemptId: string, page?: PageRequest): Promise<StudentResponse[]>;
   media(organizationId: string, page?: PageRequest): Promise<LmsRow<'media_assets'>[]>;
   registerMedia(asset: Pick<Tables['media_assets']['Insert'], 'id' | 'organization_id' | 'offering_id' | 'kind' | 'mime_type' | 'original_filename' | 'bucket' | 'object_path'>): Promise<LmsRow<'media_assets'>>;

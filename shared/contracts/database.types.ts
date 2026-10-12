@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       assessment_attempts: {
         Row: {
+          participation_id: string | null
           attempt_number: number
           created_at: string
           deadline_at: string | null
@@ -32,6 +33,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          participation_id?: string | null
           attempt_number: number
           created_at?: string
           deadline_at?: string | null
@@ -48,6 +50,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          participation_id?: string | null
           attempt_number?: number
           created_at?: string
           deadline_at?: string | null
@@ -1003,6 +1006,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      sync_exam_participation: { Args: { p_schedule_id: string }; Returns: Json }
+      decide_exam_retry: { Args: { p_schedule_id: string; p_decision: string; p_expected_revision: number }; Returns: Json }
+      save_exam_response: { Args: { p_attempt_id: string; p_question_id: string; p_response: Json | null; p_media_asset_id: string | null; p_expected_revision: number }; Returns: Json }
+      // Checked exam workflow RPCs from applied development migration 20.
+      save_exam_answers: { Args: { p_attempt_id: string; p_expected_revision: number; p_answers: Json }; Returns: Json }
+      get_exam_definition_v2: { Args: { p_schedule_id: string }; Returns: Json }
+      save_exam_definition_v2: { Args: { p_offering_id: string; p_schedule_id: string | null; p_expected_updated_at: string | null; p_definition: Json }; Returns: string }
+      clone_exam_schedule: { Args: { p_schedule_id: string }; Returns: string }
+      grade_exam_paper: { Args: { p_attempt_id: string; p_expected_revision: number; p_scores: Json; p_feedback: string; p_reason: string | null; p_request_id: string }; Returns: Json }
+      get_exam_grade_changes: { Args: { p_attempt_id: string }; Returns: Json }
+      get_exam_submission_page: { Args: { p_schedule_id: string; p_after?: string | null; p_limit?: number }; Returns: Json }
+      get_exam_definition: { Args: { p_schedule_id: string }; Returns: Json }
+      save_exam_definition: { Args: { p_offering_id: string; p_schedule_id: string | null; p_expected_updated_at: string | null; p_definition: Json }; Returns: string }
+      release_exam_result: { Args: { p_schedule_id: string; p_user_id: string; p_expected_revision: number }; Returns: Json }
+      release_exam_review: { Args: { p_schedule_id: string; p_user_id: string; p_expected_revision: number }; Returns: Json }
+      get_exam_grading_detail: { Args: { p_attempt_id: string }; Returns: Json }
+      get_exam_review: { Args: { p_schedule_id: string }; Returns: Json }
+      get_exam_attempt_content: { Args: { p_attempt_id: string }; Returns: Json }
+      get_exam_summaries: { Args: { p_schedule_ids: string[] }; Returns: Json }
       abandon_media_upload: { Args: { p_asset_id: string }; Returns: undefined }
       clone_assessment: {
         Args: { p_assessment_id: string; p_title?: string }

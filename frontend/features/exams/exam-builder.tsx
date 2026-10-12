@@ -8,7 +8,7 @@ import { api } from '@/frontend/lib/api';
 import { Button } from '@/frontend/components/ui/button';
 import { Input } from '@/frontend/components/ui/input';
 import { Textarea } from '@/frontend/components/ui/textarea';
-import type { ExamEditable, ExamEditableQuestion } from '@/shared/contracts/exams';
+import type { ExamEditable, ExamEditableQuestion, SecureQuestionType } from '@/shared/contracts/exams';
 import {
 	EXAM_DURATION_PRESETS,
 	MAX_EXAM_DURATION_MINUTES,
@@ -22,6 +22,8 @@ import { cn } from '@/shared/utils';
 interface ExamBuilderProps {
 	examId: string | null;
 	onClose: (changed: boolean) => void;
+	secure?: boolean;
+	offeringId?: string;
 }
 
 const blankMcq = (): ExamEditableQuestion => ({
@@ -45,12 +47,14 @@ const blankWritten = (): ExamEditableQuestion => ({
 const labelClass = 'mb-1 block text-xs font-bold uppercase tracking-wider text-slate-600';
 const panelClass = 'rounded-2xl border-2 border-black bg-white p-5 shadow-hard-sm';
 
-export const ExamBuilder = ({ examId, onClose }: ExamBuilderProps) => {
+export const ExamBuilder = ({ examId, onClose, secure = false, offeringId }: ExamBuilderProps) => {
 	const [isLoading, setIsLoading] = useState(!!examId);
 	const [isSaving, setIsSaving] = useState(false);
 	const [isLocked, setIsLocked] = useState(false);
+	const [updatedAt, setUpdatedAt] = useState<string | null>(null);
 
 	const [title, setTitle] = useState('');
+ const [kind,setKind]=useState<'exam'|'quiz'>('exam');
 	const [description, setDescription] = useState('');
 	const [unlimited, setUnlimited] = useState(false);
 	const [minutes, setMinutes] = useState('60');
@@ -60,10 +64,10 @@ export const ExamBuilder = ({ examId, onClose }: ExamBuilderProps) => {
 
 	useEffect(() => {
 		if (!examId) return;
-		api
-			.get<ExamEditable>(`/api/exams/${examId}`)
+		(secure ? api.post<ExamEditable>(`/api/secure-exams/${examId}/definition`, {}) : api.get<ExamEditable>(`/api/exams/${examId}`))
 			.then(({ data }) => {
-				setTitle(data.title);
+				setTitle(data.title);setKind(data.kind??'exam');
+				setUpdatedAt(data.updatedAt ?? null);
 				setDescription(data.description ?? '');
 				setUnlimited(data.durationMinutes === null);
 				setMinutes(String(data.durationMinutes ?? 60));
@@ -100,10 +104,11 @@ export const ExamBuilder = ({ examId, onClose }: ExamBuilderProps) => {
 			prev.map((q, i) => {
 				if (i !== qIndex || (q.choices?.length ?? 0) <= MIN_MCQ_CHOICES) return q;
 				const choices = (q.choices ?? []).filter((_, j) => j !== cIndex);
+                const correctChoices=q.correctChoices?.filter(i=>i!==cIndex).map(i=>i>cIndex?i-1:i);
 				let correct = q.correctChoice ?? 0;
 				if (cIndex === correct) correct = 0;
 				else if (cIndex < correct) correct -= 1;
-				return { ...q, choices, correctChoice: correct };
+				return { ...q, choices, correctChoice: correct, correctChoices };
 			})
 		);
 
@@ -114,6 +119,7 @@ export const ExamBuilder = ({ examId, onClose }: ExamBuilderProps) => {
 			return;
 		}
 		const payload = {
+            ...(secure?{kind}:{}),
 			title,
 			description,
 			durationMinutes: unlimited ? null : minutesNumber,
@@ -122,15 +128,17 @@ export const ExamBuilder = ({ examId, onClose }: ExamBuilderProps) => {
 			questions: questions.map((q) => ({
 				type: q.type,
 				text: q.text,
-				imageUrl: q.imageUrl ?? '',
+				imageUrl: secure ? q.imageUrl?.trim() || null : q.imageUrl ?? '',
 				choices: q.choices,
 				correctChoice: q.correctChoice,
 				points: q.points,
+				...(secure ? { photoAllowed: q.questionType==='file_upload'||q.photoAllowed===true, questionType:q.questionType??(q.type==='MCQ'?'single_choice':q.photoAllowed?'file_upload':'essay'),correctChoices:q.correctChoices??null,numericValue:q.numericValue??null,numericTolerance:q.numericTolerance??null } : {}),
 			})),
 		};
 		try {
 			setIsSaving(true);
-			if (examId) await api.put(`/api/exams/${examId}`, payload);
+			if (secure) await api.post(`/api/secure-exams/${examId ?? offeringId}/save-definition`, { offeringId, scheduleId: examId, updatedAt, definition: payload });
+			else if (examId) await api.put(`/api/exams/${examId}`, payload);
 			else await api.post('/api/exams', payload);
 			toast.success('Exam saved.');
 			onClose(true);
@@ -138,7 +146,7 @@ export const ExamBuilder = ({ examId, onClose }: ExamBuilderProps) => {
 			const message =
 				typeof (error as { response?: { data?: unknown } })?.response?.data === 'string'
 					? ((error as { response: { data: string } }).response.data)
-					: 'Could not save the exam.';
+					: (error as {response?:{data?:{error?:string}}}).response?.data?.error ?? 'Could not save the exam.';
 			toast.error(message);
 		} finally {
 			setIsSaving(false);
@@ -165,15 +173,16 @@ export const ExamBuilder = ({ examId, onClose }: ExamBuilderProps) => {
 				<div className="flex items-start gap-2.5 rounded-2xl border-2 border-black bg-amber-100 p-4 text-sm">
 					<Lock className="mt-0.5 h-4 w-4 shrink-0" />
 					<span>
-						Students have already started this exam, so questions, duration and attempt limit are locked to protect their answer history. You can still change the title, description and published state.
+						{secure ? 'This paper is used or shared. Create a new assessment version to change it; existing submissions remain unchanged.' : 'Students have already started this exam, so questions, duration and attempt limit are locked to protect their answer history. You can still change the title, description and published state.'}
 					</span>
 				</div>
 			)}
 
 			<div className={cn(panelClass, 'space-y-4')}>
+                {secure&&<label className={labelClass}>Assessment type<select aria-label="Assessment type" value={kind} onChange={e=>setKind(e.target.value as 'exam'|'quiz')} className="mt-1 block w-full rounded-xl border-2 border-black bg-white p-2"><option value="exam">Exam</option><option value="quiz">Quiz</option></select></label>}
 				<div>
-					<label className={labelClass}>Title</label>
-					<Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Chapter 3 – Kinematics Exam" maxLength={200} />
+					<label className={labelClass} htmlFor="exam-title">Title</label>
+					<Input id="exam-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Chapter 3 – Kinematics Exam" maxLength={200} />
 				</div>
 				<div>
 					<label className={labelClass}>Description (optional)</label>
@@ -254,7 +263,7 @@ export const ExamBuilder = ({ examId, onClose }: ExamBuilderProps) => {
 					<div key={q.id ?? qIndex} className={cn(panelClass, 'space-y-3')}>
 						<div className="flex items-center justify-between gap-2">
 							<span className="rounded-full border-2 border-black bg-primary px-2.5 py-0.5 text-xs font-bold">
-								Q{qIndex + 1} · {q.type === 'MCQ' ? 'Multiple choice' : 'Written / essay'}
+								Q{qIndex + 1} · {q.questionType?.replaceAll('_',' ') ?? (q.type === 'MCQ' ? 'Single choice' : 'Written / essay')}
 							</span>
 							<Button
 								type="button"
@@ -266,7 +275,8 @@ export const ExamBuilder = ({ examId, onClose }: ExamBuilderProps) => {
 								<Trash2 className="h-4 w-4 text-rose-600" />
 							</Button>
 						</div>
-						<Textarea value={q.text} onChange={(e) => patchQuestion(qIndex, { text: e.target.value })} placeholder="Question text" />
+						{secure&&<label className="block text-sm font-semibold">Question format<select aria-label={`Question ${qIndex+1} format`} value={q.questionType??(q.type==='MCQ'?'single_choice':q.photoAllowed?'file_upload':'essay')} onChange={event=>{const kind=event.target.value as SecureQuestionType,choice=['single_choice','multiple_choice','true_false'].includes(kind);patchQuestion(qIndex,{questionType:kind,type:choice?'MCQ':'WRITTEN',choices:choice?kind==='true_false'?['True','False']:['','','','']:null,correctChoice:choice?0:null,correctChoices:kind==='multiple_choice'?[0]:null,numericValue:kind==='numeric'?0:null,numericTolerance:kind==='numeric'?0:null,photoAllowed:kind==='file_upload'});}} className="mt-1 block w-full rounded-xl border-2 border-black bg-white p-2">{(['single_choice','multiple_choice','true_false','numeric','short_text','essay','file_upload'] as const).map(kind=><option key={kind} value={kind}>{kind.replaceAll('_',' ')}</option>)}</select></label>}
+                        <Textarea aria-label={`Question ${qIndex+1} text`} value={q.text} onChange={(e) => patchQuestion(qIndex, { text: e.target.value })} placeholder="Question text" />
 						<Input
 							value={q.imageUrl ?? ''}
 							onChange={(e) => patchQuestion(qIndex, { imageUrl: e.target.value })}
@@ -280,10 +290,10 @@ export const ExamBuilder = ({ examId, onClose }: ExamBuilderProps) => {
 										<button
 											type="button"
 											aria-label={`Mark choice ${choiceLabel(cIndex)} correct`}
-											onClick={() => patchQuestion(qIndex, { correctChoice: cIndex })}
+											onClick={() => q.questionType==='multiple_choice'?patchQuestion(qIndex,{correctChoices:(q.correctChoices??[]).includes(cIndex)?(q.correctChoices??[]).filter(i=>i!==cIndex):[...(q.correctChoices??[]),cIndex]}):patchQuestion(qIndex, { correctChoice: cIndex })}
 											className={cn(
 												'flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-black text-sm font-bold',
-												q.correctChoice === cIndex ? 'bg-emerald-400' : 'bg-white hover:bg-slate-100'
+												(q.questionType==='multiple_choice'?q.correctChoices?.includes(cIndex):q.correctChoice===cIndex) ? 'bg-emerald-400' : 'bg-white hover:bg-slate-100'
 											)}
 										>
 											{choiceLabel(cIndex)}
@@ -294,7 +304,7 @@ export const ExamBuilder = ({ examId, onClose }: ExamBuilderProps) => {
 											size="sm"
 											variant="ghost"
 											aria-label="Remove choice"
-											disabled={(q.choices?.length ?? 0) <= MIN_MCQ_CHOICES}
+											disabled={q.questionType==='true_false'||(q.choices?.length ?? 0) <= MIN_MCQ_CHOICES}
 											onClick={() => removeChoice(qIndex, cIndex)}
 										>
 											<Trash2 className="h-4 w-4" />
@@ -302,8 +312,8 @@ export const ExamBuilder = ({ examId, onClose }: ExamBuilderProps) => {
 									</div>
 								))}
 								<div className="flex items-center justify-between">
-									<span className="text-xs text-slate-600">Tap a letter to set the correct answer (green).</span>
-									{(q.choices?.length ?? 0) < MAX_MCQ_CHOICES && (
+									<span className="text-xs text-slate-600">Select the correct answer(s), shown in green. Multiple-choice questions require all correct options and no others.</span>
+									{q.questionType!=='true_false'&&(q.choices?.length ?? 0) < MAX_MCQ_CHOICES && (
 										<Button type="button" size="sm" variant="outline" onClick={() => addChoice(qIndex)}>
 											Add choice
 										</Button>
@@ -323,6 +333,8 @@ export const ExamBuilder = ({ examId, onClose }: ExamBuilderProps) => {
 								className="w-20"
 							/>
 						</div>
+						{secure&&q.questionType==='numeric'&&<div className="grid gap-3 sm:grid-cols-2"><label className="text-sm font-semibold">Correct numeric answer<Input type="number" step="any" value={q.numericValue??''} onChange={e=>patchQuestion(qIndex,{numericValue:e.target.value===''?null:Number(e.target.value)})} /></label><label className="text-sm font-semibold">Absolute tolerance<Input type="number" step="any" min={0} value={q.numericTolerance??''} onChange={e=>patchQuestion(qIndex,{numericTolerance:e.target.value===''?null:Number(e.target.value)})} /></label></div>}
+                        {secure && !q.questionType && q.type === 'WRITTEN' && <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={q.photoAllowed ?? false} onChange={event => patchQuestion(qIndex, { photoAllowed: event.target.checked })} />Require a handwritten photo (with optional typed notes)</label>}
 					</div>
 				))}
 
@@ -340,7 +352,7 @@ export const ExamBuilder = ({ examId, onClose }: ExamBuilderProps) => {
 				<Button variant="outline" onClick={() => onClose(false)} disabled={isSaving}>
 					Cancel
 				</Button>
-				<Button onClick={save} disabled={isSaving}>
+				<Button onClick={save} disabled={isSaving || (secure && isLocked)}>
 					{isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
 					Save exam
 				</Button>

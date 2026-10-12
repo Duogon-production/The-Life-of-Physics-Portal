@@ -41,6 +41,8 @@ export const formatDuration = (minutes: number | null) => {
 };
 
 export interface ExamAnswer {
+	choices?: number[];
+	value?: number | null;
 	choice?: number | null;
 	text?: string | null;
 	imageUrl?: string | null;

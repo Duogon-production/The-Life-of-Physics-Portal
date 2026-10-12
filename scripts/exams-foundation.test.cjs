@@ -16,14 +16,15 @@ const listing = load('shared/contracts/exam-listing.ts');
 const NOW = Date.parse('2026-10-11T12:00:00Z');
 const attempt = (status, deadlineAt = null) => ({ status, deadlineAt });
 
-test('listing state is derived only from real attempt/window data', () => {
+test('listing state requires database release authorization, not graded status alone', () => {
   const d = (attempts, opensAt = null, closesAt = null) => listing.deriveExamListState({ opensAt, closesAt, attempts }, NOW);
   assert.equal(d([]), 'NOT_STARTED');
   assert.equal(d([attempt('in_progress', '2026-10-11T13:00:00Z')]), 'IN_PROGRESS');
   assert.equal(d([attempt('in_progress')]), 'IN_PROGRESS'); // unlimited
   assert.equal(d([attempt('in_progress', '2026-10-11T11:00:00Z')]), 'TIME_EXPIRED');
   assert.equal(d([attempt('submitted')]), 'SUBMITTED');
-  assert.equal(d([attempt('submitted'), attempt('graded')]), 'GRADED');
+  assert.equal(d([attempt('submitted'), attempt('graded')]), 'SUBMITTED');
+  assert.equal(d([{...attempt('graded'),resultReleased:true}]), 'GRADED');
   assert.equal(d([], '2026-10-12T00:00:00Z'), 'NOT_OPEN_YET');
   assert.equal(d([], null, '2026-10-10T00:00:00Z'), 'CLOSED');
   // a submitted attempt is still shown after the window closes
@@ -53,7 +54,10 @@ test('Firebase middleware allowlist exposes only /exams and /exams/<uuid>', () =
 
 function fakeClient(tables, error = null) {
   const calls = [];
-  const client = { from(table) {
+  const client = { rpc(name, args) {
+    calls.push({rpc:name,args});
+    return Promise.resolve({data:args.p_schedule_ids.map(id=>({schedule_id:id,state:{},attempts:(tables.assessment_attempts??[]).filter(a=>a.offering_assessment_id===id).map(a=>({...a,result_released:a.result_released===true}))})),error});
+  }, from(table) {
     const q = { table, select: null, filters: [] };
     calls.push(q);
     const chain = { select: c => (q.select = c, chain), eq: (c, v) => (q.filters.push(['eq', c, v]), chain), in: (c, v) => (q.filters.push(['in', c, v]), chain),
@@ -64,7 +68,7 @@ function fakeClient(tables, error = null) {
 }
 
 test('repository is read-only, never selects answer keys, and scopes attempts to the viewer', async () => {
-  const { createExamsRepository } = load('server/repositories/exams.ts', { 'server-only': {}, '@/shared/contracts/exam-listing': listing });
+  const { createExamsRepository } = load('server/repositories/exams.ts', { 'server-only': {}, '@/shared/contracts/exam-listing': listing, '@/shared/contracts/exam-security': {examSummariesSchema:{parse:v=>v}} });
   const { client, calls } = fakeClient({
     offering_assessments: [{ id: 's1', offering_id: 'o1', assessment_id: 'a1', opens_at: null, closes_at: null, time_limit_seconds: null, max_attempts: 2, published: true }],
     assessments: [{ id: 'a1', course_id: 'c1', title: 'Physics Exam', type: 'exam', instructions: null, status: 'published' }],
@@ -85,21 +89,21 @@ test('repository is read-only, never selects answer keys, and scopes attempts to
   assert.equal(items[0].attempts[0].maxScore, null);
   for (const c of calls) assert.doesNotMatch(c.select ?? '', /is_correct|answer|correct/i);
   assert.ok(!calls.some(c => c.table === 'assessment_options'), 'options (and keys) are not read by the listing');
-  const attemptQuery = calls.find(c => c.table === 'assessment_attempts');
-  assert.ok(attemptQuery.filters.some(f => f[0] === 'eq' && f[1] === 'user_id' && f[2] === 'profile-1'));
+  assert.ok(!calls.some(c => c.table === 'assessment_attempts'));
+  assert.ok(calls.some(c=>c.rpc==='get_exam_summaries' && !('p_user_id' in c.args)),'Identity derived by database, no caller-supplied learner ID');
   assert.ok(calls.find(c => c.table === 'offering_assessments').filters.some(f => f[1] === 'published' && f[2] === true));
   assert.ok(calls.find(c => c.table === 'offering_assessments').filters.some(f => f[0] === 'in' && f[1] === 'assessments.type' && f[2].join(',') === 'exam,quiz'));
 });
 
 test('rows hidden by RLS are skipped instead of fabricated', async () => {
-  const { createExamsRepository } = load('server/repositories/exams.ts', { 'server-only': {}, '@/shared/contracts/exam-listing': listing });
+  const { createExamsRepository } = load('server/repositories/exams.ts', { 'server-only': {}, '@/shared/contracts/exam-listing': listing, '@/shared/contracts/exam-security': {examSummariesSchema:{parse:v=>v}} });
   const { client } = fakeClient({ offering_assessments: [{ id: 's1', offering_id: 'o1', assessment_id: 'a1', opens_at: null, closes_at: null, time_limit_seconds: 60, max_attempts: 1, published: true }] });
   const { items } = await createExamsRepository(client, 'p').list({ studentView: true });
   assert.equal(items.length, 0);
 });
 
 test('empty result returns an empty list', async () => {
-  const { createExamsRepository } = load('server/repositories/exams.ts', { 'server-only': {}, '@/shared/contracts/exam-listing': listing });
+  const { createExamsRepository } = load('server/repositories/exams.ts', { 'server-only': {}, '@/shared/contracts/exam-listing': listing, '@/shared/contracts/exam-security': {examSummariesSchema:{parse:v=>v}} });
   const { client } = fakeClient({});
   const r = await createExamsRepository(client, 'p').list({ studentView: true });
   assert.equal(r.items.length, 0);
@@ -107,7 +111,7 @@ test('empty result returns an empty list', async () => {
 });
 
 test('exams and quizzes are listed; homework and practice are excluded even on detail reads', async () => {
-  const { createExamsRepository } = load('server/repositories/exams.ts', { 'server-only': {}, '@/shared/contracts/exam-listing': listing });
+  const { createExamsRepository } = load('server/repositories/exams.ts', { 'server-only': {}, '@/shared/contracts/exam-listing': listing, '@/shared/contracts/exam-security': {examSummariesSchema:{parse:v=>v}} });
   for (const kind of ['exam','quiz','assignment','practice']) {
     const {client}=fakeClient({offering_assessments:[{id:'s',offering_id:'o',assessment_id:'a'}],
       assessments:[{id:'a',type:kind,title:kind}],course_offerings:[{id:'o',course_id:'c',name:'Group'}]});
@@ -117,7 +121,7 @@ test('exams and quizzes are listed; homework and practice are excluded even on d
 });
 
 test('truncated questions do not become a false exact count and query failures propagate', async () => {
-  const { createExamsRepository } = load('server/repositories/exams.ts', { 'server-only': {}, '@/shared/contracts/exam-listing': listing });
+  const { createExamsRepository } = load('server/repositories/exams.ts', { 'server-only': {}, '@/shared/contracts/exam-listing': listing, '@/shared/contracts/exam-security': {examSummariesSchema:{parse:v=>v}} });
   const tables={offering_assessments:[{id:'s',offering_id:'o',assessment_id:'a'}],
     assessments:[{id:'a',type:'quiz',title:'Quiz'}],course_offerings:[{id:'o',course_id:'c',name:'Group'}],
     assessment_questions:Array.from({length:501},()=>({assessment_id:'a'}))};
@@ -146,7 +150,7 @@ test('missing identity redirects while load failures render a safe error, not an
   const components={ExamsErrorView:()=>React.createElement('p',null,'Safe error'),ExamsListView:()=>React.createElement('p',null,'Listing')};
   const page=service=>load('app/(dashboard)/_components/website-exams.tsx',{
     'react/jsx-runtime':require('react/jsx-runtime'),'next/navigation':{redirect:()=>{throw Error('sign-in redirect')},notFound:()=>{throw Error('not found')}},
-    '@/frontend/features/exams/exams-list':components,'@/server/services/exams':service});
+    '@/frontend/features/exams/exams-list':components,'@/frontend/features/exams/exam-runner':{ExamRunner:()=>React.createElement('p',null,'Runner')},'@/frontend/features/exams/exam-teacher-portal':{ExamTeacherPortal:components.ExamsListView},'@/frontend/features/exams/exam-staff':{ExamStaffActions:()=>null},'@/server/services/exam-authoring':{examAuthoringAvailable:async()=>false},'@/server/services/exams':service});
   await assert.rejects(page({loadExamList:async()=>null}).WebsiteExams(),/sign-in redirect/);
   const html=renderToStaticMarkup(await page({loadExamList:async()=>{throw Error('private error')}}).WebsiteExams());
   assert.match(html,/Safe error/);assert.doesNotMatch(html,/private error|Listing/);
