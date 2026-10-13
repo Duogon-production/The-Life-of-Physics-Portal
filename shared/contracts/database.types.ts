@@ -14,169 +14,8 @@ export type Database = {
   }
   public: {
     Tables: {
-      lesson_segments: {
-        Row: {
-          created_at: string
-          description: string
-          id: string
-          lesson_id: string
-          position: number
-          status: string
-          thumbnail_asset_id: string | null
-          title: string
-          updated_at: string
-          video_asset_id: string | null
-          video_url: string | null
-        }
-        Insert: {
-          created_at?: string
-          description?: string
-          id?: string
-          lesson_id: string
-          position: number
-          status?: string
-          thumbnail_asset_id?: string | null
-          title: string
-          updated_at?: string
-          video_asset_id?: string | null
-          video_url?: string | null
-        }
-        Update: {
-          created_at?: string
-          description?: string
-          id?: string
-          lesson_id?: string
-          position?: number
-          status?: string
-          thumbnail_asset_id?: string | null
-          title?: string
-          updated_at?: string
-          video_asset_id?: string | null
-          video_url?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lesson_segments_lesson_id_fkey"
-            columns: ["lesson_id"]
-            isOneToOne: false
-            referencedRelation: "lessons"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lesson_segments_thumbnail_asset_id_fkey"
-            columns: ["thumbnail_asset_id"]
-            isOneToOne: false
-            referencedRelation: "media_assets"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lesson_segments_video_asset_id_fkey"
-            columns: ["video_asset_id"]
-            isOneToOne: false
-            referencedRelation: "media_assets"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      lesson_resources: {
-        Row: {
-          created_at: string
-          id: string
-          media_asset_id: string
-          name: string
-          segment_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          media_asset_id: string
-          name: string
-          segment_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          media_asset_id?: string
-          name?: string
-          segment_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lesson_resources_media_asset_id_fkey"
-            columns: ["media_asset_id"]
-            isOneToOne: false
-            referencedRelation: "media_assets"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lesson_resources_segment_id_fkey"
-            columns: ["segment_id"]
-            isOneToOne: false
-            referencedRelation: "lesson_segments"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      lesson_segment_progress: {
-        Row: {
-          completed_at: string | null
-          id: string
-          lesson_id: string
-          offering_id: string
-          revision: number
-          segment_id: string
-          started_at: string | null
-          status: string
-          updated_at: string
-          user_id: string
-          video_position_seconds: number
-        }
-        Insert: {
-          completed_at?: string | null
-          id?: string
-          lesson_id: string
-          offering_id: string
-          revision?: number
-          segment_id: string
-          started_at?: string | null
-          status?: string
-          updated_at?: string
-          user_id: string
-          video_position_seconds?: number
-        }
-        Update: {
-          completed_at?: string | null
-          id?: string
-          lesson_id?: string
-          offering_id?: string
-          revision?: number
-          segment_id?: string
-          started_at?: string | null
-          status?: string
-          updated_at?: string
-          user_id?: string
-          video_position_seconds?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lesson_segment_progress_offering_id_user_id_fkey"
-            columns: ["offering_id", "user_id"]
-            isOneToOne: false
-            referencedRelation: "enrollments"
-            referencedColumns: ["offering_id", "user_id"]
-          },
-          {
-            foreignKeyName: "lesson_segment_progress_segment_id_lesson_id_fkey"
-            columns: ["segment_id", "lesson_id"]
-            isOneToOne: false
-            referencedRelation: "lesson_segments"
-            referencedColumns: ["id", "lesson_id"]
-          },
-        ]
-      }
       assessment_attempts: {
         Row: {
-          participation_id: string | null
           attempt_number: number
           created_at: string
           deadline_at: string | null
@@ -185,6 +24,7 @@ export type Database = {
           id: string
           max_score: number | null
           offering_assessment_id: string
+          participation_id: string | null
           score: number | null
           started_at: string
           status: string
@@ -193,7 +33,6 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          participation_id?: string | null
           attempt_number: number
           created_at?: string
           deadline_at?: string | null
@@ -202,6 +41,7 @@ export type Database = {
           id?: string
           max_score?: number | null
           offering_assessment_id: string
+          participation_id?: string | null
           score?: number | null
           started_at?: string
           status?: string
@@ -210,7 +50,6 @@ export type Database = {
           user_id: string
         }
         Update: {
-          participation_id?: string | null
           attempt_number?: number
           created_at?: string
           deadline_at?: string | null
@@ -219,6 +58,7 @@ export type Database = {
           id?: string
           max_score?: number | null
           offering_assessment_id?: string
+          participation_id?: string | null
           score?: number | null
           started_at?: string
           status?: string
@@ -469,30 +309,30 @@ export type Database = {
       }
       course_modules: {
         Row: {
-          group_type: string
           course_id: string
           created_at: string
           description: string | null
+          group_type: string
           id: string
           position: number
           title: string
           updated_at: string
         }
         Insert: {
-          group_type?: string
           course_id: string
           created_at?: string
           description?: string | null
+          group_type?: string
           id?: string
           position: number
           title: string
           updated_at?: string
         }
         Update: {
-          group_type?: string
           course_id?: string
           created_at?: string
           description?: string | null
+          group_type?: string
           id?: string
           position?: number
           title?: string
@@ -724,6 +564,312 @@ export type Database = {
           },
         ]
       }
+      homework_assignments: {
+        Row: {
+          course_id: string
+          created_at: string
+          created_by: string
+          family_id: string
+          file_points: number
+          id: string
+          instructions: string
+          lesson_id: string
+          mode: string
+          offering_id: string
+          revision: number
+          segment_id: string | null
+          status: string
+          supersedes_id: string | null
+          title: string
+          updated_at: string
+          uses_marks: boolean
+          version: number
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          created_by: string
+          family_id: string
+          file_points?: number
+          id?: string
+          instructions?: string
+          lesson_id: string
+          mode?: string
+          offering_id: string
+          revision?: number
+          segment_id?: string | null
+          status?: string
+          supersedes_id?: string | null
+          title: string
+          updated_at?: string
+          uses_marks?: boolean
+          version?: number
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          created_by?: string
+          family_id?: string
+          file_points?: number
+          id?: string
+          instructions?: string
+          lesson_id?: string
+          mode?: string
+          offering_id?: string
+          revision?: number
+          segment_id?: string | null
+          status?: string
+          supersedes_id?: string | null
+          title?: string
+          updated_at?: string
+          uses_marks?: boolean
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_assignments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_assignments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_assignments_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "homework_assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_assignments_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_assignments_offering_id_fkey"
+            columns: ["offering_id"]
+            isOneToOne: false
+            referencedRelation: "course_offerings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_assignments_segment_id_fkey"
+            columns: ["segment_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_segments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_assignments_supersedes_id_fkey"
+            columns: ["supersedes_id"]
+            isOneToOne: false
+            referencedRelation: "homework_assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      homework_options: {
+        Row: {
+          id: string
+          position: number
+          question_id: string
+          text: string
+        }
+        Insert: {
+          id: string
+          position: number
+          question_id: string
+          text?: string
+        }
+        Update: {
+          id?: string
+          position?: number
+          question_id?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_options_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "homework_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      homework_questions: {
+        Row: {
+          assignment_id: string
+          id: string
+          image_id: string | null
+          points: number
+          position: number
+          response_mode: string
+          text: string
+          type: string
+        }
+        Insert: {
+          assignment_id: string
+          id: string
+          image_id?: string | null
+          points: number
+          position: number
+          response_mode: string
+          text?: string
+          type: string
+        }
+        Update: {
+          assignment_id?: string
+          id?: string
+          image_id?: string | null
+          points?: number
+          position?: number
+          response_mode?: string
+          text?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_questions_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "homework_assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      homework_responses: {
+        Row: {
+          id: string
+          question_id: string
+          response: Json
+          submission_id: string
+        }
+        Insert: {
+          id?: string
+          question_id: string
+          response?: Json
+          submission_id: string
+        }
+        Update: {
+          id?: string
+          question_id?: string
+          response?: Json
+          submission_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_responses_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "homework_questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_responses_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "homework_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      homework_submission_files: {
+        Row: {
+          id: string
+          question_id: string | null
+          submission_id: string
+          upload_id: string
+        }
+        Insert: {
+          id?: string
+          question_id?: string | null
+          submission_id: string
+          upload_id: string
+        }
+        Update: {
+          id?: string
+          question_id?: string | null
+          submission_id?: string
+          upload_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_submission_files_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "homework_questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_submission_files_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "homework_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      homework_submissions: {
+        Row: {
+          assignment_id: string
+          created_at: string
+          id: string
+          number: number
+          revision: number
+          status: string
+          submitted_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assignment_id: string
+          created_at?: string
+          id?: string
+          number: number
+          revision?: number
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assignment_id?: string
+          created_at?: string
+          id?: string
+          number?: number
+          revision?: number
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_submissions_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "homework_assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_submissions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_blocks: {
         Row: {
           block_type: string
@@ -829,10 +975,170 @@ export type Database = {
           },
         ]
       }
+      lesson_resources: {
+        Row: {
+          created_at: string
+          id: string
+          media_asset_id: string
+          name: string
+          segment_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          media_asset_id: string
+          name: string
+          segment_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          media_asset_id?: string
+          name?: string
+          segment_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_resources_media_asset_id_fkey"
+            columns: ["media_asset_id"]
+            isOneToOne: false
+            referencedRelation: "media_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_resources_segment_id_fkey"
+            columns: ["segment_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_segments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_segment_progress: {
+        Row: {
+          completed_at: string | null
+          id: string
+          lesson_id: string
+          offering_id: string
+          revision: number
+          segment_id: string
+          started_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          video_position_seconds: number
+        }
+        Insert: {
+          completed_at?: string | null
+          id?: string
+          lesson_id: string
+          offering_id: string
+          revision?: number
+          segment_id: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          video_position_seconds?: number
+        }
+        Update: {
+          completed_at?: string | null
+          id?: string
+          lesson_id?: string
+          offering_id?: string
+          revision?: number
+          segment_id?: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          video_position_seconds?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_segment_progress_offering_id_user_id_fkey"
+            columns: ["offering_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "enrollments"
+            referencedColumns: ["offering_id", "user_id"]
+          },
+          {
+            foreignKeyName: "lesson_segment_progress_segment_id_lesson_id_fkey"
+            columns: ["segment_id", "lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_segments"
+            referencedColumns: ["id", "lesson_id"]
+          },
+        ]
+      }
+      lesson_segments: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          lesson_id: string
+          position: number
+          status: string
+          thumbnail_asset_id: string | null
+          title: string
+          updated_at: string
+          video_asset_id: string | null
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          id?: string
+          lesson_id: string
+          position: number
+          status?: string
+          thumbnail_asset_id?: string | null
+          title: string
+          updated_at?: string
+          video_asset_id?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          lesson_id?: string
+          position?: number
+          status?: string
+          thumbnail_asset_id?: string | null
+          title?: string
+          updated_at?: string
+          video_asset_id?: string | null
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_segments_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_segments_thumbnail_asset_id_fkey"
+            columns: ["thumbnail_asset_id"]
+            isOneToOne: false
+            referencedRelation: "media_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_segments_video_asset_id_fkey"
+            columns: ["video_asset_id"]
+            isOneToOne: false
+            referencedRelation: "media_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lessons: {
         Row: {
-          description: string
           created_at: string
+          description: string
           estimated_duration_seconds: number | null
           id: string
           module_id: string
@@ -842,8 +1148,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          description?: string
           created_at?: string
+          description?: string
           estimated_duration_seconds?: number | null
           id?: string
           module_id: string
@@ -853,8 +1159,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          description?: string
           created_at?: string
+          description?: string
           estimated_duration_seconds?: number | null
           id?: string
           module_id?: string
@@ -1172,35 +1478,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_lesson_upload: {Args:{p_course_id:string;p_asset_id:string};Returns:Json}
-      register_lesson_upload: {Args:{p_course_id:string;p_mime:string;p_filename:string};Returns:Json}
-      archive_unused_lesson_upload: {Args:{p_asset_id:string};Returns:undefined}
-      edit_learning_content: {Args:{p_course_id:string;p_action:string;p_id:string|null;p_parent_id:string|null;p_updated_at:string|null;p_data:Json};Returns:string}
-      save_segment_progress: {Args:{p_offering_id:string;p_segment_id:string;p_position:number;p_complete:boolean;p_revision:number};Returns:Json}
-      sync_exam_participation: { Args: { p_schedule_id: string }; Returns: Json }
-      decide_exam_retry: { Args: { p_schedule_id: string; p_decision: string; p_expected_revision: number }; Returns: Json }
-      save_exam_response: { Args: { p_attempt_id: string; p_question_id: string; p_response: Json | null; p_media_asset_id: string | null; p_expected_revision: number }; Returns: Json }
-      // Checked exam workflow RPCs from applied development migration 20.
-      save_exam_answers: { Args: { p_attempt_id: string; p_expected_revision: number; p_answers: Json }; Returns: Json }
-      get_exam_definition_v2: { Args: { p_schedule_id: string }; Returns: Json }
-      save_exam_definition_v2: { Args: { p_offering_id: string; p_schedule_id: string | null; p_expected_updated_at: string | null; p_definition: Json }; Returns: string }
-      clone_exam_schedule: { Args: { p_schedule_id: string }; Returns: string }
-      grade_exam_paper: { Args: { p_attempt_id: string; p_expected_revision: number; p_scores: Json; p_feedback: string; p_reason: string | null; p_request_id: string }; Returns: Json }
-      get_exam_grade_changes: { Args: { p_attempt_id: string }; Returns: Json }
-      get_exam_submission_page: { Args: { p_schedule_id: string; p_after?: string | null; p_limit?: number }; Returns: Json }
-      get_exam_definition: { Args: { p_schedule_id: string }; Returns: Json }
-      save_exam_definition: { Args: { p_offering_id: string; p_schedule_id: string | null; p_expected_updated_at: string | null; p_definition: Json }; Returns: string }
-      release_exam_result: { Args: { p_schedule_id: string; p_user_id: string; p_expected_revision: number }; Returns: Json }
-      release_exam_review: { Args: { p_schedule_id: string; p_user_id: string; p_expected_revision: number }; Returns: Json }
-      get_exam_grading_detail: { Args: { p_attempt_id: string }; Returns: Json }
-      get_exam_review: { Args: { p_schedule_id: string }; Returns: Json }
-      get_exam_attempt_content: { Args: { p_attempt_id: string }; Returns: Json }
-      get_exam_summaries: { Args: { p_schedule_ids: string[] }; Returns: Json }
       abandon_media_upload: { Args: { p_asset_id: string }; Returns: undefined }
+      archive_unused_lesson_upload: {
+        Args: { p_asset_id: string }
+        Returns: undefined
+      }
       clone_assessment: {
         Args: { p_assessment_id: string; p_title?: string }
         Returns: string
       }
+      clone_exam_schedule: { Args: { p_schedule_id: string }; Returns: string }
       complete_media_upload: {
         Args: { p_asset_id: string }
         Returns: undefined
@@ -1214,6 +1501,25 @@ export type Database = {
         Returns: string
       }
       current_profile_id: { Args: never; Returns: string }
+      decide_exam_retry: {
+        Args: {
+          p_decision: string
+          p_expected_revision: number
+          p_schedule_id: string
+        }
+        Returns: Json
+      }
+      edit_learning_content: {
+        Args: {
+          p_action: string
+          p_course_id: string
+          p_data: Json
+          p_id: string | null
+          p_parent_id: string | null
+          p_updated_at: string | null
+        }
+        Returns: string
+      }
       finalize_assessment_grade: {
         Args: { p_attempt_id: string }
         Returns: undefined
@@ -1223,11 +1529,105 @@ export type Database = {
         Returns: Json
       }
       get_assessment_results: { Args: { p_attempt_id: string }; Returns: Json }
+      get_exam_attempt_content: {
+        Args: { p_attempt_id: string }
+        Returns: Json
+      }
+      get_exam_definition: { Args: { p_schedule_id: string }; Returns: Json }
+      get_exam_definition_v2: { Args: { p_schedule_id: string }; Returns: Json }
+      get_exam_grade_changes: { Args: { p_attempt_id: string }; Returns: Json }
+      get_exam_grading_detail: { Args: { p_attempt_id: string }; Returns: Json }
+      get_exam_review: { Args: { p_schedule_id: string }; Returns: Json }
+      get_exam_submission_page: {
+        Args: { p_after?: string | null; p_limit?: number; p_schedule_id: string }
+        Returns: Json
+      }
+      get_exam_summaries: { Args: { p_schedule_ids: string[] }; Returns: Json }
+      get_homework: {
+        Args: { p_assignment: string; p_submission?: string | null }
+        Returns: Json
+      }
+      get_lesson_upload: {
+        Args: { p_asset_id: string; p_course_id: string }
+        Returns: Json
+      }
       grade_assessment_response: {
         Args: { p_feedback?: string; p_points: number; p_response_id: string }
         Returns: undefined
       }
+      grade_exam_paper: {
+        Args: {
+          p_attempt_id: string
+          p_expected_revision: number
+          p_feedback: string
+          p_reason: string | null
+          p_request_id: string
+          p_scores: Json
+        }
+        Returns: Json
+      }
+      homework_history: {
+        Args: { p_page?: number; p_submission: string }
+        Returns: Json
+      }
+      homework_inbox: {
+        Args: {
+          p_assignment?: string | null
+          p_offering: string
+          p_page?: number
+          p_search?: string
+        }
+        Returns: Json
+      }
+      homework_lifecycle: {
+        Args: { p_action: string; p_assignment: string; p_revision: number }
+        Returns: string
+      }
+      homework_revisions: {
+        Args: { p_assignment: string; p_page?: number }
+        Returns: Json
+      }
+      homework_upload: {
+        Args: {
+          p_action: string
+          p_assignment: string
+          p_data?: Json
+          p_id?: string | null
+          p_submission?: string | null
+        }
+        Returns: Json
+      }
+      homework_work: {
+        Args: {
+          p_action: string
+          p_assignment: string
+          p_data?: Json
+          p_revision?: number | null
+          p_submission?: string | null
+        }
+        Returns: Json
+      }
       onboard_firebase_profile: { Args: never; Returns: string }
+      register_lesson_upload: {
+        Args: { p_course_id: string; p_filename: string; p_mime: string }
+        Returns: Json
+      }
+      release_exam_result: {
+        Args: {
+          p_expected_revision: number
+          p_schedule_id: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      release_exam_review: {
+        Args: {
+          p_expected_revision: number
+          p_schedule_id: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       revoke_my_firebase_identity: { Args: never; Returns: undefined }
       save_assessment_response: {
         Args: {
@@ -1237,6 +1637,64 @@ export type Database = {
           p_response: Json
         }
         Returns: string
+      }
+      save_exam_answers: {
+        Args: {
+          p_answers: Json
+          p_attempt_id: string
+          p_expected_revision: number
+        }
+        Returns: Json
+      }
+      save_exam_definition: {
+        Args: {
+          p_definition: Json
+          p_expected_updated_at: string | null
+          p_offering_id: string
+          p_schedule_id: string | null
+        }
+        Returns: string
+      }
+      save_exam_definition_v2: {
+        Args: {
+          p_definition: Json
+          p_expected_updated_at: string | null
+          p_offering_id: string
+          p_schedule_id: string | null
+        }
+        Returns: string
+      }
+      save_exam_response: {
+        Args: {
+          p_attempt_id: string
+          p_expected_revision: number
+          p_media_asset_id: string | null
+          p_question_id: string
+          p_response: Json | null
+        }
+        Returns: Json
+      }
+      save_homework: {
+        Args: {
+          p_assignment: string | null
+          p_confirm_mode_change?: boolean
+          p_definition: Json
+          p_lesson: string
+          p_offering: string
+          p_revision: number | null
+          p_segment: string | null
+        }
+        Returns: string
+      }
+      save_segment_progress: {
+        Args: {
+          p_complete: boolean
+          p_offering_id: string
+          p_position: number
+          p_revision: number
+          p_segment_id: string
+        }
+        Returns: Json
       }
       set_assessment_answer_key: {
         Args: { p_answer: Json; p_question_id: string }
@@ -1249,6 +1707,10 @@ export type Database = {
       submit_assessment_attempt: {
         Args: { p_attempt_id: string }
         Returns: undefined
+      }
+      sync_exam_participation: {
+        Args: { p_schedule_id: string }
+        Returns: Json
       }
     }
     Enums: {

@@ -14,6 +14,7 @@ import TitleForm from '@/frontend/features/teacher/courses/editor/title-form';
 import DescriptionForm from '@/frontend/features/teacher/courses/editor/description-form';
 import { type LearningTree,type LearningEdit,type LearningSegment,lessonVideo } from '@/shared/contracts/lessons';
 import { CHAPTER_TYPE_PRESETS } from '@/shared/chapter-label';
+import { HomeworkAssignments } from '@/frontend/features/courses/lesson/homework-assignments';
 
 async function edit(courseId:string,value:LearningEdit) {
  const r=await fetch(`/api/learning/${courseId}/edit`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(value)});const v=await r.json();if(!r.ok)throw new Error(v.error||'Content could not be saved');return v.id as string;
@@ -85,7 +86,7 @@ export function LearningPartEditor({courseId,segment,tree,thumbnailUrl}:{courseI
     {segment.thumbnail_asset_id&&<Button variant="outline" disabled={busy||uploading} onClick={()=>void save({thumbnail_asset_id:null}).catch(()=>{})}>Remove thumbnail</Button>}
     <label className="block text-sm font-semibold">PDF notes (20 MB) or image resources (5 MB)<Input type="file" accept="application/pdf,image/png,image/jpeg,image/webp" disabled={busy||uploading} onChange={e=>{const f=e.target.files?.[0];if(f)void upload(f,false);}}/></label>
     {resources.map(r=><div key={r.id} className="flex items-center justify-between gap-3 rounded-xl border p-3"><a target="_blank" rel="noreferrer" href={`/api/learning/${courseId}/resources/${r.id}`} className="truncate text-sm font-semibold">{r.name}</a><Button variant="outline" size="sm" disabled={busy||uploading} onClick={()=>void run({action:'remove_resource',id:segment.id,parentId:null,updatedAt:segment.updated_at,data:{resource_id:r.id}}).catch(()=>{})}>Detach</Button></div>)}
-    {fileError&&<p role="alert" className="text-red-700 text-sm">{fileError}</p>}<p className="text-xs text-slate-500">Homework assignments and submissions belong to the separate Homework milestone.</p>
+    {fileError&&<p role="alert" className="text-red-700 text-sm">{fileError}</p>}
    </div>
   </div>
   {tree.blocks.filter(b=>b.lesson_id===segment.lesson_id&&['text','heading','callout'].includes(b.block_type)).map(b=>{
@@ -93,5 +94,6 @@ export function LearningPartEditor({courseId,segment,tree,thumbnailUrl}:{courseI
    const text=typeof content.text==='string'?content.text:typeof content.html==='string'?content.html:'';
    return <div key={b.id+b.updated_at} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><h2 className="text-lg font-bold text-slate-900">Existing lesson-wide notes</h2><DescriptionForm courseId={courseId} initialData={{description:text}} onSave={v=>run({action:'edit_block',id:b.id,parentId:null,updatedAt:b.updated_at,data:{text:v.description}}).then(()=>{})}/></div>;
   })}
+  <HomeworkAssignments courseId={courseId} lessonId={segment.lesson_id} segmentId={segment.id} teacher/>
  </div>;
 }
