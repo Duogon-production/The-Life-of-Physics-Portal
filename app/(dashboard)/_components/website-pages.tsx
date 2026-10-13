@@ -9,7 +9,7 @@ import { getWebsiteContext, loadWebsiteScope, courseCapability, offeringCapabili
 import { validRosterPage } from '@/shared/website-model';
 import { SelfLearningView } from '@/frontend/features/self-learning/self-learning-view';
 import OriginalCourseDetail from '@/frontend/features/courses/course-detail';
-import { v2Chapters, v2StudentLessons } from '@/shared/v2-learning-model';
+import { v2Chapters, v2StudentLessons,v2OfferingChapters } from '@/shared/v2-learning-model';
 import { V2TeacherCourseList } from '@/frontend/features/teacher/courses/course-list';
 import SearchInput from '@/frontend/components/search-input';
 import { canEditTeacherCourse } from '@/shared/teacher-course';
@@ -69,7 +69,8 @@ export async function WebsiteCourses({ search = {}, teacher = false }: { search?
   if (!teacher) {
     const { scope } = await scopeFor(search);
     if (search.offering && !scope.offerings.some(o => o.id === search.offering)) notFound();
-    return <><LimitNotice limited={scope.limited}/><SelfLearningView chapters={scope.limited ? [] : v2Chapters(scope, search.offering)}/><Offerings scope={scope} hideEmpty/></>;
+    const enrolled=scope.offerings.filter(o=>scope.enrollments.some(e=>e.offering_id===o.id&&e.status==='active'&&(!e.expires_at||Date.parse(e.expires_at)>Date.now())&&(!e.enrolled_at||Date.parse(e.enrolled_at)<=Date.now())));
+    return <><LimitNotice limited={scope.limited}/><SelfLearningView chapters={scope.limited ? [] : v2OfferingChapters({...scope,offerings:enrolled}, search.offering)}/><Offerings scope={scope} hideEmpty/></>;
   }
   const context = await requireWebsiteContext();
   if (Object.values(search).some(v => v !== undefined && (typeof v !== 'string' || v.length > 200)) || (search.organization && !context.organizations.some(o => o.id === search.organization))) notFound();
@@ -94,8 +95,8 @@ export async function WebsiteCourse({ courseId, search = {} }: { courseId: strin
   const { context, scope } = await scopeFor(search, courseId);
   const course = scope.courses[0];
   if (search.offering && !scope.offerings.some(o => o.id === search.offering)) notFound();
-  const offering = scope.offerings.find(o => o.id === search.offering);
-  return <div className="space-y-6"><OriginalCourseDetail initialCourse={course}/><LimitNotice limited={scope.limited}/><Offerings scope={scope}/><SelfLearningView chapters={scope.limited ? [] : v2Chapters(scope, offering?.id)}/><p role="status">Lesson playback, feedback and homework are awaiting backend integration.</p></div>;
+  const offering = scope.offerings.find(o => o.id === search.offering) ?? scope.offerings.find(o=>scope.enrollments.some(e=>e.offering_id===o.id&&e.status==='active'));
+  return <div className="space-y-6"><OriginalCourseDetail initialCourse={course}/><LimitNotice limited={scope.limited}/><Offerings scope={scope}/><SelfLearningView chapters={scope.limited ? [] : v2Chapters(scope, offering?.id)}/><p role="status">Choose a lesson to study. Feedback and homework belong to their separate milestones.</p></div>;
 
 }
 export async function WebsiteGroups({ search = {} }: { search?: WebsiteSearch }) {

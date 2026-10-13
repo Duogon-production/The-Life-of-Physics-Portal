@@ -1,3 +1,4 @@
+import { LearningPartPage } from '../../../../../../_components/learning-part-page';
 import { isFirebaseStaging } from '@/shared/auth-config';
 import { auth } from '@clerk/nextjs/server';
 import { ArrowLeft, FileText, LayoutDashboard, ShieldCheck } from 'lucide-react';
@@ -15,11 +16,13 @@ import ChapterContentTypeForm from '@/frontend/features/teacher/chapters/editor/
 
 const ChapterIdPage = async ({
 	params: paramsPromise,
+ searchParams,
 }: {
 	params: Promise<{ courseId: string; chapterId: string }>;
+ searchParams: Promise<{preview?:string}>;
 }) => {
 	const params = await paramsPromise;
-	if (isFirebaseStaging()) return redirect('/unavailable');
+	if (isFirebaseStaging()) return <LearningPartPage courseId={params.courseId} segmentId={params.chapterId} preview={(await searchParams).preview==='1'}/>;
 	const { userId } = await auth();
 
 	if (!userId) {

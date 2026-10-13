@@ -11,7 +11,7 @@ function load(file, dependencies = {}) {
   return module.exports;
 }
 const { courseCapability, offeringCapability, loadWebsiteScope } = load('server/services/website.ts', {
-  react: { cache: fn => fn }, '@/server/services/application-auth': {}, '@/server/integrations/supabase': {}, '@/server/repositories/website': {}, '@/shared/auth-config': {},
+  react: { cache: fn => fn }, '@/server/services/application-auth': {}, '@/server/integrations/supabase': {}, '@/server/repositories/website': {}, '@/shared/auth-config': {}, '@/server/services/lesson-media': {},
 });
 test('navigation capabilities require active membership and assignments in the specific organization', () => {
   const courseA = { id: 'a', organization_id: 'orgA' }, courseB = { id: 'b', organization_id: 'orgB' };

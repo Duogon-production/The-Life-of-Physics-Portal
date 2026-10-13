@@ -7,7 +7,7 @@ import { CheckCircle2, Layers, LockKeyhole, PlayCircle } from 'lucide-react';
 import { formatChapterLabel } from '@/shared/chapter-label';
 import { cn } from '@/shared/utils';
 
-export type LessonCardStatus = 'Completed' | 'In Progress' | 'Open Lesson' | 'Locked';
+export type LessonCardStatus = 'Completed' | 'In Progress' | 'Open Lesson' | 'Not Started' | 'Locked';
 
 /** One rule for both the dashboard and the self-learning page. */
 export const getLessonCardStatus = (parts: { isCompleted: boolean }[]): LessonCardStatus => {
@@ -59,6 +59,7 @@ export const LessonCard = ({
 		Completed: 'bg-emerald-100 text-emerald-800',
 		'In Progress': 'bg-sky-100 text-sky-800',
 		'Open Lesson': 'bg-slate-900 text-white',
+  'Not Started': 'bg-slate-900 text-white',
 		Locked: 'bg-slate-100 text-slate-500',
 	};
 	const StatusIcon =

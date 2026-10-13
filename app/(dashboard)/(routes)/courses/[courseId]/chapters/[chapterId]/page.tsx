@@ -1,3 +1,4 @@
+import { SecureLessonPage } from '../../../../../_components/secure-lesson-page';
 import { isFirebaseStaging } from '@/shared/auth-config';
 import { getChapter } from '@/server/queries/get-chapter';
 import Banner from '@/frontend/components/banner';
@@ -6,12 +7,12 @@ import { redirect } from 'next/navigation';
 import LessonTabs, { type LessonSegmentItem } from '@/frontend/features/courses/lesson/lesson-tabs';
 
 const ChapterIdPage = async ({
-	params: paramsPromise,
+	params: paramsPromise, searchParams,
 }: {
-	params: Promise<{ courseId: string; chapterId: string }>;
+	params: Promise<{ courseId: string; chapterId: string }>; searchParams: Promise<{offering?:string}>;
 }) => {
 	const params = await paramsPromise;
-	if (isFirebaseStaging()) return redirect('/unavailable');
+	if (isFirebaseStaging()) return <SecureLessonPage courseId={params.courseId} segmentId={params.chapterId} offeringId={(await searchParams).offering}/>;
 	const { userId } = await auth();
 
 	if (!userId) return redirect('/');
