@@ -17,7 +17,7 @@ begin
  insert into pg_temp.test_results values(name,true);
 end $$;
 
-select pg_temp.assert_true((select count(*)=19 and bool_and(relrowsecurity) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind='r'),'all 19 public tables have RLS');
+select pg_temp.assert_true((select count(*)>=19 and bool_and(relrowsecurity) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind='r'),'foundation and additive public tables have RLS');
 select pg_temp.assert_true((select count(*)=7 from public.profiles where id between '10000000-0000-0000-0000-000000000001'::uuid and '10000000-0000-0000-0000-000000000007'::uuid),'auth trigger created all seed profiles');
 select pg_temp.assert_true(not exists(select 1 from information_schema.columns where table_schema='public' and table_name='profiles' and column_name='role'),'no global user role');
 select pg_temp.assert_true(not exists(select 1 from storage.buckets where id in ('lms-course-media','lms-submissions') and public),'buckets are private');

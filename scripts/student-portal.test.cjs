@@ -8,7 +8,7 @@ function pages(scope,failure){return load('app/(dashboard)/_components/website-p
  if(n==='react/jsx-runtime')return require(n);
  if(n==='next/link')return props=>React.createElement('a',props);
  if(n==='next/navigation')return {notFound:()=>{throw Error('404')},redirect:()=>{throw Error('redirect')}};
- if(n==='@/shared/v2-learning-model')return {v2StudentLessons:()=>[],v2Chapters:()=>[]};
+ if(n==='@/shared/v2-learning-model')return {v2StudentLessons:()=>[],v2Chapters:()=>[],v2OfferingChapters:()=>[]};
  return new Proxy({},{get:()=>()=>null});
 })}
 test('learner Home and Self Learning omit genuinely empty summaries and organization creation',async()=>{

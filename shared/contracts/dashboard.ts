@@ -2,7 +2,7 @@ export interface StudentLesson {
 	href?: string | null;
 	groupKey?: string;
 	partsCount?: number | null;
-	status?: "Completed" | "In Progress" | "Open Lesson" | "Locked";
+	status?: "Completed" | "In Progress" | "Open Lesson" | "Not Started" | "Locked";
 	id: string;
 	title: string;
 	description?: string | null;
@@ -18,7 +18,7 @@ export interface StudentLesson {
 
 export interface SelfLearningLesson {
 	href?: string | null;
-	status?: "Completed" | "In Progress" | "Open Lesson" | "Locked";
+	status?: "Completed" | "In Progress" | "Open Lesson" | "Not Started" | "Locked";
 	partsCount?: number | null;
 	id: string;
 	title: string;

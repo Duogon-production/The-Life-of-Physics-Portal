@@ -62,4 +62,18 @@ where not exists(select 1 from public.assessment_options o where o.id=v.id::uuid
 insert into public.offering_assessments(id,offering_id,assessment_id,max_attempts,time_limit_seconds,published) values
  ('a0000000-0000-0000-0000-000000000001','60000000-0000-0000-0000-000000000001','70000000-0000-0000-0000-000000000001',2,1800,true),
  ('a0000000-0000-0000-0000-000000000002','60000000-0000-0000-0000-000000000002','70000000-0000-0000-0000-000000000001',2,1800,true) on conflict(id) do nothing;
+-- Supports both foundation-before-21 upgrade tests and fresh development installs.
+-- Only this seed's known demo lesson is affected; existing delivery/progress wins.
+do $$ begin
+ if to_regclass('public.lesson_segments') is not null then
+  insert into public.lesson_segments(lesson_id,title,position,status)
+   select l.id,l.title,0,l.status from public.lessons l where l.id='50000000-0000-0000-0000-000000000001'
+   and not exists(select 1 from public.lesson_segments s where s.lesson_id=l.id);
+  insert into public.lesson_segment_progress(offering_id,user_id,segment_id,lesson_id,status,video_position_seconds,revision,started_at,completed_at,updated_at)
+   select p.offering_id,p.user_id,s.id,p.lesson_id,p.status,coalesce(p.video_position_seconds,0),1,p.started_at,p.completed_at,p.updated_at
+   from public.lesson_progress p join public.lesson_segments s on s.lesson_id=p.lesson_id and s.position=0
+   where p.lesson_id='50000000-0000-0000-0000-000000000001' and p.status in ('in_progress','completed')
+   on conflict(offering_id,user_id,segment_id) do nothing;
+ end if;
+end $$;
 commit;

@@ -22,6 +22,8 @@ export default function middleware(request: NextRequest, event: NextFetchEvent) 
     return legacyMiddleware(request, event);
   }
   if (/^\/api\/teacher\/(organizations|courses(?:\/[0-9a-f-]{36})?)$/.test(path)) return NextResponse.next();
+  if (/^\/api\/learning\/[0-9a-f-]{36}\/(edit|progress|upload|media|cleanup|upload-intent|finish-upload)$/.test(path)) return NextResponse.next();
+  if (/^\/api\/learning\/[0-9a-f-]{36}\/(resources|blocks)\/[0-9a-f-]{36}$/.test(path)) return NextResponse.next();
   if (/^\/api\/secure-exams\/[0-9a-f-]{36}\/(state|start|answers|submit|decision|result|photo|grading|grade|release|release-review|definition|save-definition|clone)$/.test(path)) return NextResponse.next();
   if (path.startsWith('/sign-in') || path.startsWith('/sign-up') || path === '/lms-staging' || isPhaseOneRoute(path)) return NextResponse.next();
   // No Firebase UID may enter an unmigrated Clerk/Prisma or UploadThing handler.

@@ -1,4 +1,7 @@
 'use client';
+import { LearningTreeEditor } from '@/frontend/features/teacher/chapters/editor/learning-editor';
+import type { LearningTree } from '@/shared/contracts/lessons';
+
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -15,7 +18,7 @@ import { Input } from '@/frontend/components/ui/input';
 import { Button } from '@/frontend/components/ui/button';
 import { CapabilityGate } from '@/frontend/components/capability-gate';
 type Record = {id:string;title:string;description:string|null;slug:string;status:string;visibility:string;updated_at:string};
-export function V2TeacherCourseEditor({record}:{record:Record}) {
+export function V2TeacherCourseEditor({record,tree}:{record:Record;tree:LearningTree}) {
  const [busy,setBusy]=useState(false);
  const course={...record,isPublished:record.status==='published'};
  const completionText='Course metadata';
@@ -88,7 +91,7 @@ export function V2TeacherCourseEditor({record}:{record:Record}) {
 
 					<div className="space-y-4">
 						<TitleForm initialData={course} courseId={course.id} onSave={save} />
-						<CapabilityGate reason="V2 shared chapter numbering has no tenant-safe module adapter yet."><ChapterNamingForm initialData={{chapterType:"Module",chapterNumber:null}} courseId={course.id} initialInfo={null} /></CapabilityGate>
+						<p className="text-xs text-slate-500">Choose chapters, units or weeks in each curriculum group below.</p>
 <CourseMetadata course={record} save={save} busy={busy}/>
 						<DescriptionForm initialData={course} courseId={course.id} onSave={save} />
 						<CapabilityGate reason="Course cover uploads require a Storage/media adapter."><ImageForm initialData={{imageUrl:null}} courseId={course.id} /></CapabilityGate>
@@ -109,7 +112,7 @@ export function V2TeacherCourseEditor({record}:{record:Record}) {
 						</div>
 					</div>
 
-					<CapabilityGate reason="V2 segments differ from Supabase lessons/blocks. Editing requires a reviewed content adapter."><ChaptersForm initialData={{chapters:[]}} courseId={course.id} /></CapabilityGate>
+					<LearningTreeEditor courseId={course.id} tree={tree}/>
 				</div>
 			</div>
 		</div>

@@ -14,6 +14,166 @@ export type Database = {
   }
   public: {
     Tables: {
+      lesson_segments: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          lesson_id: string
+          position: number
+          status: string
+          thumbnail_asset_id: string | null
+          title: string
+          updated_at: string
+          video_asset_id: string | null
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          id?: string
+          lesson_id: string
+          position: number
+          status?: string
+          thumbnail_asset_id?: string | null
+          title: string
+          updated_at?: string
+          video_asset_id?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          lesson_id?: string
+          position?: number
+          status?: string
+          thumbnail_asset_id?: string | null
+          title?: string
+          updated_at?: string
+          video_asset_id?: string | null
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_segments_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_segments_thumbnail_asset_id_fkey"
+            columns: ["thumbnail_asset_id"]
+            isOneToOne: false
+            referencedRelation: "media_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_segments_video_asset_id_fkey"
+            columns: ["video_asset_id"]
+            isOneToOne: false
+            referencedRelation: "media_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_resources: {
+        Row: {
+          created_at: string
+          id: string
+          media_asset_id: string
+          name: string
+          segment_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          media_asset_id: string
+          name: string
+          segment_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          media_asset_id?: string
+          name?: string
+          segment_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_resources_media_asset_id_fkey"
+            columns: ["media_asset_id"]
+            isOneToOne: false
+            referencedRelation: "media_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_resources_segment_id_fkey"
+            columns: ["segment_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_segments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_segment_progress: {
+        Row: {
+          completed_at: string | null
+          id: string
+          lesson_id: string
+          offering_id: string
+          revision: number
+          segment_id: string
+          started_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          video_position_seconds: number
+        }
+        Insert: {
+          completed_at?: string | null
+          id?: string
+          lesson_id: string
+          offering_id: string
+          revision?: number
+          segment_id: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          video_position_seconds?: number
+        }
+        Update: {
+          completed_at?: string | null
+          id?: string
+          lesson_id?: string
+          offering_id?: string
+          revision?: number
+          segment_id?: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          video_position_seconds?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_segment_progress_offering_id_user_id_fkey"
+            columns: ["offering_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "enrollments"
+            referencedColumns: ["offering_id", "user_id"]
+          },
+          {
+            foreignKeyName: "lesson_segment_progress_segment_id_lesson_id_fkey"
+            columns: ["segment_id", "lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_segments"
+            referencedColumns: ["id", "lesson_id"]
+          },
+        ]
+      }
       assessment_attempts: {
         Row: {
           participation_id: string | null
@@ -309,6 +469,7 @@ export type Database = {
       }
       course_modules: {
         Row: {
+          group_type: string
           course_id: string
           created_at: string
           description: string | null
@@ -318,6 +479,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          group_type?: string
           course_id: string
           created_at?: string
           description?: string | null
@@ -327,6 +489,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          group_type?: string
           course_id?: string
           created_at?: string
           description?: string | null
@@ -668,6 +831,7 @@ export type Database = {
       }
       lessons: {
         Row: {
+          description: string
           created_at: string
           estimated_duration_seconds: number | null
           id: string
@@ -678,6 +842,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          description?: string
           created_at?: string
           estimated_duration_seconds?: number | null
           id?: string
@@ -688,6 +853,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          description?: string
           created_at?: string
           estimated_duration_seconds?: number | null
           id?: string
@@ -1006,6 +1172,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_lesson_upload: {Args:{p_course_id:string;p_asset_id:string};Returns:Json}
+      register_lesson_upload: {Args:{p_course_id:string;p_mime:string;p_filename:string};Returns:Json}
+      archive_unused_lesson_upload: {Args:{p_asset_id:string};Returns:undefined}
+      edit_learning_content: {Args:{p_course_id:string;p_action:string;p_id:string|null;p_parent_id:string|null;p_updated_at:string|null;p_data:Json};Returns:string}
+      save_segment_progress: {Args:{p_offering_id:string;p_segment_id:string;p_position:number;p_complete:boolean;p_revision:number};Returns:Json}
       sync_exam_participation: { Args: { p_schedule_id: string }; Returns: Json }
       decide_exam_retry: { Args: { p_schedule_id: string; p_decision: string; p_expected_revision: number }; Returns: Json }
       save_exam_response: { Args: { p_attempt_id: string; p_question_id: string; p_response: Json | null; p_media_asset_id: string | null; p_expected_revision: number }; Returns: Json }
