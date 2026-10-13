@@ -5,6 +5,7 @@ import { getApplicationViewer } from '@/server/services/application-auth';
 import LessonTabs from '@/frontend/features/courses/lesson/lesson-tabs';
 import { lessonId,continuePart,lessonPartHref,lessonPlayback } from '@/shared/contracts/lessons';
 import { lessonBlockViews } from '@/server/services/lesson-blocks';
+import { HomeworkAssignments } from '@/frontend/features/courses/lesson/homework-assignments';
 
 export async function SecureLessonPage({courseId,segmentId,offeringId}:{courseId:string;segmentId:string;offeringId?:string}) {
  if(!await getApplicationViewer())redirect('/sign-in');
@@ -38,7 +39,7 @@ async function LessonContent({courseId,segmentId,offeringId}:{courseId:string;se
   playbackId={null} videoUrl={videoUrl} solutionVideoUrl={null} contentType="VIDEO_EXPLANATION" completeOnEnd={false} isCompleted={state?.status==='completed'}
   isWatched={state?.status==='completed'} userId="" hasSubmission={false} attachments={attachments}
   secure={{offeringId:offeringId!,revision:state?.revision??0,position:state?.video_position_seconds??0,assetId:videoAssetId,thumbnailUrl:segment.thumbnail_asset_id?thumbnails[segment.thumbnail_asset_id]:null,status:state?.status??'not_started'}}
-  segments={parts.map(s=>({...s,thumbnailUrl:s.thumbnail_asset_id?thumbnails[s.thumbnail_asset_id]:null,contentType:'VIDEO_EXPLANATION',isCompleted:progress.some(p=>p.segment_id===s.id&&p.status==='completed')}))}/></div>;
+  segments={parts.map(s=>({...s,thumbnailUrl:s.thumbnail_asset_id?thumbnails[s.thumbnail_asset_id]:null,contentType:'VIDEO_EXPLANATION',isCompleted:progress.some(p=>p.segment_id===s.id&&p.status==='completed')}))}/><HomeworkAssignments key={`hw:${segment.id}`} courseId={courseId} lessonId={lesson.id} segmentId={segment.id} offeringId={offeringId}/></div>;
  }catch(e){return <UnavailableLesson failed={(e as {status?:number}).status===503}/>;}
 }
 function UnavailableLesson({failed=false}:{failed?:boolean}) {return <div className="rounded-2xl border border-slate-200 bg-white p-6 space-y-3"><p role="alert">{failed?'Lessons could not be loaded. Please retry.':'This lesson is unpublished, unavailable or your enrollment has expired.'}</p><Link className="text-sky-700 font-semibold" href="/self-learning">Return to your lessons</Link></div>;}

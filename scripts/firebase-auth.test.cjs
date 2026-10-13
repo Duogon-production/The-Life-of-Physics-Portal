@@ -159,3 +159,11 @@ test('logout revokes only verified identity, invalidates database tokens and cle
     assert.equal(handler.writes[0][2].maxAge, 0);
   }
 });
+
+function adminFixture(value,extra={}) {
+ const events=[],deps={'node:fs':{readFileSync:()=>{events.push('read');return JSON.stringify(value);}},'firebase-admin/app':{getApps:()=>[],cert:v=>{events.push({cert:v});return 'local-cert';},applicationDefault:()=>{events.push('adc');return 'adc';},initializeApp:v=>{events.push({initialized:v});return {}; }},'firebase-admin/auth':{getAuth:()=>({local:true})}};
+ return {events,admin:load('server/integrations/firebase-admin.ts',deps,{NEXT_PUBLIC_FIREBASE_PROJECT_ID:'synthetic-project',...extra})};
+}
+test('protected service-account configuration signs locally without remote IAM escalation',()=>{const f=adminFixture({type:'service_account',project_id:'synthetic-project',client_email:'synthetic@example.invalid',private_key:'synthetic-key'},{GOOGLE_APPLICATION_CREDENTIALS:'protected-credential.json'});f.admin.getFirebaseAdminAuth();assert.equal(f.events.includes('adc'),false);assert.equal(f.events.find(e=>e.cert)?.cert.projectId,'synthetic-project');assert.equal(f.events.find(e=>e.initialized)?.initialized.credential,'local-cert');});
+test('protected service-account configuration rejects mismatched projects before initialization',()=>{const f=adminFixture({type:'service_account',project_id:'wrong-project',client_email:'synthetic@example.invalid',private_key:'synthetic-key'},{GOOGLE_APPLICATION_CREDENTIALS:'protected-credential.json'});assert.throws(()=>f.admin.getFirebaseAdminAuth(),/does not match/);assert.equal(f.events.some(e=>e.initialized),false);});
+test('workload ADC and explicit server credential modes remain supported',()=>{const workload=adminFixture({});workload.admin.getFirebaseAdminAuth();assert.equal(workload.events.includes('adc'),true);assert.equal(workload.events.includes('read'),false);const explicit=adminFixture({},{FIREBASE_CLIENT_EMAIL:'synthetic@example.invalid',FIREBASE_PRIVATE_KEY:'synthetic-key',GOOGLE_APPLICATION_CREDENTIALS:'unused.json'});explicit.admin.getFirebaseAdminAuth();assert.equal(explicit.events.includes('read'),false);assert.equal(explicit.events.find(e=>e.initialized)?.initialized.credential,'local-cert');});
