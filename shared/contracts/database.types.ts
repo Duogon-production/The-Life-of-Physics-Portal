@@ -564,6 +564,255 @@ export type Database = {
           },
         ]
       }
+      group_memberships: {
+        Row: {
+          created_at: string
+          created_by: string
+          ends_at: string | null
+          enrollment_expires_at: string | null
+          enrollment_id: string
+          group_id: string
+          id: string
+          offering_id: string
+          starts_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          ends_at?: string | null
+          enrollment_expires_at?: string | null
+          enrollment_id: string
+          group_id: string
+          id?: string
+          offering_id: string
+          starts_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          ends_at?: string | null
+          enrollment_expires_at?: string | null
+          enrollment_id?: string
+          group_id?: string
+          id?: string
+          offering_id?: string
+          starts_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_memberships_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_memberships_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_memberships_group_id_offering_id_fkey"
+            columns: ["group_id", "offering_id"]
+            isOneToOne: false
+            referencedRelation: "study_groups"
+            referencedColumns: ["id", "offering_id"]
+          },
+          {
+            foreignKeyName: "group_memberships_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_schedules: {
+        Row: {
+          active: boolean
+          created_at: string
+          duration_minutes: number
+          group_id: string
+          id: string
+          local_time: string
+          materialized_through: string
+          weekday: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          duration_minutes: number
+          group_id: string
+          id?: string
+          local_time: string
+          materialized_through?: string
+          weekday: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          duration_minutes?: number
+          group_id?: string
+          id?: string
+          local_time?: string
+          materialized_through?: string
+          weekday?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_schedules_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "study_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_sessions: {
+        Row: {
+          attendance_state: string
+          cancellation_reason: string
+          cancelled: boolean
+          created_at: string
+          created_by: string
+          ends_at: string
+          exception: boolean
+          group_id: string
+          id: string
+          instructions: string
+          join_url: string
+          location: string
+          mode: string
+          occurrence_date: string | null
+          original_ends_at: string
+          original_starts_at: string
+          roster_at: string | null
+          schedule_id: string | null
+          starts_at: string
+          title: string
+          updated_at: string
+          updated_by: string
+          version: number
+        }
+        Insert: {
+          attendance_state?: string
+          cancellation_reason?: string
+          cancelled?: boolean
+          created_at?: string
+          created_by: string
+          ends_at: string
+          exception?: boolean
+          group_id: string
+          id?: string
+          instructions?: string
+          join_url?: string
+          location?: string
+          mode: string
+          occurrence_date?: string | null
+          original_ends_at: string
+          original_starts_at: string
+          roster_at?: string | null
+          schedule_id?: string | null
+          starts_at: string
+          title: string
+          updated_at?: string
+          updated_by: string
+          version?: number
+        }
+        Update: {
+          attendance_state?: string
+          cancellation_reason?: string
+          cancelled?: boolean
+          created_at?: string
+          created_by?: string
+          ends_at?: string
+          exception?: boolean
+          group_id?: string
+          id?: string
+          instructions?: string
+          join_url?: string
+          location?: string
+          mode?: string
+          occurrence_date?: string | null
+          original_ends_at?: string
+          original_starts_at?: string
+          roster_at?: string | null
+          schedule_id?: string | null
+          starts_at?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_sessions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_sessions_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "study_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_sessions_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "group_schedules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_sessions_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_staff: {
+        Row: {
+          created_at: string
+          group_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          group_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          group_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_staff_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "study_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_staff_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       homework_assignments: {
         Row: {
           course_id: string
@@ -1473,6 +1722,131 @@ export type Database = {
         }
         Relationships: []
       }
+      session_attendance: {
+        Row: {
+          membership_id: string
+          session_id: string
+          status: string
+          updated_at: string
+          updated_by: string | null
+          user_id: string
+        }
+        Insert: {
+          membership_id: string
+          session_id: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+          user_id: string
+        }
+        Update: {
+          membership_id?: string
+          session_id?: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_attendance_membership_id_fkey"
+            columns: ["membership_id"]
+            isOneToOne: false
+            referencedRelation: "group_memberships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_attendance_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "group_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_attendance_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_attendance_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      study_groups: {
+        Row: {
+          capacity: number | null
+          created_at: string
+          created_by: string
+          description: string
+          id: string
+          instructions: string
+          join_url: string
+          location: string
+          mode: string
+          name: string
+          offering_id: string
+          status: string
+          timezone: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          capacity?: number | null
+          created_at?: string
+          created_by: string
+          description?: string
+          id?: string
+          instructions?: string
+          join_url?: string
+          location?: string
+          mode: string
+          name: string
+          offering_id: string
+          status?: string
+          timezone?: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          capacity?: number | null
+          created_at?: string
+          created_by?: string
+          description?: string
+          id?: string
+          instructions?: string
+          join_url?: string
+          location?: string
+          mode?: string
+          name?: string
+          offering_id?: string
+          status?: string
+          timezone?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_groups_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "study_groups_offering_id_fkey"
+            columns: ["offering_id"]
+            isOneToOne: false
+            referencedRelation: "course_offerings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1563,6 +1937,24 @@ export type Database = {
           p_reason: string | null
           p_request_id: string
           p_scores: Json
+        }
+        Returns: Json
+      }
+      group_command: {
+        Args: {
+          p_action: string
+          p_data?: Json
+          p_group: string | null
+          p_version?: number | null
+        }
+        Returns: Json
+      }
+      group_view: {
+        Args: {
+          p_group?: string | null
+          p_page?: number
+          p_search?: string
+          p_section?: string
         }
         Returns: Json
       }

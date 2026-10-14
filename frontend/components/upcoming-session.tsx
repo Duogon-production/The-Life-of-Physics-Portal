@@ -3,13 +3,15 @@ import SessionCountdown from '@/frontend/components/session-countdown';
 import { cn } from '@/shared/utils';
 
 interface UpcomingSessionProps {
-	session: { date: string | Date; fullFormatted: string } | null;
+	session: { date: string | Date; fullFormatted: string; endDate?:string } | null;
+	serverNow?: string;
 	groupName?: string | null;
 	description?: string;
 	className?: string;
 }
 
 export default function UpcomingSession({
+	serverNow,
 	session,
 	groupName,
 	description = 'Have your notes and questions ready for class.',
@@ -34,7 +36,7 @@ export default function UpcomingSession({
 					</p>
 				</div>
 			</div>
-			{session && <SessionCountdown targetDate={session.date} />}
+			{session && <SessionCountdown targetDate={session.date} endDate={session.endDate} serverNow={serverNow} />}
 		</div>
 	);
 }

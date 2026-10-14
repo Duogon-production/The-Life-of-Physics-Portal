@@ -5,8 +5,10 @@ import { NextResponse } from 'next/server';
 
 import { db } from '@/server/db';
 import { isAdminOrTeacher } from '@/server/services/teacher';
+import { isFirebaseStaging } from '@/shared/auth-config';
 
 const requireStaffAccess = async () => {
+ if (isFirebaseStaging()) return false;
 	const { userId, sessionClaims } = await auth();
 	return isAdminOrTeacher(userId, sessionClaims);
 };

@@ -19,6 +19,9 @@ import UpcomingSession from '@/frontend/components/upcoming-session';
 
 
 export const GroupRosterView = ({
+ privacySafe = false,
+ mode,
+ location,
 	phase1 = false,
 	groupName,
 	nextSession,
@@ -48,26 +51,26 @@ export const GroupRosterView = ({
 						<div className="flex flex-wrap items-center gap-2.5">
 							<div className="inline-flex items-center gap-1.5 rounded-xl bg-slate-800/90 border border-slate-700/80 px-3.5 py-2 text-xs font-medium text-slate-200">
 								<MapPin className="h-4 w-4 text-cyan-400 shrink-0" />
-								<span>Class Location</span>
+								<span>{privacySafe ? (mode === 'center' ? location || 'Center / In-Person' : 'Online') : phase1 ? 'Course offering' : 'Class Location'}</span>
 							</div>
 							<div className="inline-flex items-center gap-1.5 rounded-xl bg-slate-800/90 border border-slate-700/80 px-3.5 py-2 text-xs font-medium text-slate-200">
 								<Video className="h-4 w-4 text-cyan-400 shrink-0" />
-								<span>Live Interactive Stream</span>
+								<span>{privacySafe || phase1 ? 'Livestream · Coming Soon' : 'Live Interactive Stream'}</span>
 							</div>
 						</div>
 					</div>
 
-					<UpcomingSession
+					{!privacySafe && (!phase1 || nextSession) && <UpcomingSession
 						session={nextSession}
 						groupName={groupName}
 						description="Finish your homework and have your notes ready before class."
 						className="p-4 sm:p-5"
-					/>
+					/>}
 				</div>
 			</div>
 
 			{/* 2. ENROLLED GROUP ROSTER & HOMEWORK SUBMISSION TRACKER */}
-			<div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
+			{!privacySafe && <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
 				<TextbookWaveBottomLeft opacity={0.2} />
 
 				<div className="relative z-10 space-y-6">
@@ -75,10 +78,10 @@ export const GroupRosterView = ({
 						<div>
 							<h2 className="text-xl font-bold text-slate-950 flex items-center gap-2">
 								<Users className="h-5 w-5 text-cyan-600" />
-								<span>Enrolled Peer Roster</span>
+								<span>{phase1 ? 'Offering Enrollment' : 'Enrolled Peer Roster'}</span>
 							</h2>
 							<p className="mt-1 text-xs sm:text-sm text-slate-500">
-								Live study group members and their latest homework submission status.
+								{phase1 ? 'Authorized enrollment records for this offering.' : 'Live study group members and their latest homework submission status.'}
 							</p>
 						</div>
 
@@ -172,7 +175,7 @@ export const GroupRosterView = ({
 						})}
 					</div>
 				</div>
-			</div>
+			</div>}
 		</div>
 	);
 };

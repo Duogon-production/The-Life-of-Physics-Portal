@@ -1,2 +1,3 @@
 # Preserve the exact owner-approved migration checksum across Windows/Linux checkouts.
 supabase/migrations/20261013184915_complete_homework_workflows.sql -text whitespace=cr-at-eol
+supabase/migrations/20261014054726_complete_group_attendance_workflows.sql -text
