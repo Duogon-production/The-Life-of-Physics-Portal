@@ -6,11 +6,15 @@ import { cn } from '@/shared/utils';
 
 interface SessionCountdownProps {
     targetDate?: string | Date | null;
+    endDate?: string | Date | null;
+    serverNow?: string;
     className?: string;
 }
 
-export const SessionCountdown = ({ targetDate, className }: SessionCountdownProps) => {
+export const SessionCountdown = ({ targetDate, endDate, serverNow, className }: SessionCountdownProps) => {
     const target = targetDate ? new Date(targetDate).getTime() : NaN;
+    const end = endDate ? new Date(endDate).getTime() : NaN;
+    const [sessionEnded,setSessionEnded] = useState(false);
     const [countdown, setCountdown] = useState<{
         target: number;
         remaining: RemainingTime | null;
@@ -18,10 +22,14 @@ export const SessionCountdown = ({ targetDate, className }: SessionCountdownProp
 
     useEffect(() => {
         let interval: ReturnType<typeof setInterval> | undefined;
+        const base = Date.now();
+        const server = serverNow ? Date.parse(serverNow) : base;
         const update = () => {
-            const remaining = getRemainingTime(target, Date.now());
+            const now = Number.isFinite(server) ? server + Date.now() - base : Date.now();
+            const remaining = getRemainingTime(target, now);
+            setSessionEnded(Number.isFinite(end) && now >= end);
             setCountdown({ target, remaining });
-            if (!remaining || remaining.hasStarted) {
+            if (!remaining || (remaining.hasStarted && !Number.isFinite(end))) {
                 if (interval) clearInterval(interval);
                 return false;
             }
@@ -31,7 +39,7 @@ export const SessionCountdown = ({ targetDate, className }: SessionCountdownProp
         return () => {
             if (interval) clearInterval(interval);
         };
-    }, [target]);
+    }, [target,end,serverNow]);
 
     const timeLeft = countdown?.target === target ? countdown.remaining : null;
     const units = [
@@ -44,7 +52,7 @@ export const SessionCountdown = ({ targetDate, className }: SessionCountdownProp
     return (
         <div className={cn('w-full min-w-0 max-w-sm space-y-2.5', className)}>
             <p className="text-xs font-medium text-slate-500">
-                {timeLeft?.hasStarted ? 'Scheduled start time reached' : 'Class starts in'}
+                {sessionEnded ? 'Session completed' : timeLeft?.hasStarted ? (endDate ? 'In Progress' : 'Scheduled start time reached') : 'Class starts in'}
             </p>
             <div role="timer" aria-label="Time until your next class" aria-live="off" className="grid grid-cols-4 gap-2 sm:gap-3">
                 {units.map(({ key, label }) => (

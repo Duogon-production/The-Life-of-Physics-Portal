@@ -5,6 +5,8 @@ import StudentHome from '@/frontend/features/dashboard/student-home';
 import AdminHome from '@/frontend/features/dashboard/admin-home';
 import CourseCard from '@/frontend/components/course-card';
 import GroupRosterView from '@/frontend/features/groups/group-roster-view';
+import { GroupWorkspace } from '@/frontend/features/groups/group-workspace';
+import { groupService } from '@/server/services/groups';
 import { getWebsiteContext, loadWebsiteScope, courseCapability, offeringCapability } from '@/server/services/website';
 import { validRosterPage } from '@/shared/website-model';
 import { SelfLearningView } from '@/frontend/features/self-learning/self-learning-view';
@@ -100,10 +102,10 @@ export async function WebsiteCourse({ courseId, search = {} }: { courseId: strin
 
 }
 export async function WebsiteGroups({ search = {} }: { search?: WebsiteSearch }) {
-  const { scope } = await scopeFor(search);
-  return <div className="mx-auto max-w-5xl space-y-6"><LimitNotice limited={scope.limited} /><Offerings scope={scope} />
-    <section className={panel}><h2 className="mb-3 text-xl font-bold">Your Enrollment Status</h2><p className="mb-3 text-sm text-slate-500">Suspended, expired, invited and cancelled enrollments do not grant course access.</p>{scope.enrollments.filter(e => !search.organization || scope.offerings.some(o => o.id === e.offering_id)).map(e => <p className="border-t py-3 text-sm" key={e.id}>{scope.offerings.find(o => o.id === e.offering_id)?.name || 'Unavailable offering'} · {e.status}{e.expires_at ? ` · Expires ${e.expires_at}` : ''}</p>)}{!scope.enrollments.length && <p className="text-sm text-slate-500">You have no enrollments yet.</p>}</section>
-  </div>;
+  await requireWebsiteContext();
+  const service = await groupService();
+  const [initial,initialOfferings] = await Promise.all([service.overview(),service.view<{id:string;name:string}>(null,'offerings')]);
+  return <GroupWorkspace initial={initial} initialOfferings={initialOfferings}/>;
 }
 export async function WebsiteOffering({ offeringId, search = {} }: { offeringId: string; search?: WebsiteSearch }) {
   const context = await requireWebsiteContext();
@@ -116,7 +118,7 @@ export async function WebsiteOffering({ offeringId, search = {} }: { offeringId:
   const staff = offeringCapability(context, course, offeringId);
   const [enrollments, total] = staff ? await Promise.all([context.repository.roster(offeringId, page), context.repository.enrollmentCount([offeringId])]) : [[], null];
   const mine = (await context.repository.myEnrollments()).find(e => e.offering_id === offeringId);
-  return <div className="space-y-6"><Link className="text-sm font-semibold text-sky-700" href={`/courses/${course.id}?offering=${offering.id}`}>View {course.title} lessons &amp; progress →</Link>
-    {staff ? <><GroupRosterView phase1 groupName={offering.name} nextSession={null} peers={enrollments.slice(0, 50).map(e => ({ id: e.id, name: e.profiles?.display_name || 'Learner', email: '', role: 'student', isCurrentUser: e.user_id === context.viewer.id, enrollmentStatus: e.status, latestSubmission: null }))} /><div className={panel}><p>{total} enrollment records · Page {page + 1}</p><nav className="mt-3 flex gap-6" aria-label="Roster pages">{page > 0 && <Link href={`/offerings/${offeringId}?page=${page - 1}`}>Previous</Link>}{enrollments.length > 50 && <Link href={`/offerings/${offeringId}?page=${page + 1}`}>Next</Link>}</nav></div></> : <><GroupRosterView phase1 groupName={offering.name} nextSession={null} peers={mine?[{id:mine.id,name:context.viewer.displayName,email:context.viewer.email,role:'student',isCurrentUser:true,enrollmentStatus:mine.status,latestSubmission:null}]:[]}/><p role="status" className="text-sm text-slate-500">Only your own enrollment is shown. Classmate records are private. Live sessions and homework are awaiting integration.</p></>}
+  return <div className="space-y-6"><Link className="text-sm font-semibold text-sky-700" href="/group">View your groups, sessions &amp; attendance →</Link><Link className="text-sm font-semibold text-sky-700" href={`/courses/${course.id}?offering=${offering.id}`}>View {course.title} lessons &amp; progress →</Link>
+    {staff ? <><GroupRosterView phase1 groupName={offering.name} nextSession={null} peers={enrollments.slice(0, 50).map(e => ({ id: e.id, name: e.profiles?.display_name || 'Learner', email: '', role: 'student', isCurrentUser: e.user_id === context.viewer.id, enrollmentStatus: e.status, latestSubmission: null }))} /><div className={panel}><p>{total} enrollment records · Page {page + 1}</p><nav className="mt-3 flex gap-6" aria-label="Roster pages">{page > 0 && <Link href={`/offerings/${offeringId}?page=${page - 1}`}>Previous</Link>}{enrollments.length > 50 && <Link href={`/offerings/${offeringId}?page=${page + 1}`}>Next</Link>}</nav></div></> : <><GroupRosterView phase1 groupName={offering.name} nextSession={null} peers={mine?[{id:mine.id,name:context.viewer.displayName,email:context.viewer.email,role:'student',isCurrentUser:true,enrollmentStatus:mine.status,latestSubmission:null}]:[]}/><p role="status" className="text-sm text-slate-500">Only your own enrollment is shown. Classmate records are private. Open Your Groups for class sessions and attendance.</p></>}
   </div>;
 }

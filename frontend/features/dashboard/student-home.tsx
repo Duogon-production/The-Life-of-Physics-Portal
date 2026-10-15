@@ -23,6 +23,7 @@ import {
 
 import { cn } from '@/shared/utils';
 import { getUpcomingGroupSessions } from '@/shared/group-schedule';
+import { useGroupSessions } from '@/frontend/features/groups/use-group-sessions';
 import { TextbookWaveTopRight, TextbookWaveBottomLeft } from '@/frontend/components/textbook-accent';
 import UpcomingSession from '@/frontend/components/upcoming-session';
 import { LessonCard, getLessonCardStatus } from '@/frontend/features/courses/lesson-card';
@@ -203,10 +204,12 @@ const StudentHome = ({
 		? Math.round((completedLessons / lessons.length) * 100)
 		: 0;
 	const firstName = user?.firstName || user?.username?.split(' ')[0] || 'there';
-	const upcomingSessions = useMemo(
+	const liveGroups = useGroupSessions(phase1);
+	const legacySessions = useMemo(
 		() => getUpcomingGroupSessions(groupName, groupSchedule),
 		[groupName, groupSchedule]
 	);
+	const upcomingSessions = phase1 ? liveGroups.sessions : legacySessions;
 	const nextSession = upcomingSessions[0] || null;
 
 	// Lesson numbers restart at 1 inside each chapter (scoped by chapter type + number),
@@ -311,11 +314,14 @@ const StudentHome = ({
 			{/* LIVE SESSION & HOMEWORK REMINDER BANNER */}
 			<section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
 				<div className="flex min-w-0 flex-col justify-between gap-6 xl:flex-row xl:items-center">
-					<UpcomingSession
+					{phase1 && liveGroups.error && <p role="alert" className="text-sm text-red-700">{liveGroups.error}</p>}
+					{phase1 && liveGroups.loading && <p role="status" className="text-sm text-slate-500">Loading your class schedule…</p>}
+					{(!phase1 || (!liveGroups.error && !liveGroups.loading)) && <UpcomingSession
+						serverNow={phase1 ? liveGroups.serverNow : undefined}
 						session={nextSession}
-						groupName={groupName}
+						groupName={phase1 ? liveGroups.sessions[0]?.group_name ?? null : groupName}
 						className="flex-1"
-					/>
+					/>}
 
 					{/* Right: Homework Status Badge */}
 					<div className="shrink-0 flex flex-col sm:flex-row items-start sm:items-center gap-3.5 p-4 rounded-2xl border bg-slate-50/80">
@@ -487,7 +493,7 @@ const StudentHome = ({
 						<CalendarClock className="h-5 w-5 text-sky-700" />
 					</div>
 					<div className="mt-5 max-h-60 space-y-3 overflow-y-auto pr-1">
-						{upcomingSessions.length ? (
+						{phase1 && (liveGroups.error || liveGroups.loading) ? <p role={liveGroups.error ? 'alert' : 'status'} className="text-sm text-slate-500">{liveGroups.error || 'Loading your class schedule…'}</p> : upcomingSessions.length ? (
 							upcomingSessions.map((session) => (
 								<div
 									className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4"

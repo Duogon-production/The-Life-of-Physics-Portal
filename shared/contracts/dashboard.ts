@@ -67,6 +67,9 @@ export interface PeerMember {
 }
 
 export interface GroupRosterViewProps {
+ privacySafe?: boolean;
+ mode?: 'online' | 'center';
+ location?: string;
 	phase1?: boolean;
 	groupName: string;
 	nextSession: {
