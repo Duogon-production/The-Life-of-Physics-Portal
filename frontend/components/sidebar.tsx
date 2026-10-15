@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 
 import EduLabsMark from '@/frontend/components/edulabs-mark';
+import { NotificationBell } from '@/frontend/features/notifications/notifications-view';
 import { cn } from '@/shared/utils';
 
 interface SidebarProps {
@@ -91,6 +92,7 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 		Learning Platform
 		</span>
 		</div>
+		{isFirebaseStaging() && <div className="ml-auto hidden md:block"><NotificationBell /></div>}
 		</div>
 
 		{/* 2. TACTILE NAVIGATION LINKS */}
@@ -185,11 +187,9 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 		</Link>
 
 		<a role="link"
-		href={isFirebaseStaging() ? undefined : "/support"}
-        aria-disabled={isFirebaseStaging() || undefined}
+		href="/support"
         tabIndex={0}
-        title={isFirebaseStaging() ? "EduLabs platform help is not yet available." : undefined}
-		onClick={() => { if (!isFirebaseStaging()) onNavigate?.(); }}
+		onClick={() => onNavigate?.()}
 		className={cn(
 			'relative flex items-center gap-3.5 px-4 py-3 min-h-[48px] text-[15px] font-medium rounded-2xl border-2 border-transparent transition-all duration-200 ease-out cursor-pointer active:translate-x-0.5 active:translate-y-0.5',
 			isSupportActive
@@ -203,7 +203,7 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 			isSupportActive ? 'text-black' : 'text-slate-500'
 		)}
 		/>
-		<span>{isFirebaseStaging() ? "Help — soon" : "Support"}</span>
+		<span>Support</span>
 		</a>
 
 		{isAdminOrTeacher && (

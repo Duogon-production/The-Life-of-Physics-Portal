@@ -14,6 +14,137 @@ export type Database = {
   }
   public: {
     Tables: {
+      support_tickets: {
+        Row: {
+          id: string
+          organization_id: string | null
+          requester_id: string
+          category: string
+          subject: string
+          status: string
+          assigned_to: string | null
+          version: number
+          created_at: string
+          updated_at: string
+          last_message_at: string
+          response_due_at: string | null
+          first_staff_response_at: string | null
+        }
+        Insert: {
+          id?: string
+          organization_id?: string | null
+          requester_id: string
+          category: string
+          subject: string
+          status?: string
+          assigned_to?: string | null
+          version?: number
+          created_at?: string
+          updated_at?: string
+          last_message_at?: string
+          response_due_at?: string | null
+          first_staff_response_at?: string | null
+        }
+        Update: {
+          id?: string
+          organization_id?: string | null
+          requester_id?: string
+          category?: string
+          subject?: string
+          status?: string
+          assigned_to?: string | null
+          version?: number
+          created_at?: string
+          updated_at?: string
+          last_message_at?: string
+          response_due_at?: string | null
+          first_staff_response_at?: string | null
+        }
+        Relationships: [{"foreignKeyName":"support_tickets_assigned_to_fkey","columns":["assigned_to"],"isOneToOne":false,"referencedRelation":"profiles","referencedColumns":["id"]},{"foreignKeyName":"support_tickets_organization_id_fkey","columns":["organization_id"],"isOneToOne":false,"referencedRelation":"organizations","referencedColumns":["id"]},{"foreignKeyName":"support_tickets_requester_id_fkey","columns":["requester_id"],"isOneToOne":false,"referencedRelation":"profiles","referencedColumns":["id"]}]
+      }
+      support_messages: {
+        Row: {
+          id: string
+          ticket_id: string
+          sender_id: string
+          staff: boolean
+          body: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          ticket_id: string
+          sender_id: string
+          staff: boolean
+          body: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          ticket_id?: string
+          sender_id?: string
+          staff?: boolean
+          body?: string
+          created_at?: string
+        }
+        Relationships: [{"foreignKeyName":"support_messages_sender_id_fkey","columns":["sender_id"],"isOneToOne":false,"referencedRelation":"profiles","referencedColumns":["id"]},{"foreignKeyName":"support_messages_ticket_id_fkey","columns":["ticket_id"],"isOneToOne":false,"referencedRelation":"support_tickets","referencedColumns":["id"]}]
+      }
+      notifications: {
+        Row: {
+          id: string
+          event_id: string
+          recipient_id: string
+          event_type: string
+          in_app: boolean
+          created_at: string
+          read_at: string | null
+        }
+        Insert: {
+          id?: string
+          event_id: string
+          recipient_id: string
+          event_type: string
+          in_app?: boolean
+          created_at?: string
+          read_at?: string | null
+        }
+        Update: {
+          id?: string
+          event_id?: string
+          recipient_id?: string
+          event_type?: string
+          in_app?: boolean
+          created_at?: string
+          read_at?: string | null
+        }
+        Relationships: [{"foreignKeyName":"notifications_event_id_fkey","columns":["event_id"],"isOneToOne":false,"referencedRelation":"notification_events","referencedColumns":["id"]},{"foreignKeyName":"notifications_recipient_id_fkey","columns":["recipient_id"],"isOneToOne":false,"referencedRelation":"profiles","referencedColumns":["id"]}]
+      }
+      notification_preferences: {
+        Row: {
+          user_id: string
+          event_type: string
+          in_app: boolean
+          push: boolean
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          event_type: string
+          in_app?: boolean
+          push?: boolean
+          updated_at?: string
+        }
+        Update: {
+          user_id?: string
+          event_type?: string
+          in_app?: boolean
+          push?: boolean
+          updated_at?: string
+        }
+        Relationships: [{"foreignKeyName":"notification_preferences_user_id_fkey","columns":["user_id"],"isOneToOne":false,"referencedRelation":"profiles","referencedColumns":["id"]}]
+      }
+
+
       assessment_attempts: {
         Row: {
           attempt_number: number
@@ -1852,6 +1983,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      notification_command: { Args: { p_action: string; p_data?: Json }; Returns: Json }
+      support_command: { Args: { p_action: string; p_ticket?: string | null; p_version?: number | null; p_request?: string | null; p_data?: Json }; Returns: Json }
+      notification_worker: { Args: { p_action: string; p_data?: Json }; Returns: Json }
       abandon_media_upload: { Args: { p_asset_id: string }; Returns: undefined }
       archive_unused_lesson_upload: {
         Args: { p_asset_id: string }

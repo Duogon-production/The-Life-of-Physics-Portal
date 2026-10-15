@@ -1,9 +1,10 @@
 'use client';
 
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { useApplicationAuth } from '@/frontend/components/providers/application-auth-provider';
 import { isFirebaseStaging } from '@/shared/auth-config';
 import { api } from '@/frontend/lib/api';
+import { communicate } from '@/frontend/lib/communications';
 import { HelpCircle, Send, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -34,6 +35,7 @@ const SupportModal = ({ trigger }: SupportModalProps) => {
 	const [subject, setSubject] = useState('');
 	const [message, setMessage] = useState('');
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const supportRequest = useRef<{ payload: string; id: string } | null>(null);
 
 	const clerkEmail = user?.email ?? '';
 	const clerkName =
@@ -59,7 +61,15 @@ const SupportModal = ({ trigger }: SupportModalProps) => {
 		}
 
 		if (isFirebaseStaging()) {
-			window.location.assign('mailto:support.lop.physics@gmail.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(message));
+			setIsSubmitting(true);
+			try {
+				const data = {organizationId:null,category:'website',subject:subject.trim() || 'Website Help Request',body:message.trim()};
+				const payload = JSON.stringify(data);
+				if (supportRequest.current?.payload !== payload) supportRequest.current = {payload,id:crypto.randomUUID()};
+				const ticket = await communicate<{id:string}>('support','create',data,{requestId:supportRequest.current.id});
+				supportRequest.current = null;
+				window.location.assign('/support?ticket=' + ticket.id);
+			} catch(e) { toast.error((e as Error).message); } finally { setIsSubmitting(false); }
 			return;
 		}
 		setIsSubmitting(true);

@@ -13,7 +13,7 @@
 		"test:lms-http": "node scripts/lms-http-security.cjs",
 		"test:lms-load": "node scripts/lms-load-test.cjs",
 		"db:legacy-inspect": "node scripts/legacy-migration.cjs --inspect",
-		"test": "node --test scripts/check-boundaries.test.cjs scripts/backend.test.cjs scripts/countdown.test.cjs scripts/windows-filesystem.test.cjs scripts/lms.test.cjs scripts/legacy-migration.test.cjs scripts/dependency-security.test.cjs scripts/firebase-auth.test.cjs scripts/website.test.cjs scripts/teacher-course.test.cjs scripts/v2-transplant.test.cjs scripts/platform-branding.test.cjs scripts/student-portal.test.cjs scripts/exams-foundation.test.cjs scripts/exam-security.test.cjs scripts/exam-runner.test.cjs scripts/lessons.test.cjs scripts/homework.test.cjs scripts/groups.test.cjs",
+		"test": "node --test scripts/check-boundaries.test.cjs scripts/backend.test.cjs scripts/countdown.test.cjs scripts/windows-filesystem.test.cjs scripts/lms.test.cjs scripts/legacy-migration.test.cjs scripts/dependency-security.test.cjs scripts/firebase-auth.test.cjs scripts/website.test.cjs scripts/teacher-course.test.cjs scripts/v2-transplant.test.cjs scripts/platform-branding.test.cjs scripts/student-portal.test.cjs scripts/exams-foundation.test.cjs scripts/exam-security.test.cjs scripts/exam-runner.test.cjs scripts/lessons.test.cjs scripts/homework.test.cjs scripts/groups.test.cjs scripts/communications.test.cjs",
 		"check": "npm test && npm run check:boundaries && npm run typecheck && npm run lint",
 		"postinstall": "prisma generate",
 		"test:exam-sql": "node scripts/exam-sql-local.cjs",
@@ -23,7 +23,8 @@
 		"test:firebase-public": "node scripts/firebase-public-smoke.cjs",
 		"test:firebase-tenant": "node scripts/firebase-tenant-http.cjs",
 		"db:auth-plan": "node scripts/auth-migration-plan.cjs",
-		"db:firebase-sql": "node scripts/firebase-sql-suite.cjs"
+		"db:firebase-sql": "node scripts/firebase-sql-suite.cjs",
+		"notifications:dispatch": "node scripts/notification-dispatch.cjs"
 	},
 	"dependencies": {
 		"@clerk/backend": "3.23.2",
@@ -77,6 +78,7 @@
 		"sharp": "0.35.5",
 		"tailwind-merge": "1.14.0",
 		"uploadthing": "7.7.4",
+		"web-push": "3.6.7",
 		"zod": "3.22.4",
 		"zustand": "4.4.4"
 	},
