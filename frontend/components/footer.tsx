@@ -27,9 +27,9 @@ const Footer = () => {
 							<Phone className="h-4 w-4" aria-hidden="true" />
 							{firebase ? 'Contact — soon' : 'Call Mrs. Ghada'}
 						</a>
-						<a role="link" href={firebase ? undefined : '/support'} aria-disabled={firebase || undefined} tabIndex={0} title={firebase ? 'EduLabs platform help is not yet available.' : undefined} className={`${contactClass} text-sky-700 hover:bg-sky-50`}>
+						<a role="link" href="/support" tabIndex={0} className={`${contactClass} text-sky-700 hover:bg-sky-50`}>
 							<HelpCircle className="h-4 w-4" aria-hidden="true" />
-							{firebase ? 'Help — soon' : 'Support'}
+							Support
 						</a>
 					</nav>
 				</div>
