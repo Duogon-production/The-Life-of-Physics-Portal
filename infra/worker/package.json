@@ -1,0 +1,10 @@
+{
+  "name": "edulabs-notification-worker",
+  "version": "1.0.0",
+  "private": true,
+  "engines": { "node": ">=24.12.0" },
+  "dependencies": {
+    "@supabase/supabase-js": "2.117.2",
+    "web-push": "3.6.7"
+  }
+}

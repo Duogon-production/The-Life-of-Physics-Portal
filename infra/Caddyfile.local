@@ -1,0 +1,20 @@
+{
+  admin off
+}
+https://localhost {
+  tls internal
+  basic_auth {
+    {$REVIEW_USER} {$REVIEW_PASSWORD_HASH}
+  }
+  request_body {
+    max_size 64MB
+  }
+  header {
+    -Server
+    X-Content-Type-Options nosniff
+    Referrer-Policy no-referrer
+  }
+  reverse_proxy app:3000 {
+    header_up -Authorization
+  }
+}

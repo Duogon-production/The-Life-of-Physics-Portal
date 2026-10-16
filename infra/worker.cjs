@@ -1,0 +1,11 @@
+const fs=require('fs'),{spawn}=require('child_process');
+if(process.env.NOTIFICATION_WORKER_ENABLED!=='true')throw Error('Worker disabled; explicitly authorize project, credential and scheduling first');
+process.env.SUPABASE_SERVICE_ROLE_KEY=fs.readFileSync(process.env.SUPABASE_SERVICE_ROLE_KEY_FILE||'','utf8').trim();
+if(process.env.PUSH_VAPID_PRIVATE_KEY_FILE)process.env.PUSH_VAPID_PRIVATE_KEY=fs.readFileSync(process.env.PUSH_VAPID_PRIVATE_KEY_FILE,'utf8').trim();
+const args=['--require','./infra/buffer-compat.cjs','scripts/notification-dispatch.cjs'];
+if(process.env.NOTIFICATION_WORKER_PUSH!=='true')args.push('--in-app-only');
+const child=spawn(process.execPath,args,{stdio:['ignore','pipe','pipe'],env:process.env});
+child.stdout.on('data',data=>{process.stdout.write(data);for(const line of data.toString().split('\n')){try{const result=JSON.parse(line);if(result.swept===true||typeof result.providerAccepted==='number')fs.writeFileSync('/tmp/worker-heartbeat',String(Date.now()));}catch{}}});
+child.stderr.on('data',data=>process.stderr.write(data));
+for(const signal of ['SIGTERM','SIGINT'])process.on(signal,()=>child.kill(signal));
+child.on('exit',code=>{process.exitCode=code??1;});child.on('error',()=>{process.exitCode=1;});

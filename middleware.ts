@@ -16,6 +16,7 @@ const legacyMiddleware = clerkMiddleware(async (auth, request) => {
 
 export default function middleware(request: NextRequest, event: NextFetchEvent) {
   const path = request.nextUrl.pathname;
+  if (path === '/api/health') return NextResponse.next();
   if (path.startsWith('/api/auth/firebase/')) return NextResponse.next();
   if (!isFirebaseStaging()) {
     if (path === '/lms-staging') return NextResponse.redirect(new URL('/sign-in', request.url));

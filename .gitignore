@@ -56,3 +56,5 @@ firebase-admin*.json
 application_default_credentials.json
 *.p12
 *.key
+/deployment-public.json
+/infra/*.env
