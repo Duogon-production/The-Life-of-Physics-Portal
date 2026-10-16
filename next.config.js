@@ -5,6 +5,7 @@ if (!buf.SlowBuffer) {
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  ...(process.env.EDULABS_STANDALONE === '1' ? { output: 'standalone', experimental: { cpus: 2 } } : {}),
 	images: {
 		domains: ['utfs.io', 'images.unsplash.com', 'img.clerk.com'],
 	},

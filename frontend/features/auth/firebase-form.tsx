@@ -2,8 +2,9 @@
 
 import { useCallback, useRef, useState } from 'react';
 import Link from 'next/link';
-import { createUserWithEmailAndPassword, GoogleAuthProvider, sendEmailVerification, sendPasswordResetEmail,
-  signInWithEmailAndPassword, signInWithPopup, signInWithRedirect, getRedirectResult,updateProfile } from 'firebase/auth';
+import { GoogleAuthProvider, sendEmailVerification, sendPasswordResetEmail,
+  signInWithEmailAndPassword, signInWithPopup, signInWithRedirect, getRedirectResult } from 'firebase/auth';
+import { registerFirebaseAccount } from '@/frontend/lib/signup-recovery';
 import { useEffect } from 'react';
 import { getFirebaseAuth, restoreFirebaseAuth } from '@/frontend/lib/firebase';
 import { synchronizeFirebaseSession, useFirebaseAuth } from '@/frontend/components/providers/firebase-auth-provider';
@@ -27,6 +28,7 @@ export function FirebaseForm({ register = false }: { register?: boolean }) {
   const [displayName,setDisplayName]=useState('');const [next,setNext]=useState('/home');
   useEffect(()=>setNext(safeStudentAuthDestination(new URLSearchParams(window.location.search).get('next'))),[]);
   const [busy, setBusy] = useState(false); const [message, setMessage] = useState<string | null>(null);
+  const [verificationRetryAt,setVerificationRetryAt]=useState(0);
   const redirecting = useRef(false);
   const goHome = useCallback(() => {
     if (redirecting.current) return;
@@ -46,9 +48,12 @@ export function FirebaseForm({ register = false }: { register?: boolean }) {
   const submit = () => run(async () => {
     if(register&&!displayName.trim())throw Error('Enter your full name.');
     const auth = getFirebaseAuth();
-    const credential = register ? await createUserWithEmailAndPassword(auth, email.trim(), password) : await signInWithEmailAndPassword(auth, email.trim(), password);
-    if (register) { await updateProfile(credential.user,{displayName:displayName.trim()});await sendEmailVerification(credential.user); setMessage('Check your email for a verification link.'); }
-    else { await synchronizeFirebaseSession(credential.user); goHome(); }
+    if(register){
+      if(Date.now()<verificationRetryAt)throw Error('Please wait before requesting another verification email. Your account is saved.');
+      const result=await registerFirebaseAccount(auth,email,password,displayName);
+      setVerificationRetryAt(Date.now()+result.retryAfterSeconds*1000);setMessage(result.message);
+      if(result.user.emailVerified){await synchronizeFirebaseSession(result.user);goHome();}
+    }else {const credential=await signInWithEmailAndPassword(auth,email.trim(),password);await synchronizeFirebaseSession(credential.user);goHome();}
   });
   const google = () => run(async () => {
     const provider = new GoogleAuthProvider();
@@ -73,7 +78,7 @@ export function FirebaseForm({ register = false }: { register?: boolean }) {
     <button disabled={busy || loading} onClick={() => void google()} className="mt-4 w-full rounded-lg border p-3">Continue with Google</button>
     {!register && <button disabled={busy || !email} onClick={() => void run(async () => { await sendPasswordResetEmail(getFirebaseAuth(), email.trim()); setMessage('If an account exists, a password reset email has been sent.'); })} className="mt-4 text-sky-700">Forgot password?</button>}
     {user && !user.emailVerified && <div className="mt-4 flex gap-4">
-      <button disabled={busy} onClick={() => void run(async () => { await sendEmailVerification(user); setMessage('Verification email sent.'); })}>Resend verification</button>
+      <button disabled={busy} onClick={() => void run(async () => { if(Date.now()<verificationRetryAt)throw Error('Please wait before requesting another verification email. Your account is saved.');setVerificationRetryAt(Date.now()+60000);await sendEmailVerification(user); setMessage('Verification email sent.'); })}>Resend verification</button>
       <button disabled={busy} onClick={() => void run(async () => { await refresh(); goHome(); })}>I verified my email</button>
     </div>}
     {(message || error) && <p role="status" className="mt-4 text-sm">{message || error}</p>}

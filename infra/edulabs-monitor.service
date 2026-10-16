@@ -1,0 +1,9 @@
+[Unit]
+Description=EduLabs local health observation
+After=docker.service
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/edulabs/current
+ExecStart=/bin/bash /opt/edulabs/current/infra/monitor.sh
+# Read-only observation. External HTTPS alarms must be configured separately.
+NoNewPrivileges=true

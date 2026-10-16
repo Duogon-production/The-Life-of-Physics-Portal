@@ -28,6 +28,7 @@ test('restored-session and form completion navigate home only once', async () =>
     'next/link': { default: 'Link' },
     'firebase/auth': { signInWithEmailAndPassword: async () => ({ user }), getRedirectResult: async () => null },
     '@/frontend/lib/firebase': { getFirebaseAuth: () => ({}), restoreFirebaseAuth: async () => {} },
+    '@/frontend/lib/signup-recovery': { registerFirebaseAccount: async () => { throw Error('Registration not exercised by this sign-in test'); } },
     '@/shared/contracts/student-administration': load('shared/contracts/student-administration.ts',{zod:require('zod')}),
     '@/frontend/components/providers/firebase-auth-provider': {
       useFirebaseAuth: () => ({ user, loading: false, error: null }),

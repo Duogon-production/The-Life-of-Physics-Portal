@@ -1,0 +1,1 @@
+const http=require('http');const r=http.get('http://127.0.0.1:3000/api/health',res=>{res.resume();process.exitCode=res.statusCode===200?0:1;});r.setTimeout(3000,()=>r.destroy(Error('Health timeout')));r.on('error',()=>{process.exitCode=1});

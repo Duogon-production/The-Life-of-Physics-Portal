@@ -1,0 +1,27 @@
+{
+  admin off
+  email {$TLS_EMAIL}
+}
+{$APP_HOST} {
+  basic_auth {
+    {$REVIEW_USER} {$REVIEW_PASSWORD_HASH}
+  }
+  request_body {
+    max_size 64MB
+  }
+  header {
+    -Server
+    X-Content-Type-Options nosniff
+    Referrer-Policy no-referrer
+  }
+  encode zstd gzip
+  reverse_proxy app:3000 {
+    header_up -Authorization
+    transport http {
+      dial_timeout 5s
+      response_header_timeout 60s
+    }
+  }
+}
+# No request access log: invitation tokens and private query strings must not
+# be persisted by the proxy. Error logs remain bounded by Compose rotation.
