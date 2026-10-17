@@ -15,7 +15,14 @@ test('Firebase sidebar labels contextual students/staff and places its only bell
   assert.match(html,staff?/>STAFF</:/>STUDENT</);assert.doesNotMatch(html,/LEARNER|>Logout</);
   assert.equal((html.match(/Notification preview/g)||[]).length,1);assert.ok(html.indexOf('Notification preview')>html.indexOf('Fictional Student'));assert.match(html,/Sign out/);
   assert.equal(html.includes('Admin &amp; Teacher'),staff);
+  assert.match(html,/font-family:&#x27;Times New Roman&#x27;, Times, serif/);
  }
+});
+test('shared tree mark defaults to its existing black offset shadow and retains explicit opt-out',()=>{
+ const Mark=load('frontend/components/edulabs-mark.tsx').default;
+ const html=renderToStaticMarkup(React.createElement(Mark,{grow:true}));
+ assert.match(html,/translate\(12 12\)/);assert.match(html,/fill="#000000"/);assert.match(html,/fill="#7ed957"/);assert.match(html,/tree-grow/);
+ const plain=renderToStaticMarkup(React.createElement(Mark,{shadow:false}));assert.doesNotMatch(plain,/fill="#000000"/);
 });
 test('notification transport carries cancellation without changing scoped command or permitting recipient fields',async()=>{
  let args;const controller=new AbortController();

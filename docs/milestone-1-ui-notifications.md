@@ -15,7 +15,9 @@
 
 The Firebase contextual label is now STUDENT or STAFF; database roles and permission decisions are unchanged. Both sidebar implementations say “Sign out”; their existing sign-out callbacks and the Firebase account menu/session cleanup remain unchanged.
 
-The Firebase notification bell moved from desktop branding/mobile header into the sidebar's bottom account section. Mobile users open the existing navigation drawer to reach the same account-associated control. There is no duplicate header bell. Its existing border, green badge and hard shadow are retained. No separate icon received a guessed shadow: the request did not identify that icon.
+The Firebase notification bell moved from desktop branding/mobile header into the sidebar's bottom account section. Mobile users open the existing navigation drawer to reach the same account-associated control. There is no duplicate header bell. Its existing border, green badge and hard shadow are retained.
+
+Owner visual correction: the initial comparison's fallback-font screenshot differed from the subsequently font-loaded screenshot. The sidebar title is now explicitly regular Times New Roman/Times/serif on desktop and mobile to retain the requested earlier appearance, without changing other application fonts. The owner also identified the tree mark as the intended shadow target. Its shared component now defaults to the existing black offset-shadow variant used by splash/loading screens; shape, color and growth animation are preserved, and an explicit `shadow={false}` opt-out remains supported.
 
 ### Notification preview
 
@@ -42,15 +44,15 @@ Browser evidence is **component acceptance with fictional local API/provider fix
 
 | Check | Actual result |
 | --- | --- |
-| `npm run check` | PASS: 204 application tests, architecture, TypeScript, lint; seven inherited lint warnings, no new warnings |
-| Focused milestone/communications/Exams foundation suites | PASS: 35 tests |
+| `npm run check` | PASS: 205 application tests, architecture, TypeScript, lint; seven inherited lint warnings, no new warnings |
+| Focused milestone/communications/Exams foundation suites | PASS: 36 tests |
 | Firebase/Supabase production build | PASS, exit 0 |
 | Clerk/legacy production build | PASS, exit 0 |
 | Chromium component acceptance | PASS: 14 check groups; desktop 1440×1000 and mobile 390×844 |
 | Preview timeout and refresh | PASS: hung response becomes error after 15 seconds; background refresh preserves focused link |
 | Unauthorized notification response | PASS: synthetic 403 is an explicit error, not an empty list; existing origin/viewer/recipient-injection tests also pass |
 | Migration preservation | PASS: 25 files byte-identical to staging baseline |
-| Scope/secret audit | PASS: 14 intended changed/new files; no env, credentials, private keys, local artifacts or lockfile changes |
+| Scope/secret audit | PASS: 15 intended changed/new files; no env, credentials, private keys, local artifacts or lockfile changes |
 | `git diff --check` | PASS |
 | Real authenticated staging, live RLS, physical devices, Firefox/WebKit | NOT RUN; not represented as passed |
 
@@ -82,7 +84,7 @@ No SQL, migration, RLS policy, grant, Firebase configuration, environment file, 
 
 ## Remaining limits
 
-- Intended separate icon-shadow target needs an owner reference; no unrelated redesign was made.
+- Tree-shadow target was clarified and implemented using the existing shared SVG variant; unrelated icons were not changed.
 - Real Firebase-authenticated staging/browser testing was not performed; no supplied test identity or permission to create fixtures was assumed.
 - Chromium desktop/mobile viewport coverage is not physical-device, Firefox or WebKit acceptance.
 - This frontend task does not retest or claim changes to live database RLS or Web Push delivery.

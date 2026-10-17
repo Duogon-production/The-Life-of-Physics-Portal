@@ -7,7 +7,7 @@ const toolRoot=process.env.EDULABS_BROWSER_TOOLS||path.join(root,'.local/milesto
 const esbuild=require(path.join(toolRoot,'esbuild')),{chromium}=require(path.join(toolRoot,'playwright'));
 const baseline='fdafb13b407a4b31219b8d3f4655a3785f63021b';
 const built=process.env.EDULABS_BROWSER_BUILD||path.join(root,fs.existsSync(path.join(root,'.local/milestone1/build-firebase/static/css'))?'.local/milestone1/build-firebase':'.next');
-const files=['frontend/components/sidebar.tsx','frontend/features/dashboard/mobile-sidebar.tsx','frontend/features/notifications/notifications-view.tsx','frontend/features/exams/exams-view.tsx','frontend/features/exams/exams-list.tsx'];
+const files=['frontend/components/sidebar.tsx','frontend/components/edulabs-mark.tsx','frontend/features/dashboard/mobile-sidebar.tsx','frontend/features/notifications/notifications-view.tsx','frontend/features/exams/exams-view.tsx','frontend/features/exams/exams-list.tsx'];
 const entry=`import React from 'react';import {createRoot} from 'react-dom/client';import Sidebar from './frontend/components/sidebar';import MobileSidebar from './frontend/features/dashboard/mobile-sidebar';import {ExamsView} from './frontend/features/exams/exams-view';import {ExamsListView,ExamsErrorView} from './frontend/features/exams/exams-list';import ExamsLoading from './app/(dashboard)/(routes)/exams/loading';
  const q=new URLSearchParams(location.search),view=q.get('view')||'sidebar';window.__staff=q.get('staff')==='1';
  const main=view==='legacy'?<ExamsView isStaff={window.__staff}/>:view==='error'?<ExamsErrorView/>:view==='loading'?<ExamsLoading/>:<ExamsListView items={[]} isStaff={window.__staff} truncated={false}/>;
