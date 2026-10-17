@@ -99,7 +99,7 @@ const SidebarRoutes = () => {
 					type="button"
 				>
 					<LogOut className="h-5 w-5 shrink-0" />
-					<span>Logout</span>
+					<span>Sign out</span>
 				</button>
 			</div>
 		</div>

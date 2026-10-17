@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
 	CheckCircle2,
@@ -42,23 +42,30 @@ const cardClass = 'rounded-2xl border-2 border-black bg-white p-5 shadow-hard-sm
 export const ExamsView = ({ isStaff }: ExamsViewProps) => {
 	const [exams, setExams] = useState<ExamSummary[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
+	const [loadError, setLoadError] = useState('');
+	const requestSequence = useRef(0);
 	const [mode, setMode] = useState<
 		{ type: 'list' } | { type: 'builder'; examId: string | null } | { type: 'grading'; examId: string }
 	>({ type: 'list' });
 
 	const load = useCallback(async () => {
+		const request = ++requestSequence.current;
+		setIsLoading(true);
+		setLoadError('');
 		try {
-			const res = await api.get<ExamSummary[]>('/api/exams');
-			setExams(res.data);
+			const res = await api.get<ExamSummary[]>('/api/exams', { timeout: 15000 });
+			if (request === requestSequence.current) setExams(res.data);
 		} catch {
-			toast.error('Failed to load exams.');
+			if (request === requestSequence.current) setLoadError('We could not load your exams. Please try again.');
 		} finally {
-			setIsLoading(false);
+			if (request === requestSequence.current) setIsLoading(false);
 		}
 	}, []);
 
 	useEffect(() => {
+		const requests = requestSequence;
 		load();
+		return () => { requests.current++; };
 	}, [load]);
 
 	const togglePublish = async (exam: ExamSummary) => {
@@ -130,8 +137,13 @@ export const ExamsView = ({ isStaff }: ExamsViewProps) => {
 			</div>
 
 			{isLoading ? (
-				<div className="flex justify-center py-16">
+				<div role="status" aria-label="Loading exams" className="flex justify-center py-16">
 					<Loader2 className="h-6 w-6 animate-spin text-slate-500" />
+				</div>
+			) : loadError ? (
+				<div role="alert" className={cn(cardClass, 'text-center')}>
+					<p>{loadError}</p>
+					<Button className="mt-3" variant="outline" onClick={() => void load()}>Try again</Button>
 				</div>
 			) : exams.length === 0 ? (
 				<div className={cn(cardClass, 'text-center text-slate-600')}>
