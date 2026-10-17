@@ -16,7 +16,7 @@ test('notification commands reject custom link and recipient injection',()=>{
  assert.throws(()=>contract.validateCommunication('notifications','read',{id:'10000000-0000-0000-0000-000000000005',link:'https://evil.example'}));
 });
 test('all required notification events have informative labels',()=>{assert.equal(contract.notificationEvents.length,7);for(const event of contract.notificationEvents)assert.ok(contract.eventLabels[event].length>10);});
-test('active mobile navigation exposes Firebase notifications while preserving legacy navigation',()=>{
+test('mobile header has one menu entry and delegates account notifications to the drawer sidebar',()=>{
  const React=require('react'),{renderToStaticMarkup}=require('react-dom/server');
  const shell=({children})=>React.createElement('div',null,children);
  for(const firebase of [true,false]){
@@ -24,10 +24,11 @@ test('active mobile navigation exposes Firebase notifications while preserving l
    '@/shared/auth-config':{isFirebaseStaging:()=>firebase},
    '@/frontend/features/notifications/notifications-view':{NotificationBell:()=>React.createElement('a',{href:'/notifications'},'Notifications')},
    '@/frontend/components/ui/sheet':{Sheet:shell,SheetContent:shell,SheetTrigger:({children,...props})=>React.createElement('button',props,children)},
-   '@/frontend/components/sidebar':()=>null,'@/frontend/components/edulabs-mark':()=>null,'lucide-react':{Menu:()=>null},
+   '@/frontend/components/sidebar':()=>React.createElement('div',null,firebase?'Account Notifications':'Account'),'@/frontend/components/edulabs-mark':()=>null,'lucide-react':{Menu:()=>null},
   });
   const html=renderToStaticMarkup(React.createElement(MobileSidebar));
-  assert.equal(html.includes('href="/notifications"'),firebase);
+  assert.equal(html.includes('Account Notifications'),firebase);
+  assert.equal(html.includes('href="/notifications"'),false);
   assert.match(html,/Open Navigation Menu/);assert.match(html,/EduLabs/);
  }
 });

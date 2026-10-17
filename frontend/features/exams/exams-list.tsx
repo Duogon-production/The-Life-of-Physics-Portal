@@ -22,6 +22,7 @@ import {
 	type ExamListState,
 } from '@/shared/contracts/exam-listing';
 import { cn } from '@/shared/utils';
+import { ExamsRetry } from '@/frontend/features/exams/exams-retry';
 
 /**
  * Server-renderable (no client hooks) views for the Firebase/Supabase Exams
@@ -160,9 +161,7 @@ export function ExamsErrorView() {
 				<AlertTriangle aria-hidden className="mx-auto h-6 w-6 text-rose-600" />
 				<p className="mt-2 font-semibold">We could not load your exams.</p>
 				<p className="mt-1 text-sm text-slate-600">Your data is safe. Please refresh the page or try again in a moment.</p>
-				<Link href="/exams" className="mt-4 inline-block rounded-xl border-2 border-black bg-primary px-4 py-2 text-sm font-semibold shadow-hard-sm">
-					Try again
-				</Link>
+				<ExamsRetry />
 			</div>
 		</div>
 	);

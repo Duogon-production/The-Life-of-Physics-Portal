@@ -7,13 +7,13 @@ interface EduLabsMarkProps {
 	className?: string;
 	/** Play the growing animation: the middle grows first, then both branches follow. */
 	grow?: boolean;
-	/** Cartoony black offset shadow that follows the logo's shape. Pass a number to set the offset (logo units). */
+	/** Black offset shadow, enabled by default. Pass false to omit it or a number for logo-unit offset. */
 	shadow?: boolean | number;
 	/** Delay between pieces while growing, in ms (default 45). */
 	stagger?: number;
 }
 
-const EduLabsMark = ({ className, grow = false, shadow = false, stagger }: EduLabsMarkProps) => {
+const EduLabsMark = ({ className, grow = false, shadow = true, stagger }: EduLabsMarkProps) => {
 	const offset = typeof shadow === 'number' ? shadow : 12;
 	const svgStyle = {
 		overflow: 'visible',

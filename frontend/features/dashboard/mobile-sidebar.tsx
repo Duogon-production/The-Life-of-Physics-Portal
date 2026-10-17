@@ -6,8 +6,6 @@ import { Menu } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/frontend/components/ui/sheet';
 import Sidebar from '@/frontend/components/sidebar';
 import EduLabsMark from '@/frontend/components/edulabs-mark';
-import { NotificationBell } from '@/frontend/features/notifications/notifications-view';
-import { isFirebaseStaging } from '@/shared/auth-config';
 
 interface MobileSidebarProps {
 	initialRole?: string | null;
@@ -22,7 +20,7 @@ export const MobileSidebar = ({ initialRole }: MobileSidebarProps) => {
 		<div className="flex items-center gap-2.5">
 		<EduLabsMark className="h-9 w-9 shrink-0" />
 		<div className="flex flex-col">
-		<span className="font-display text-2xl text-black leading-none">
+		<span className="text-2xl font-normal text-black leading-none" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
 		EduLabs
 		</span>
 		<span className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600">
@@ -33,7 +31,6 @@ export const MobileSidebar = ({ initialRole }: MobileSidebarProps) => {
 
 		{/* Sheet Trigger & Drawer Content */}
 		<div className="flex items-center gap-3">
-		{isFirebaseStaging() && <NotificationBell />}
 		<Sheet open={open} onOpenChange={setOpen}>
 		<SheetTrigger
 		aria-label="Open Navigation Menu"

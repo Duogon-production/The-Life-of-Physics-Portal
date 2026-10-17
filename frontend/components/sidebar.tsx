@@ -85,14 +85,13 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 		<div className="p-4 border-b-[2.5px] border-black flex items-center gap-3 bg-white text-black shrink-0">
 		<EduLabsMark className="h-10 w-10 shrink-0" />
 		<div className="flex flex-col min-w-0">
-		<span className="font-display text-2xl leading-none text-black truncate">
+		<span className="text-2xl font-normal leading-none text-black truncate" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
 		EduLabs
 		</span>
 		<span className="mt-1 text-[10px] font-bold uppercase tracking-wider text-slate-600">
 		Learning Platform
 		</span>
 		</div>
-		{isFirebaseStaging() && <div className="ml-auto hidden md:block"><NotificationBell /></div>}
 		</div>
 
 		{/* 2. TACTILE NAVIGATION LINKS */}
@@ -300,10 +299,11 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 			: 'bg-primary text-black border-black'
 		)}
 		>
-		{isFirebaseStaging() ? (isAdminOrTeacher ? 'STAFF' : 'LEARNER') : role ? role.toUpperCase() : 'STUDENT'}
+		{isFirebaseStaging() ? (isAdminOrTeacher ? 'STAFF' : 'STUDENT') : role ? role.toUpperCase() : 'STUDENT'}
 		</span>
 		</div>
 		</div>
+		{isFirebaseStaging() && <NotificationBell onNavigate={onNavigate} />}
 		</div>
 
 		<button
@@ -315,7 +315,7 @@ const Sidebar = ({ className, initialRole, onNavigate }: SidebarProps) => {
 		className="flex items-center gap-3 px-3 py-2.5 text-xs font-medium text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all duration-150 w-full text-left cursor-pointer active:scale-[0.97]"
 		>
 		<LogOut className="w-4 h-4 shrink-0 text-slate-500" />
-		<span>Logout</span>
+		<span>Sign out</span>
 		</button>
 		</div>
 		</aside>
